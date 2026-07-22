@@ -1,0 +1,13 @@
+node_modules
+.git
+.github
+*.log
+dist
+.vite
+*.ps1
+*.md
+.env
+.env.*
+.DS_Store
+attached_assets
+scripts

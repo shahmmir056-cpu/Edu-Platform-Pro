@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "AI Study Hub"
+version = "1.0.0"
+id = "artifacts/ai-study-hub"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23299
+
+[services.development]
+run = "pnpm --filter @workspace/ai-study-hub run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/ai-study-hub", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/ai-study-hub/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23299"
+BASE_PATH = "/"

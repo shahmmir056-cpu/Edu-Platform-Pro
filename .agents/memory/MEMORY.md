@@ -1,0 +1,2 @@
+- [AI integration setup can require account upgrade](ai-integration-account-upgrade.md) — `setupReplitAIIntegrations` may return `awaiting_account_upgrade`; don't retry, get user's own key via `requestSecrets` or ask how to proceed.
+- [PhET simulations are iframe-embeddable](phet-simulation-embedding.md) — official PhET HTML5 sims allow cross-origin iframing; useful for any "virtual lab" / science simulation feature.

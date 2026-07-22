@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: neural-sync
+    runtime: docker
+    dockerfilePath: Dockerfile
+    plan: free
+    healthCheckPath: /api/healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: GROQ_API_KEY
+        sync: false
+      - key: PORT
+        value: 10000

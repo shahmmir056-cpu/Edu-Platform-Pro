@@ -1,0 +1,476 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: ai-tools
+    description: Free AI study tools - research, writing, quizzes, and more
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /ai-tools/research:
+    post:
+      operationId: generateResearch
+      tags: [ai-tools]
+      summary: Generate a deep research report on a topic
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResearchInput"
+      responses:
+        "200":
+          description: Research report generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResearchReport"
+
+  /ai-tools/essay:
+    post:
+      operationId: generateEssay
+      tags: [ai-tools]
+      summary: Generate an essay or written piece on a topic
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EssayInput"
+      responses:
+        "200":
+          description: Essay generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Essay"
+
+  /ai-tools/quiz:
+    post:
+      operationId: generateQuiz
+      tags: [ai-tools]
+      summary: Generate a multiple-choice quiz on a topic
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuizInput"
+      responses:
+        "200":
+          description: Quiz generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Quiz"
+
+  /ai-tools/flashcards:
+    post:
+      operationId: generateFlashcards
+      tags: [ai-tools]
+      summary: Generate a set of flashcards on a topic
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FlashcardSetInput"
+      responses:
+        "200":
+          description: Flashcards generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FlashcardSet"
+
+  /ai-tools/study-notes:
+    post:
+      operationId: generateStudyNotes
+      tags: [ai-tools]
+      summary: Generate structured study notes on a topic
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StudyNotesInput"
+      responses:
+        "200":
+          description: Study notes generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudyNotes"
+
+  /ai-tools/presentation:
+    post:
+      operationId: generatePresentation
+      tags: [ai-tools]
+      summary: Generate a slide-by-slide presentation outline
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PresentationInput"
+      responses:
+        "200":
+          description: Presentation generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Presentation"
+
+  /ai-tools/math-solver:
+    post:
+      operationId: solveMath
+      tags: [ai-tools]
+      summary: Solve a math problem with a clear, numbered step-by-step explanation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MathSolverInput"
+      responses:
+        "200":
+          description: Step-by-step solution generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MathSolution"
+
+  /ai-tools/text-playground:
+    post:
+      operationId: transformText
+      tags: [ai-tools]
+      summary: Summarize, expand, simplify, translate, or rewrite a block of text
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TextTransformInput"
+      responses:
+        "200":
+          description: Text transformed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TextTransformResult"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    ResearchInput:
+      type: object
+      required: [topic]
+      properties:
+        topic:
+          type: string
+          minLength: 1
+        depth:
+          type: string
+          enum: [overview, standard, deep]
+          description: How thorough the report should be
+    ResearchSection:
+      type: object
+      required: [heading, content]
+      properties:
+        heading:
+          type: string
+        content:
+          type: string
+    ResearchSource:
+      type: object
+      required: [title, note]
+      properties:
+        title:
+          type: string
+        note:
+          type: string
+    ResearchReport:
+      type: object
+      required: [title, summary, sections, keyTakeaways, furtherQuestions]
+      properties:
+        title:
+          type: string
+        summary:
+          type: string
+        sections:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResearchSection"
+        keyTakeaways:
+          type: array
+          items:
+            type: string
+        furtherQuestions:
+          type: array
+          items:
+            type: string
+        suggestedSources:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResearchSource"
+
+    EssayInput:
+      type: object
+      required: [topic, essayType, wordCount]
+      properties:
+        topic:
+          type: string
+          minLength: 1
+        essayType:
+          type: string
+          enum: [argumentative, narrative, expository, persuasive, descriptive, compare-contrast]
+        wordCount:
+          type: integer
+          minimum: 100
+          maximum: 3000
+        tone:
+          type: string
+    Essay:
+      type: object
+      required: [title, outline, body, wordCount]
+      properties:
+        title:
+          type: string
+        outline:
+          type: array
+          items:
+            type: string
+        body:
+          type: string
+        wordCount:
+          type: integer
+
+    QuizInput:
+      type: object
+      required: [topic, numQuestions, difficulty]
+      properties:
+        topic:
+          type: string
+          minLength: 1
+        numQuestions:
+          type: integer
+          minimum: 1
+          maximum: 20
+        difficulty:
+          type: string
+          enum: [easy, medium, hard]
+    QuizQuestion:
+      type: object
+      required: [question, options, correctIndex, explanation]
+      properties:
+        question:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+        correctIndex:
+          type: integer
+        explanation:
+          type: string
+    Quiz:
+      type: object
+      required: [title, questions]
+      properties:
+        title:
+          type: string
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuizQuestion"
+
+    FlashcardSetInput:
+      type: object
+      required: [topic, numCards]
+      properties:
+        topic:
+          type: string
+          minLength: 1
+        numCards:
+          type: integer
+          minimum: 1
+          maximum: 30
+    Flashcard:
+      type: object
+      required: [front, back]
+      properties:
+        front:
+          type: string
+        back:
+          type: string
+    FlashcardSet:
+      type: object
+      required: [title, cards]
+      properties:
+        title:
+          type: string
+        cards:
+          type: array
+          items:
+            $ref: "#/components/schemas/Flashcard"
+
+    StudyNotesInput:
+      type: object
+      required: [topic]
+      properties:
+        topic:
+          type: string
+          minLength: 1
+    KeyTerm:
+      type: object
+      required: [term, definition]
+      properties:
+        term:
+          type: string
+        definition:
+          type: string
+    NoteSection:
+      type: object
+      required: [heading, bullets]
+      properties:
+        heading:
+          type: string
+        bullets:
+          type: array
+          items:
+            type: string
+    StudyNotes:
+      type: object
+      required: [title, sections, keyTerms]
+      properties:
+        title:
+          type: string
+        sections:
+          type: array
+          items:
+            $ref: "#/components/schemas/NoteSection"
+        keyTerms:
+          type: array
+          items:
+            $ref: "#/components/schemas/KeyTerm"
+
+    PresentationInput:
+      type: object
+      required: [topic, numSlides]
+      properties:
+        topic:
+          type: string
+          minLength: 1
+        numSlides:
+          type: integer
+          minimum: 3
+          maximum: 20
+    Slide:
+      type: object
+      required: [title, bullets, speakerNotes]
+      properties:
+        title:
+          type: string
+        bullets:
+          type: array
+          items:
+            type: string
+        speakerNotes:
+          type: string
+    Presentation:
+      type: object
+      required: [title, slides]
+      properties:
+        title:
+          type: string
+        slides:
+          type: array
+          items:
+            $ref: "#/components/schemas/Slide"
+
+    MathSolverInput:
+      type: object
+      required: [problem]
+      properties:
+        problem:
+          type: string
+          minLength: 1
+          description: The math problem to solve, e.g. "2x + 5 = 17" or "derivative of 3x^2 + 2x"
+    MathStep:
+      type: object
+      required: [title, explanation, expression]
+      properties:
+        title:
+          type: string
+          description: Short label for this step, e.g. "Isolate the variable"
+        explanation:
+          type: string
+          description: Plain-language explanation of what is happening in this step and why
+        expression:
+          type: string
+          description: The math expression/equation resulting from this step, as plain text (e.g. "2x = 12")
+    MathSolution:
+      type: object
+      required: [restatedProblem, topic, steps, finalAnswer]
+      properties:
+        restatedProblem:
+          type: string
+        topic:
+          type: string
+          description: Short label for the branch of math, e.g. "Linear Equations", "Calculus - Derivatives"
+        steps:
+          type: array
+          items:
+            $ref: "#/components/schemas/MathStep"
+        finalAnswer:
+          type: string
+        checkNote:
+          type: string
+          description: A brief note on how to verify/check the final answer
+
+    TextTransformInput:
+      type: object
+      required: [text, mode]
+      properties:
+        text:
+          type: string
+          minLength: 1
+        mode:
+          type: string
+          enum: [summarize, expand, simplify, rewrite, translate, fix-grammar]
+        targetLanguage:
+          type: string
+    TextTransformResult:
+      type: object
+      required: [result]
+      properties:
+        result:
+          type: string
+
