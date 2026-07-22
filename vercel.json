@@ -1,7 +1,7 @@
 {
   "buildCommand": "cd artifacts/ai-study-hub && pnpm run build",
   "outputDirectory": "artifacts/ai-study-hub/dist/public",
-  "installCommand": "npm install -g pnpm && pnpm install",
+  "installCommand": "pnpm install --no-frozen-lockfile",
   "framework": null,
   "builds": [
     {
