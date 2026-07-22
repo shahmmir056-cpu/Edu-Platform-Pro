@@ -1,11 +1,17 @@
 [build]
-  command = "npx cross-env PORT=5000 BASE_PATH=/ pnpm --filter @workspace/ai-study-hub run build"
+  command = "pnpm --filter @workspace/ai-study-hub run build"
   publish = "artifacts/ai-study-hub/dist/public"
+  functions = "netlify/functions"
 
 [build.environment]
   PORT = "5000"
   BASE_PATH = "/"
   NODE_VERSION = "20"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
 
 [[redirects]]
   from = "/*"
