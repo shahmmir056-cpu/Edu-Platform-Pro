@@ -56,3 +56,4 @@ api-err.log
 api-out.log
 api-server.log
 artifacts/data/
+vite.log
