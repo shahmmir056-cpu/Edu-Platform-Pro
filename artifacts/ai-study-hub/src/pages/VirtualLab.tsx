@@ -320,7 +320,7 @@ export default function VirtualLab() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center"
             onClick={() => setActiveSimId(null)}
           >
             <motion.div
@@ -330,10 +330,10 @@ export default function VirtualLab() {
               transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
               onClick={(e) => e.stopPropagation()}
               className={cn(
-                "bg-card overflow-hidden w-full flex flex-col shadow-2xl border border-card-border",
+                "bg-card overflow-clip w-full flex flex-col shadow-2xl border border-card-border",
                 isCustom
                   ? "rounded-2xl max-w-5xl mx-auto mt-[5vh] h-[90vh]"
-                  : "md:rounded-2xl rounded-t-2xl max-w-5xl absolute inset-x-3 md:inset-x-8 top-3 md:top-4 bottom-0"
+                  : "rounded-2xl h-[100dvh]"
               )}
             >
               <div className="flex items-center justify-between px-5 py-3 border-b border-border bg-sidebar text-sidebar-foreground shrink-0">
