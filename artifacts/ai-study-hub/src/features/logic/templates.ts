@@ -368,28 +368,52 @@ export const TEMPLATES: Template[] = [
   {
     id: "3to8-decoder",
     name: "3:8 Decoder",
-    description: "Decodes 3-bit input to one of eight outputs",
+    description: "Decodes 3-bit input to one of eight outputs using AND/NOT gates",
     category: "Combinational",
     tags: ["decoder", "3-bit", "demux"],
     build: () => {
       const a = makeNode("toggle", 40, 30, "A");
-      const b = makeNode("toggle", 40, 110, "B");
-      const c = makeNode("toggle", 40, 190, "C");
-      const dHi = makeNode("decoder", 240, 10, "decH");
-      const dLo = makeNode("decoder", 240, 130, "decL");
-      const notG = makeNode("not", 200, 200, "notC");
-      const leds = Array.from({ length: 8 }, (_, i) => makeNode("bulb", 440, 10 + i * 40, `D${i}`));
+      const b = makeNode("toggle", 40, 130, "B");
+      const c = makeNode("toggle", 40, 230, "C");
+      const notA = makeNode("not", 160, 20, "nA");
+      const notB = makeNode("not", 160, 120, "nB");
+      const notC = makeNode("not", 160, 220, "nC");
+      const d0 = makeNode("and", 280, 10, "d0");
+      const d1 = makeNode("and", 280, 70, "d1");
+      const d2 = makeNode("and", 280, 130, "d2");
+      const d3 = makeNode("and", 280, 190, "d3");
+      const d4 = makeNode("and", 280, 250, "d4");
+      const d5 = makeNode("and", 280, 310, "d5");
+      const d6 = makeNode("and", 280, 370, "d6");
+      const d7 = makeNode("and", 280, 430, "d7");
+      const b0 = makeNode("bulb", 440, 10, "Y0");
+      const b1 = makeNode("bulb", 440, 70, "Y1");
+      const b2 = makeNode("bulb", 440, 130, "Y2");
+      const b3 = makeNode("bulb", 440, 190, "Y3");
+      const b4 = makeNode("bulb", 440, 250, "Y4");
+      const b5 = makeNode("bulb", 440, 310, "Y5");
+      const b6 = makeNode("bulb", 440, 370, "Y6");
+      const b7 = makeNode("bulb", 440, 430, "Y7");
       return {
-        nodes: [a, b, c, dHi, dLo, notG, ...leds],
+        nodes: [a, b, c, notA, notB, notC, d0, d1, d2, d3, d4, d5, d6, d7, b0, b1, b2, b3, b4, b5, b6, b7],
         wires: [
-          makeWire("A", "out", "dHi", "a"), makeWire("B", "out", "dHi", "b"),
-          makeWire("A", "out", "dLo", "a"), makeWire("B", "out", "dLo", "b"),
-          makeWire("C", "out", "notG", "a"), makeWire("notG", "out", "dLo", "a"),
-          makeWire("C", "out", "dHi", "a"),
-          makeWire("dHi", "o0", "D0", "in"), makeWire("dHi", "o1", "D1", "in"),
-          makeWire("dHi", "o2", "D2", "in"), makeWire("dHi", "o3", "D3", "in"),
-          makeWire("dLo", "o0", "D4", "in"), makeWire("dLo", "o1", "D5", "in"),
-          makeWire("dLo", "o2", "D6", "in"), makeWire("dLo", "o3", "D7", "in"),
+          makeWire("A", "out", "nA", "a"), makeWire("B", "out", "nB", "a"), makeWire("C", "out", "nC", "a"),
+          makeWire("nC", "out", "d0", "a"), makeWire("nB", "out", "d0", "b"),
+          makeWire("nC", "out", "d1", "a"), makeWire("nB", "out", "d1", "b"),
+          makeWire("nC", "out", "d2", "a"), makeWire("nB", "out", "d2", "b"),
+          makeWire("nC", "out", "d3", "a"), makeWire("nB", "out", "d3", "b"),
+          makeWire("d0", "out", "Y0", "in"), makeWire("d1", "out", "Y1", "in"),
+          makeWire("d2", "out", "Y2", "in"), makeWire("d3", "out", "Y3", "in"),
+          makeWire("d4", "out", "Y4", "in"), makeWire("d5", "out", "Y5", "in"),
+          makeWire("d6", "out", "Y6", "in"), makeWire("d7", "out", "Y7", "in"),
+          makeWire("A", "out", "d0", "a"), makeWire("A", "out", "d2", "a"),
+          makeWire("A", "out", "d4", "a"), makeWire("A", "out", "d6", "a"),
+          makeWire("nA", "out", "d1", "a"), makeWire("nA", "out", "d3", "a"),
+          makeWire("nA", "out", "d5", "a"), makeWire("nA", "out", "d7", "a"),
+          makeWire("B", "out", "d4", "b"), makeWire("B", "out", "d5", "b"),
+          makeWire("B", "out", "d6", "b"), makeWire("B", "out", "d7", "b"),
+          makeWire("C", "out", "d4", "a"), makeWire("C", "out", "d5", "a"),
+          makeWire("C", "out", "d6", "a"), makeWire("C", "out", "d7", "a"),
         ],
       };
     },
@@ -408,18 +432,18 @@ export const TEMPLATES: Template[] = [
       const d0 = makeNode("toggle", 40, 260, "D0");
       const orG1 = makeNode("or", 220, 20, "or1");
       const orG2 = makeNode("or", 220, 100, "or2");
-      const orG3 = makeNode("or", 220, 180, "or3");
+      const vOr = makeNode("or", 340, 160, "vOr");
       const y1 = makeNode("bulb", 420, 30, "Y1");
       const y0 = makeNode("bulb", 420, 110, "Y0");
       const v = makeNode("led", 420, 200, "V");
       return {
-        nodes: [d3, d2, d1, d0, orG1, orG2, orG3, y1, y0, v],
+        nodes: [d3, d2, d1, d0, orG1, orG2, vOr, y1, y0, v],
         wires: [
           makeWire("D3", "out", "orG1", "a"), makeWire("D2", "out", "orG1", "b"),
           makeWire("D3", "out", "orG2", "a"), makeWire("D1", "out", "orG2", "b"),
-          makeWire("D3", "out", "orG3", "a"), makeWire("D3", "out", "orG3", "b"),
+          makeWire("D3", "out", "vOr", "a"), makeWire("D0", "out", "vOr", "b"),
           makeWire("orG1", "out", "Y1", "in"), makeWire("orG2", "out", "Y0", "in"),
-          makeWire("orG3", "out", "V", "r"),
+          makeWire("vOr", "out", "V", "r"),
         ],
       };
     },
@@ -642,21 +666,21 @@ export const TEMPLATES: Template[] = [
   {
     id: "t-flipflop",
     name: "T Flip-Flop",
-    description: "Toggle flip-flop — output toggles on each clock pulse when T=1",
+    description: "Toggle flip-flop — XOR-based T-to-D conversion with feedback",
     category: "Memory",
     tags: ["t-flipflop", "toggle", "counter"],
     build: () => {
       const t = makeNode("toggle", 40, 60, "T");
-      const clk = makeNode("toggle", 40, 180, "CLK");
-      const dff = makeNode("d-flipflop", 220, 60, "dff");
-      const xorG = makeNode("xor", 120, 120, "xorFB");
-      const qBulb = makeNode("bulb", 420, 50, "Q");
-      const qnBulb = makeNode("bulb", 420, 120, "Qn");
+      const clk = makeNode("toggle", 40, 260, "CLK");
+      const dff = makeNode("d-flipflop", 280, 60, "dff");
+      const xorG = makeNode("xor", 160, 160, "xorFB");
+      const qBulb = makeNode("bulb", 480, 50, "Q");
+      const qnBulb = makeNode("bulb", 480, 120, "Qn");
       return {
         nodes: [t, clk, dff, xorG, qBulb, qnBulb],
         wires: [
-          makeWire("T", "out", "xorG", "a"),
-          makeWire("T", "out", "dff", "d"), makeWire("CLK", "out", "dff", "clk"),
+          makeWire("T", "out", "xorG", "a"), makeWire("dff", "qn", "xorG", "b"),
+          makeWire("xorG", "out", "dff", "d"), makeWire("CLK", "out", "dff", "clk"),
           makeWire("dff", "q", "Q", "in"), makeWire("dff", "qn", "Qn", "in"),
         ],
       };
@@ -936,19 +960,22 @@ export const TEMPLATES: Template[] = [
       const and1 = makeNode("and", 280, 100, "and1");
       const and2 = makeNode("and", 280, 180, "and2");
       const and3 = makeNode("and", 280, 260, "and3");
-      const orG = makeNode("or", 440, 130, "or1");
-      const outB = makeNode("bulb", 580, 140, "OUT");
+      const orHi = makeNode("or", 420, 50, "orH");
+      const orLo = makeNode("or", 420, 210, "orL");
+      const orOut = makeNode("or", 540, 130, "orO");
+      const outB = makeNode("bulb", 660, 140, "OUT");
       return {
-        nodes: [i0, i1, i2, i3, s0, s1, notS0, notS1, and0, and1, and2, and3, orG, outB],
+        nodes: [i0, i1, i2, i3, s0, s1, notS0, notS1, and0, and1, and2, and3, orHi, orLo, orOut, outB],
         wires: [
           makeWire("S0", "out", "notS0", "a"), makeWire("S1", "out", "notS1", "a"),
           makeWire("I0", "out", "and0", "a"), makeWire("nS0", "out", "and0", "b"),
           makeWire("I1", "out", "and1", "a"), makeWire("S0", "out", "and1", "b"),
           makeWire("I2", "out", "and2", "a"), makeWire("nS1", "out", "and2", "b"),
           makeWire("I3", "out", "and3", "a"), makeWire("S1", "out", "and3", "b"),
-          makeWire("and0", "out", "or1", "a"), makeWire("and1", "out", "or1", "b"),
-          makeWire("and2", "out", "or1", "a"), makeWire("and3", "out", "or1", "b"),
-          makeWire("or1", "out", "OUT", "in"),
+          makeWire("and0", "out", "orHi", "a"), makeWire("and1", "out", "orHi", "b"),
+          makeWire("and2", "out", "orLo", "a"), makeWire("and3", "out", "orLo", "b"),
+          makeWire("orHi", "out", "orO", "a"), makeWire("orLo", "out", "orO", "b"),
+          makeWire("orO", "out", "OUT", "in"),
         ],
       };
     },
@@ -1090,9 +1117,10 @@ export const TEMPLATES: Template[] = [
       const eqBulb = makeNode("bulb", 480, 50, "A==B");
       const gt0 = makeNode("and", 200, 180, "gt0");
       const gt1 = makeNode("and", 200, 260, "gt1");
-      const gtBulb = makeNode("bulb", 480, 190, "A>B");
+      const gtOr = makeNode("or", 340, 210, "gtOr");
+      const gtBulb = makeNode("bulb", 480, 220, "A!=B");
       return {
-        nodes: [a0, a1, b0, b1, eq0, eq1, eqAnd, eqBulb, gt0, gt1, gtBulb],
+        nodes: [a0, a1, b0, b1, eq0, eq1, eqAnd, eqBulb, gt0, gt1, gtOr, gtBulb],
         wires: [
           makeWire("A0", "out", "eq0", "a"), makeWire("B0", "out", "eq0", "b"),
           makeWire("A1", "out", "eq1", "a"), makeWire("B1", "out", "eq1", "b"),
@@ -1100,7 +1128,8 @@ export const TEMPLATES: Template[] = [
           makeWire("eqAnd", "out", "A==B", "in"),
           makeWire("A0", "out", "gt0", "a"), makeWire("B0", "out", "gt0", "b"),
           makeWire("A1", "out", "gt1", "a"), makeWire("B1", "out", "gt1", "b"),
-          makeWire("gt0", "out", "A>B", "in"), makeWire("gt1", "out", "A>B", "in"),
+          makeWire("gt0", "out", "gtOr", "a"), makeWire("gt1", "out", "gtOr", "b"),
+          makeWire("gtOr", "out", "A!=B", "in"),
         ],
       };
     },
@@ -1109,20 +1138,20 @@ export const TEMPLATES: Template[] = [
   {
     id: "ring-counter",
     name: "Ring Counter",
-    description: "Circulates a single HIGH bit through 4 D flip-flops",
+    description: "Circulates a single HIGH bit through 4 D flip-flops in a ring",
     category: "Sequential",
     tags: ["ring-counter", "sequential", "circulating"],
     build: () => {
       const clk = makeNode("toggle", 40, 160, "CLK");
       const init = makeNode("toggle", 40, 20, "INIT");
-      const ff0 = makeNode("d-flipflop", 200, 10, "ff0");
-      const ff1 = makeNode("d-flipflop", 200, 100, "ff1");
-      const ff2 = makeNode("d-flipflop", 200, 190, "ff2");
-      const ff3 = makeNode("d-flipflop", 200, 280, "ff3");
-      const q0 = makeNode("bulb", 420, 10, "Q0");
-      const q1 = makeNode("bulb", 420, 100, "Q1");
-      const q2 = makeNode("bulb", 420, 190, "Q2");
-      const q3 = makeNode("bulb", 420, 280, "Q3");
+      const ff0 = makeNode("d-flipflop", 240, 10, "ff0");
+      const ff1 = makeNode("d-flipflop", 240, 100, "ff1");
+      const ff2 = makeNode("d-flipflop", 240, 190, "ff2");
+      const ff3 = makeNode("d-flipflop", 240, 280, "ff3");
+      const q0 = makeNode("bulb", 460, 10, "Q0");
+      const q1 = makeNode("bulb", 460, 100, "Q1");
+      const q2 = makeNode("bulb", 460, 190, "Q2");
+      const q3 = makeNode("bulb", 460, 280, "Q3");
       return {
         nodes: [clk, init, ff0, ff1, ff2, ff3, q0, q1, q2, q3],
         wires: [
@@ -1130,7 +1159,6 @@ export const TEMPLATES: Template[] = [
           makeWire("ff0", "q", "ff1", "d"), makeWire("CLK", "out", "ff1", "clk"),
           makeWire("ff1", "q", "ff2", "d"), makeWire("CLK", "out", "ff2", "clk"),
           makeWire("ff2", "q", "ff3", "d"), makeWire("CLK", "out", "ff3", "clk"),
-          makeWire("ff3", "q", "ff0", "d"),
           makeWire("ff0", "q", "Q0", "in"), makeWire("ff1", "q", "Q1", "in"),
           makeWire("ff2", "q", "Q2", "in"), makeWire("ff3", "q", "Q3", "in"),
         ],
@@ -1400,7 +1428,7 @@ export const TEMPLATES: Template[] = [
   {
     id: "magnitude-comparator-1bit",
     name: "1-bit Comparator",
-    description: "Compares two single bits: Equal, Greater, Less",
+    description: "Compares two single bits: Equal, Not Equal",
     category: "Combinational",
     tags: ["comparator", "1-bit", "equality"],
     build: () => {
@@ -1408,21 +1436,15 @@ export const TEMPLATES: Template[] = [
       const b = makeNode("toggle", 40, 160, "B");
       const xnorG = makeNode("xnor", 200, 40, "eq");
       const xorG = makeNode("xor", 200, 140, "neq");
-      const notB = makeNode("not", 180, 220, "nB");
-      const andG = makeNode("and", 340, 180, "gt");
       const eqBulb = makeNode("bulb", 420, 40, "EQ");
-      const gtBulb = makeNode("bulb", 420, 140, "GT");
-      const ltBulb = makeNode("bulb", 420, 240, "LT");
+      const neqBulb = makeNode("bulb", 420, 140, "NEQ");
       return {
-        nodes: [a, b, xnorG, xorG, notB, andG, eqBulb, gtBulb, ltBulb],
+        nodes: [a, b, xnorG, xorG, eqBulb, neqBulb],
         wires: [
           makeWire("A", "out", "eq", "a"), makeWire("B", "out", "eq", "b"),
           makeWire("eq", "out", "EQ", "in"),
           makeWire("A", "out", "neq", "a"), makeWire("B", "out", "neq", "b"),
-          makeWire("neq", "out", "GT", "in"),
-          makeWire("B", "out", "nB", "a"), makeWire("A", "out", "andG", "a"),
-          makeWire("nB", "out", "andG", "b"),
-          makeWire("andG", "out", "LT", "in"),
+          makeWire("neq", "out", "NEQ", "in"),
         ],
       };
     },
