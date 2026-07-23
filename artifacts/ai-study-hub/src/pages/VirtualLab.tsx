@@ -333,7 +333,7 @@ export default function VirtualLab() {
                 "bg-card overflow-hidden w-full flex flex-col shadow-2xl border border-card-border",
                 isCustom
                   ? "rounded-2xl max-w-5xl mx-auto mt-[5vh] h-[90vh]"
-                  : "md:rounded-2xl rounded-t-2xl max-w-5xl absolute inset-x-3 md:inset-x-8 top-3 bottom-0"
+                  : "md:rounded-2xl rounded-t-2xl max-w-5xl absolute inset-x-3 md:inset-x-8 top-3 md:top-4 bottom-0"
               )}
             >
               <div className="flex items-center justify-between px-5 py-3 border-b border-border bg-sidebar text-sidebar-foreground shrink-0">
