@@ -36,7 +36,7 @@ const FEATURE_STRIP = [
 
 const STATS = [
   { value: "8", label: "AI-Powered Tools" },
-  { value: "26+", label: "Virtual Lab Simulations" },
+  { value: "50+", label: "Virtual Lab Simulations" },
   { value: "0", label: "Sign-ups Required" },
   { value: "24/7", label: "Always Available" },
 ];

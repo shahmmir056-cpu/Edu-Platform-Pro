@@ -23,10 +23,17 @@ import {
   FunctionSquare,
   Beaker,
   Zap,
+  Microscope,
+  DnaIcon,
+  Bug,
+  Heart,
+  FlaskRound,
+  Binary,
   type LucideIcon,
 } from "lucide-react";
 import { ToolHeader } from "@/components/ui/ToolHeader";
-import { SIMULATIONS, SIM_SUBJECTS, simEmbedUrl, type SimSubject } from "@/lib/simulations";
+import { SIMULATIONS, SIM_SUBJECTS, simEmbedUrl, type SimSubject, type Simulation } from "@/lib/simulations";
+import { getCustomSim, CUSTOM_SIM_IDS } from "@/components/lab";
 import { cn } from "@/lib/utils";
 
 const SUBJECT_COLORS: Record<SimSubject, string> = {
@@ -34,6 +41,7 @@ const SUBJECT_COLORS: Record<SimSubject, string> = {
   Chemistry: "bg-emerald-500/10 text-emerald-700",
   Math: "bg-orange-500/10 text-orange-700",
   Biology: "bg-purple-500/10 text-purple-700",
+  Biotechnology: "bg-rose-500/10 text-rose-700",
 };
 
 const SUBJECT_GRADIENTS: Record<SimSubject, string> = {
@@ -41,6 +49,7 @@ const SUBJECT_GRADIENTS: Record<SimSubject, string> = {
   Chemistry: "from-emerald-500/15 via-emerald-500/5 to-transparent",
   Math: "from-orange-500/15 via-orange-500/5 to-transparent",
   Biology: "from-purple-500/15 via-purple-500/5 to-transparent",
+  Biotechnology: "from-rose-500/15 via-rose-500/5 to-transparent",
 };
 
 const SUBJECT_ICON_COLORS: Record<SimSubject, string> = {
@@ -48,26 +57,75 @@ const SUBJECT_ICON_COLORS: Record<SimSubject, string> = {
   Chemistry: "text-emerald-600",
   Math: "text-orange-600",
   Biology: "text-purple-600",
+  Biotechnology: "text-rose-600",
 };
 
 const SIM_ICONS: Record<string, LucideIcon> = {
   "build-an-atom": Atom,
   "ph-scale": TestTube2,
+  "ph-scale-basics": TestTube2,
   "states-of-matter": Thermometer,
+  "states-of-matter-basics": Thermometer,
   "balancing-chemical-equations": Beaker,
   concentration: TestTube2,
   "molecule-shapes": Atom,
+  "molecule-shapes-basics": Atom,
+  "gas-properties": Beaker,
+  molarity: Beaker,
+  "reactants-products-and-leftovers": Beaker,
+  "acid-base-solutions": TestTube2,
+  solutions: Beaker,
+  density: Weight,
+  "beers-law-lab": FlaskRound,
+  "molecule-polarity": Atom,
+  "ionic-bonds": Atom,
+  "covalent-bonds": Atom,
+  "electron-domain": Atom,
   "forces-and-motion-basics": Weight,
   "energy-skate-park-basics": Zap,
+  "energy-skate-park": Zap,
   "projectile-motion": Orbit,
   "pendulum-lab": Waves,
   "circuit-construction-kit-dc": CircuitBoard,
+  "circuit-construction-kit-ac": CircuitBoard,
   "wave-on-a-string": Waves,
   "wave-interference": Waves,
   "gravity-and-orbits": Orbit,
   "energy-forms-and-changes": Thermometer,
   "masses-and-springs": Magnet,
-  "gas-properties": Beaker,
+  "masses-and-springs-basics": Magnet,
+  "color-vision": Waves,
+  "coulombs-law": Zap,
+  "my-solar-system": Orbit,
+  "coulomb-and-charge": Zap,
+  "ohms-law": CircuitBoard,
+  "faradays-law": Magnet,
+  "radioactive-date-finding": Thermometer,
+  "nuclear-physics": Atom,
+  "blackbody-spectrum": Waves,
+  "geometric-optics": Waves,
+  lasers: Zap,
+  "sun-and-spectra": Waves,
+  "natural-selection": Rabbit,
+  "gene-expression-essentials": Dna,
+  "bacterial-growth": Bug,
+  "natural-selection-lab": Rabbit,
+  "evolution-natural-and-artificial": Rabbit,
+  "dna-replication": DnaIcon,
+  neuron: Zap,
+  "membrane-channels": Dna,
+  "gel-electrophoresis": DnaIcon,
+  "light-microscope": Microscope,
+  "osmosis-sim": Heart,
+  "cell-structure": Dna,
+  "mitosis-sim": DnaIcon,
+  "photosynthesis-sim": Leaf,
+  "hardy-weinberg": Rabbit,
+  "epidemic-sim": Bug,
+  spectrophotometer: FlaskRound,
+  "plant-dissection": Leaf,
+  "mendelian-genetics": Dna,
+  "enzyme-kinetics": FlaskRound,
   "graphing-lines": LineChart,
   "function-builder": FunctionSquare,
   "area-model-multiplication": Shapes,
@@ -76,15 +134,26 @@ const SIM_ICONS: Record<string, LucideIcon> = {
   arithmetic: Calculator,
   "trig-tour": LineChart,
   "area-builder": Ruler,
-  "natural-selection": Rabbit,
-  "gene-expression-essentials": Dna,
+  radians: Shapes,
+  "plinko-probability": Shapes,
+  "factor-building": Shapes,
+  "unit-circle": LineChart,
 };
+
+function Leaf(props: { size?: number; className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={props.size} height={props.size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={props.className}>
+      <path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 20 2 20 2s-1.5 5-5 7A7 7 0 0 1 11 20Z" /><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+    </svg>
+  );
+}
 
 const SUBJECT_FALLBACK_ICON: Record<SimSubject, LucideIcon> = {
   Physics: Magnet,
   Chemistry: TestTube2,
   Math: Calculator,
   Biology: Dna,
+  Biotechnology: FlaskConical,
 };
 
 export default function VirtualLab() {
@@ -95,20 +164,35 @@ export default function VirtualLab() {
   const filtered = useMemo(() => {
     return SIMULATIONS.filter((sim) => {
       const matchesSubject = activeSubject === "All" || sim.subject === activeSubject;
-      const matchesQuery = query.trim().length === 0 || sim.name.toLowerCase().includes(query.toLowerCase());
+      const matchesQuery = query.trim().length === 0 || sim.name.toLowerCase().includes(query.toLowerCase()) || sim.description.toLowerCase().includes(query.toLowerCase());
       return matchesSubject && matchesQuery;
     });
   }, [activeSubject, query]);
 
   const activeSim = SIMULATIONS.find((s) => s.id === activeSimId) ?? null;
+  const isCustom = activeSim ? CUSTOM_SIM_IDS.includes(activeSim.id) : false;
+  const CustomSimComponent = activeSim ? getCustomSim(activeSim.id) : null;
 
   return (
     <div className="max-w-7xl mx-auto p-6 md:p-10">
       <ToolHeader
         title="Virtual Science Lab"
-        description="Real, interactive PhET simulations for physics, chemistry, biology, and math — right in your browser."
+        description="Interactive PhET simulations, custom lab experiments, and biology interactives — all free in your browser."
         icon={FlaskConical}
       />
+
+      {/* Stats */}
+      <div className="flex flex-wrap gap-3 mb-8">
+        <div className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl text-sm font-medium text-zinc-600 dark:text-zinc-300">
+          {SIMULATIONS.length} Simulations
+        </div>
+        <div className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl text-sm font-medium text-zinc-600 dark:text-zinc-300">
+          {SIMULATIONS.filter((s) => s.type === "custom").length} Custom Lab Experiments
+        </div>
+        <div className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-xl text-sm font-medium text-zinc-600 dark:text-zinc-300">
+          {SIMULATIONS.filter((s) => s.type === "phet").length} PhET Simulations
+        </div>
+      </div>
 
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 mb-8">
@@ -117,7 +201,7 @@ export default function VirtualLab() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search simulations (e.g. pendulum, atom, fractions)..."
+            placeholder="Search simulations (e.g. osmosis, electrophoresis, circuits)..."
             className="w-full bg-card border border-card-border rounded-xl pl-11 pr-4 py-3.5 outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
           />
         </div>
@@ -143,11 +227,12 @@ export default function VirtualLab() {
       <motion.div
         initial="hidden"
         animate="show"
-        variants={{ hidden: {}, show: { transition: { staggerChildren: 0.05 } } }}
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-20"
+        variants={{ hidden: {}, show: { transition: { staggerChildren: 0.03 } } }}
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 pb-20"
       >
         {filtered.map((sim) => {
           const SimIcon = SIM_ICONS[sim.id] ?? SUBJECT_FALLBACK_ICON[sim.subject];
+          const isCustomSim = sim.type === "custom";
           return (
             <motion.button
               key={sim.id}
@@ -157,7 +242,7 @@ export default function VirtualLab() {
             >
               <div
                 className={cn(
-                  "relative h-36 flex items-center justify-center bg-gradient-to-br overflow-hidden",
+                  "relative h-32 flex items-center justify-center bg-gradient-to-br overflow-hidden",
                   SUBJECT_GRADIENTS[sim.subject]
                 )}
               >
@@ -172,29 +257,46 @@ export default function VirtualLab() {
                   </svg>
                 </div>
                 <SimIcon
-                  size={56}
+                  size={48}
                   className={cn(
                     "stroke-[1.25] relative z-10 transition-transform duration-300 group-hover:scale-110",
                     SUBJECT_ICON_COLORS[sim.subject]
                   )}
                 />
+                {isCustomSim && (
+                  <span className="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 bg-rose-500/20 text-rose-400 rounded-full border border-rose-500/30">
+                    Interactive Lab
+                  </span>
+                )}
                 <span
                   aria-hidden
-                  className="absolute top-3 right-3 w-8 h-8 rounded-full bg-card/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-2 right-2 w-7 h-7 rounded-full bg-card/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                 >
-                  <Maximize2 size={14} className="text-foreground" />
+                  <Maximize2 size={12} className="text-foreground" />
                 </span>
               </div>
-              <div className="p-6">
-                <span className={cn("text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full", SUBJECT_COLORS[sim.subject])}>
-                  {sim.subject}
-                </span>
-                <h3 className="font-serif text-lg font-medium text-foreground mt-3 mb-2 group-hover:text-primary transition-colors">
+              <div className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={cn("text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full", SUBJECT_COLORS[sim.subject])}>
+                    {sim.subject}
+                  </span>
+                  {sim.difficulty && (
+                    <span className={cn(
+                      "text-[10px] font-bold px-2 py-0.5 rounded-full",
+                      sim.difficulty === "Beginner" && "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400",
+                      sim.difficulty === "Intermediate" && "bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400",
+                      sim.difficulty === "Advanced" && "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400",
+                    )}>
+                      {sim.difficulty}
+                    </span>
+                  )}
+                </div>
+                <h3 className="font-serif text-sm font-medium text-foreground mb-1 group-hover:text-primary transition-colors line-clamp-1">
                   {sim.name}
                 </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{sim.description}</p>
-                <div className="mt-5 flex items-center text-sm font-bold text-primary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all">
-                  Launch Simulation
+                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">{sim.description}</p>
+                <div className="mt-3 flex items-center text-xs font-bold text-primary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all">
+                  {isCustomSim ? "Open Lab" : "Launch Simulation"}
                 </div>
               </div>
             </motion.button>
@@ -227,30 +329,42 @@ export default function VirtualLab() {
               exit={{ opacity: 0, scale: 0.96, y: 10 }}
               transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-card rounded-2xl overflow-hidden w-full max-w-5xl h-[85vh] flex flex-col shadow-2xl border border-card-border"
+              className={cn(
+                "bg-card rounded-2xl overflow-hidden w-full flex flex-col shadow-2xl border border-card-border",
+                isCustom ? "max-w-5xl h-[90vh]" : "max-w-5xl h-[85vh]"
+              )}
             >
               <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-sidebar text-sidebar-foreground">
-                <div>
+                <div className="flex items-center gap-3">
                   <p className="font-serif text-lg leading-none">{activeSim.name}</p>
+                  {isCustom && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 bg-rose-500/20 text-rose-400 rounded-full">
+                      Interactive Lab
+                    </span>
+                  )}
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setActiveSimId(null)}
-                    className="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-                    aria-label="Close"
-                  >
-                    <X size={18} />
-                  </button>
-                </div>
+                <button
+                  onClick={() => setActiveSimId(null)}
+                  className="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                  aria-label="Close"
+                >
+                  <X size={18} />
+                </button>
               </div>
               <div className="flex-1 relative overflow-hidden">
-                <iframe
-                  src={simEmbedUrl(activeSim.slug)}
-                  title={activeSim.name}
-                  className="absolute inset-0 w-full h-full border-0 bg-white"
-                  style={{ height: "calc(100% + 60px)", marginTop: "-60px" }}
-                  allow="fullscreen"
-                />
+                {isCustom && CustomSimComponent ? (
+                  <div className="absolute inset-0 overflow-y-auto p-6">
+                    <CustomSimComponent />
+                  </div>
+                ) : (
+                  <iframe
+                    src={simEmbedUrl(activeSim.slug)}
+                    title={activeSim.name}
+                    className="absolute inset-0 w-full h-full border-0 bg-white"
+                    style={{ height: "calc(100% + 60px)", marginTop: "-60px" }}
+                    allow="fullscreen"
+                  />
+                )}
               </div>
             </motion.div>
           </motion.div>
