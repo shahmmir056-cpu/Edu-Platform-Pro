@@ -1,39 +1,26 @@
-export type PortSide = "left" | "right";
+export type GateType =
+  | "const-0" | "const-1" | "toggle" | "button" | "clock"
+  | "bulb" | "hex-display" | "led"
+  | "buffer" | "not" | "and" | "nand" | "or" | "nor" | "xor" | "xnor"
+  | "half-adder" | "full-adder"
+  | "half-subtractor" | "full-subtractor"
+  | "mux2" | "mux4" | "decoder"
+  | "d-latch" | "d-flipflop";
 
 export interface PortDef {
   id: string;
   label: string;
-  side: PortSide;
+  side: "left" | "right";
 }
-
-export type GateType =
-  | "input"
-  | "output"
-  | "not"
-  | "and"
-  | "or"
-  | "nand"
-  | "nor"
-  | "xor"
-  | "xnor"
-  | "buffer"
-  | "half-adder"
-  | "full-adder"
-  | "half-subtractor"
-  | "full-subtractor"
-  | "mux2"
-  | "decoder"
-  | "d-latch"
-  | "d-flipflop";
 
 export interface GateDef {
   type: GateType;
   label: string;
-  category: "Input / Output" | "Logic Gates" | "Combinational" | "Sequential";
+  category: "Input Controls" | "Output Controls" | "Logic Gates" | "Combinational" | "Sequential";
   inputs: PortDef[];
   outputs: PortDef[];
-  width: number;
-  height: number;
+  w: number;
+  h: number;
 }
 
 export interface CircuitNode {
@@ -41,14 +28,17 @@ export interface CircuitNode {
   type: GateType;
   x: number;
   y: number;
-  inputValues: Record<string, boolean>;
-  outputValues: Record<string, boolean>;
+  inputs: Record<string, boolean>;
+  outputs: Record<string, boolean>;
+  state?: boolean;
 }
 
 export interface Wire {
   id: string;
-  from: { nodeId: string; portId: string };
-  to: { nodeId: string; portId: string };
+  fromNode: string;
+  fromPort: string;
+  toNode: string;
+  toPort: string;
 }
 
 export interface Circuit {
@@ -56,11 +46,25 @@ export interface Circuit {
   wires: Wire[];
 }
 
-export interface GateDefMap {
-  [key: string]: GateDef;
+export type ThemeId = "dark" | "light" | "forest" | "midnight";
+
+export interface AppTheme {
+  id: ThemeId;
+  label: string;
+  bg: string;
+  canvasBg: string;
+  gridDot: string;
+  sidebar: string;
+  toolbar: string;
+  panel: string;
+  card: string;
+  border: string;
+  text: string;
+  textMuted: string;
+  accent: string;
 }
 
-export interface TruthTableRow {
-  inputs: Record<string, boolean>;
-  outputs: Record<string, boolean>;
+export interface Settings {
+  showGrid: boolean;
+  theme: ThemeId;
 }
