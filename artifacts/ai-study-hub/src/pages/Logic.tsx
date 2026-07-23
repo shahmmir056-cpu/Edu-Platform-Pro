@@ -18,74 +18,141 @@ const GATE_COLORS: Record<string, string> = {
 function GateSVG({ type, w, h }: { type: GateType; w: number; h: number }) {
   const m = h / 2;
   switch (type) {
-    case "const-0": case "const-1":
-      return <rect width={w} height={h} rx={4} fill="#374151" stroke="#4b5563" strokeWidth={1.5} />;
+    case "const-0":
+      return (
+        <g>
+          <rect width={w} height={h} rx={4} fill="#1e293b" stroke="#475569" strokeWidth={1.5} />
+          <rect x={2} y={2} width={w - 4} height={h - 4} rx={3} fill="#0f172a" />
+          <text x={m} y={m + 1} textAnchor="middle" dominantBaseline="central" fill="#64748b" fontSize={16} fontWeight={900} fontFamily="monospace" pointerEvents="none">0</text>
+        </g>
+      );
+    case "const-1":
+      return (
+        <g>
+          <rect width={w} height={h} rx={4} fill="#1e293b" stroke="#22c55e" strokeWidth={1.5} />
+          <rect x={2} y={2} width={w - 4} height={h - 4} rx={3} fill="#052e16" />
+          <text x={m} y={m + 1} textAnchor="middle" dominantBaseline="central" fill="#22c55e" fontSize={16} fontWeight={900} fontFamily="monospace" pointerEvents="none">1</text>
+        </g>
+      );
     case "toggle":
-      return <rect width={w} height={h} rx={6} fill="#059669" stroke="#047857" strokeWidth={1.5} />;
+      return (
+        <g>
+          <rect width={w} height={h} rx={6} fill="#059669" stroke="#047857" strokeWidth={1.5} />
+          <rect x={4} y={4} width={w - 8} height={h - 8} rx={4} fill="#065f46" />
+          <circle cx={m} cy={m} r={m - 8} fill="#10b981" />
+        </g>
+      );
     case "button":
-      return <rect width={w} height={h} rx={6} fill="#d97706" stroke="#b45309" strokeWidth={1.5} />;
+      return (
+        <g>
+          <rect width={w} height={h} rx={6} fill="#92400e" stroke="#b45309" strokeWidth={1.5} />
+          <circle cx={m} cy={m} r={m - 8} fill="#f59e0b" stroke="#d97706" strokeWidth={1} />
+        </g>
+      );
     case "clock":
-      return <rect width={w} height={h} rx={6} fill="#0891b2" stroke="#0e7490" strokeWidth={1.5} />;
+      return (
+        <g>
+          <rect width={w} height={h} rx={6} fill="#164e63" stroke="#0e7490" strokeWidth={1.5} />
+          <polyline points={`10,${m} 18,${m} 18,${m - 10} 30,${m - 10} 30,${m} 38,${m} 38,${m + 10} 50,${m + 10} 50,${m}`}
+            fill="none" stroke="#22d3ee" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+        </g>
+      );
     case "bulb":
-      return <circle cx={w / 2} cy={m} r={m - 2} fill="#fbbf24" stroke="#d97706" strokeWidth={1.5} />;
+      return (
+        <g>
+          <circle cx={w / 2} cy={m - 2} r={m - 6} fill="#fbbf24" stroke="#d97706" strokeWidth={1.5} opacity={0.3} />
+          <circle cx={w / 2} cy={m - 2} r={m - 10} fill="#fbbf24" stroke="#d97706" strokeWidth={1.5} />
+          <rect x={w / 2 - 6} y={m + 6} width={12} height={6} rx={1} fill="#92400e" stroke="#78350f" strokeWidth={1} />
+        </g>
+      );
     case "hex-display":
-      return <rect width={w} height={h} rx={4} fill="#1e293b" stroke="#475569" strokeWidth={1.5} />;
+      return (
+        <g>
+          <rect width={w} height={h} rx={4} fill="#0f172a" stroke="#334155" strokeWidth={1.5} />
+          <rect x={3} y={3} width={w - 6} height={h - 6} rx={3} fill="#020617" stroke="#1e293b" strokeWidth={1} />
+          <text x={m} y={m} textAnchor="middle" dominantBaseline="central" fill="#38bdf8" fontSize={22} fontWeight={900} fontFamily="monospace" pointerEvents="none">8</text>
+        </g>
+      );
     case "led":
-      return <circle cx={w / 2} cy={m} r={m - 4} fill="#ef4444" stroke="#dc2626" strokeWidth={1.5} />;
+      return (
+        <g>
+          <circle cx={w / 2} cy={m} r={m - 4} fill="#7f1d1d" stroke="#991b1b" strokeWidth={1.5} />
+          <circle cx={w / 2} cy={m} r={m - 8} fill="#dc2626" opacity={0.7} />
+        </g>
+      );
     case "buffer":
-      return <polygon points={`4,2 ${w - 4},${m} 4,${h - 2}`} fill="#6366f1" stroke="#4f46e5" strokeWidth={1.5} />;
+      return (
+        <g>
+          <polygon points={`6,3 ${w - 3},${m} 6,${h - 3}`} fill="#4f46e5" stroke="#4338ca" strokeWidth={1.5} />
+          <text x={m - 2} y={m + 1} textAnchor="middle" dominantBaseline="central" fill="white" fontSize={10} fontWeight={700} fontFamily="system-ui" pointerEvents="none">1</text>
+        </g>
+      );
     case "not":
       return (
         <g>
-          <polygon points={`4,2 ${w - 12},${m} 4,${h - 2}`} fill="#8b5cf6" stroke="#7c3aed" strokeWidth={1.5} />
-          <circle cx={w - 9} cy={m} r={4} fill="#8b5cf6" stroke="#7c3aed" strokeWidth={1.5} />
+          <polygon points={`6,3 ${w - 12},${m} 6,${h - 3}`} fill="#7c3aed" stroke="#6d28d9" strokeWidth={1.5} />
+          <circle cx={w - 8} cy={m} r={4.5} fill="#7c3aed" stroke="#6d28d9" strokeWidth={1.5} />
+          <text x={m - 4} y={m + 1} textAnchor="middle" dominantBaseline="central" fill="white" fontSize={10} fontWeight={700} fontFamily="system-ui" pointerEvents="none">1</text>
         </g>
       );
     case "and":
       return (
-        <path
-          d={`M 4 2 L ${w * 0.5} 2 A ${w * 0.45} ${m - 2} 0 0 1 ${w * 0.5} ${h - 2} L 4 ${h - 2} Z`}
-          fill="#3b82f6" stroke="#2563eb" strokeWidth={1.5}
-        />
+        <g>
+          <path d={`M 6 3 L ${w * 0.45} 3 A ${m - 3} ${m - 3} 0 0 1 ${w * 0.45} ${h - 3} L 6 ${h - 3} Z`}
+            fill="#2563eb" stroke="#1d4ed8" strokeWidth={1.5} />
+          <text x={w * 0.35} y={m + 1} textAnchor="middle" dominantBaseline="central" fill="white" fontSize={10} fontWeight={700} fontFamily="system-ui" pointerEvents="none">&amp;</text>
+        </g>
       );
     case "nand":
       return (
         <g>
-          <path d={`M 4 2 L ${w * 0.45} 2 A ${w * 0.42} ${m - 2} 0 0 1 ${w * 0.45} ${h - 2} L 4 ${h - 2} Z`} fill="#ec4899" stroke="#db2777" strokeWidth={1.5} />
-          <circle cx={w - 8} cy={m} r={4} fill="#ec4899" stroke="#db2777" strokeWidth={1.5} />
+          <path d={`M 6 3 L ${w * 0.4} 3 A ${m - 3} ${m - 3} 0 0 1 ${w * 0.4} ${h - 3} L 6 ${h - 3} Z`} fill="#db2777" stroke="#be185d" strokeWidth={1.5} />
+          <circle cx={w - 8} cy={m} r={4.5} fill="#db2777" stroke="#be185d" strokeWidth={1.5} />
+          <text x={w * 0.3} y={m + 1} textAnchor="middle" dominantBaseline="central" fill="white" fontSize={9} fontWeight={700} fontFamily="system-ui" pointerEvents="none">&amp;</text>
         </g>
       );
     case "or":
       return (
-        <path
-          d={`M 4 2 Q ${w * 0.2} 2 ${w - 4} ${m} Q ${w * 0.2} ${h - 2} 4 ${h - 2} Q ${w * 0.15} ${m} 4 2 Z`}
-          fill="#06b6d4" stroke="#0891b2" strokeWidth={1.5}
-        />
+        <g>
+          <path d={`M 6 3 Q ${w * 0.2} 3 ${w - 3} ${m} Q ${w * 0.2} ${h - 3} 6 ${h - 3} Q ${w * 0.15} ${m} 6 3 Z`}
+            fill="#0891b2" stroke="#0e7490" strokeWidth={1.5} />
+          <text x={w * 0.38} y={m + 1} textAnchor="middle" dominantBaseline="central" fill="white" fontSize={10} fontWeight={700} fontFamily="system-ui" pointerEvents="none">≥1</text>
+        </g>
       );
     case "nor":
       return (
         <g>
-          <path d={`M 4 2 Q ${w * 0.2} 2 ${w - 10} ${m} Q ${w * 0.2} ${h - 2} 4 ${h - 2} Q ${w * 0.15} ${m} 4 2 Z`} fill="#f97316" stroke="#ea580c" strokeWidth={1.5} />
-          <circle cx={w - 6} cy={m} r={4} fill="#f97316" stroke="#ea580c" strokeWidth={1.5} />
+          <path d={`M 6 3 Q ${w * 0.2} 3 ${w - 10} ${m} Q ${w * 0.2} ${h - 3} 6 ${h - 3} Q ${w * 0.15} ${m} 6 3 Z`} fill="#ea580c" stroke="#c2410c" strokeWidth={1.5} />
+          <circle cx={w - 6} cy={m} r={4.5} fill="#ea580c" stroke="#c2410c" strokeWidth={1.5} />
+          <text x={w * 0.3} y={m + 1} textAnchor="middle" dominantBaseline="central" fill="white" fontSize={9} fontWeight={700} fontFamily="system-ui" pointerEvents="none">≥1</text>
         </g>
       );
     case "xor":
       return (
         <g>
-          <path d={`M 10 2 Q ${w * 0.25} 2 ${w - 4} ${m} Q ${w * 0.25} ${h - 2} 10 ${h - 2} Q ${w * 0.18} ${m} 10 2 Z`} fill="#14b8a6" stroke="#0d9488" strokeWidth={1.5} />
-          <path d={`M 4 ${h - 2} Q ${w * 0.1} ${m} 4 2`} fill="none" stroke="#0d9488" strokeWidth={2} />
+          <path d={`M 12 3 Q ${w * 0.28} 3 ${w - 3} ${m} Q ${w * 0.28} ${h - 3} 12 ${h - 3} Q ${w * 0.2} ${m} 12 3 Z`} fill="#0d9488" stroke="#0f766e" strokeWidth={1.5} />
+          <path d={`M 6 ${h - 3} Q ${w * 0.1} ${m} 6 3`} fill="none" stroke="#0f766e" strokeWidth={2.5} />
+          <text x={w * 0.42} y={m + 1} textAnchor="middle" dominantBaseline="central" fill="white" fontSize={9} fontWeight={700} fontFamily="system-ui" pointerEvents="none">=1</text>
         </g>
       );
     case "xnor":
       return (
         <g>
-          <path d={`M 12 2 Q ${w * 0.25} 2 ${w - 10} ${m} Q ${w * 0.25} ${h - 2} 12 ${h - 2} Q ${w * 0.18} ${m} 12 2 Z`} fill="#a855f7" stroke="#9333ea" strokeWidth={1.5} />
-          <path d={`M 6 ${h - 2} Q ${w * 0.1} ${m} 6 2`} fill="none" stroke="#9333ea" strokeWidth={2} />
-          <circle cx={w - 6} cy={m} r={4} fill="#a855f7" stroke="#9333ea" strokeWidth={1.5} />
+          <path d={`M 14 3 Q ${w * 0.28} 3 ${w - 10} ${m} Q ${w * 0.28} ${h - 3} 14 ${h - 3} Q ${w * 0.2} ${m} 14 3 Z`} fill="#9333ea" stroke="#7e22ce" strokeWidth={1.5} />
+          <path d={`M 8 ${h - 3} Q ${w * 0.1} ${m} 8 3`} fill="none" stroke="#7e22ce" strokeWidth={2.5} />
+          <circle cx={w - 6} cy={m} r={4.5} fill="#9333ea" stroke="#7e22ce" strokeWidth={1.5} />
+          <text x={w * 0.38} y={m + 1} textAnchor="middle" dominantBaseline="central" fill="white" fontSize={8} fontWeight={700} fontFamily="system-ui" pointerEvents="none">=1</text>
         </g>
       );
     default:
-      return <rect width={w} height={h} rx={4} fill="#475569" stroke="#334155" strokeWidth={1.5} />;
+      return (
+        <g>
+          <rect width={w} height={h} rx={4} fill="#334155" stroke="#475569" strokeWidth={1.5} />
+          <text x={m} y={m} textAnchor="middle" dominantBaseline="central" fill="white" fontSize={8} fontWeight={600} fontFamily="system-ui" pointerEvents="none">
+            {GATE_DEFS[type]?.label || "?"}
+          </text>
+        </g>
+      );
   }
 }
 
@@ -99,11 +166,11 @@ function NodePorts({ node, onPortDown }: { node: CircuitNode; onPortDown: (nid: 
         const val = !!node.inputs[p.id];
         return (
           <g key={p.id}>
-            <circle cx={0} cy={py} r={5} fill={val ? "#22c55e" : "#1e293b"}
-              stroke={val ? "#16a34a" : "#64748b"} strokeWidth={1.5}
+            <circle cx={0} cy={py} r={5} fill={val ? "#22c55e" : "#0f172a"}
+              stroke={val ? "#16a34a" : "#475569"} strokeWidth={1.5}
               onMouseDown={(e) => { e.stopPropagation(); onPortDown(node.id, p.id, "left", e); }}
               className="cursor-crosshair hover:stroke-yellow-400 transition-colors" />
-            <text x={10} y={py} dominantBaseline="central" fill="rgba(255,255,255,0.5)" fontSize={8} fontWeight={600} pointerEvents="none">{p.label}</text>
+            <text x={9} y={py + 1} dominantBaseline="central" fill={val ? "#86efac" : "#64748b"} fontSize={8} fontWeight={600} fontFamily="monospace" pointerEvents="none">{p.label}</text>
           </g>
         );
       })}
@@ -113,11 +180,11 @@ function NodePorts({ node, onPortDown }: { node: CircuitNode; onPortDown: (nid: 
         const val = !!node.outputs[p.id];
         return (
           <g key={p.id}>
-            <circle cx={px} cy={py} r={5} fill={val ? "#22c55e" : "#1e293b"}
-              stroke={val ? "#16a34a" : "#64748b"} strokeWidth={1.5}
+            <circle cx={px} cy={py} r={5} fill={val ? "#22c55e" : "#0f172a"}
+              stroke={val ? "#16a34a" : "#475569"} strokeWidth={1.5}
               onMouseDown={(e) => { e.stopPropagation(); onPortDown(node.id, p.id, "right", e); }}
               className="cursor-crosshair hover:stroke-yellow-400 transition-colors" />
-            <text x={px - 10} y={py} textAnchor="end" dominantBaseline="central" fill="rgba(255,255,255,0.5)" fontSize={8} fontWeight={600} pointerEvents="none">{p.label}</text>
+            <text x={px - 9} y={py + 1} textAnchor="end" dominantBaseline="central" fill={val ? "#86efac" : "#64748b"} fontSize={8} fontWeight={600} fontFamily="monospace" pointerEvents="none">{p.label}</text>
           </g>
         );
       })}
@@ -472,10 +539,12 @@ export default function Logic() {
                     const def = GATE_DEFS[node.type];
                     if (!def) return null;
                     const isSel = node.id === selected;
-                    const cat = def.category;
-                    const color = GATE_COLORS[cat] || "#64748b";
                     const isInput = ["toggle", "const-0", "const-1", "button", "clock"].includes(node.type);
                     const isOutput = ["bulb", "hex-display", "led"].includes(node.type);
+                    const isOn = isOutput && (node.inputs.in || node.inputs.r || node.inputs.a || node.inputs.b || node.inputs.c || node.inputs.d);
+                    const hexVal = node.type === "hex-display"
+                      ? ((node.inputs.d ? 8 : 0) + (node.inputs.c ? 4 : 0) + (node.inputs.b ? 2 : 0) + (node.inputs.a ? 1 : 0))
+                      : 0;
 
                     return (
                       <g key={node.id} transform={`translate(${node.x},${node.y})`}
@@ -495,16 +564,74 @@ export default function Logic() {
                             fill="none" stroke="#facc15" strokeWidth={2} strokeDasharray="4 2" opacity={0.7} />
                         )}
 
-                        <g style={{ color }}>
-                          <GateSVG type={node.type} w={def.w} h={def.h} />
-                        </g>
+                        {/* Real output rendering */}
+                        {node.type === "bulb" && (
+                          <g>
+                            {isOn ? (
+                              <>
+                                <circle cx={def.w / 2} cy={def.h / 2 - 4} r={def.h / 2 - 2} fill="#fbbf24" opacity={0.15} />
+                                <circle cx={def.w / 2} cy={def.h / 2 - 4} r={def.h / 2 - 6} fill="#fbbf24" stroke="#d97706" strokeWidth={1.5} />
+                                <circle cx={def.w / 2} cy={def.h / 2 - 4} r={def.h / 2 - 12} fill="#fef3c7" opacity={0.8} />
+                              </>
+                            ) : (
+                              <>
+                                <circle cx={def.w / 2} cy={def.h / 2 - 4} r={def.h / 2 - 2} fill="#1c1917" stroke="#44403c" strokeWidth={1.5} />
+                                <circle cx={def.w / 2} cy={def.h / 2 - 4} r={def.h / 2 - 8} fill="#292524" opacity={0.5} />
+                              </>
+                            )}
+                            <rect x={def.w / 2 - 6} y={def.h / 2 + 10} width={12} height={6} rx={1} fill="#78350f" stroke="#451a03" strokeWidth={0.5} />
+                            <text x={def.w / 2} y={def.h / 2 + 16} textAnchor="middle" dominantBaseline="central" fill={isOn ? "#fbbf24" : "#57534e"} fontSize={6} fontWeight={600} pointerEvents="none">{isOn ? "ON" : "OFF"}</text>
+                          </g>
+                        )}
 
-                        <text x={def.w / 2} y={def.h / 2} textAnchor="middle" dominantBaseline="central"
-                          fill="white" fontSize={10} fontWeight={700} fontFamily="system-ui" pointerEvents="none">
-                          {isInput ? (node.type === "const-0" ? "0" : node.type === "const-1" ? "1" : node.outputs.out ? "1" : "0")
-                            : isOutput ? (node.inputs.in || node.inputs.r ? "ON" : "OFF")
-                            : def.label}
-                        </text>
+                        {node.type === "led" && (
+                          <g>
+                            {isOn ? (
+                              <>
+                                <circle cx={def.w / 2} cy={def.h / 2} r={def.h / 2 - 2} fill="#ef4444" opacity={0.15} />
+                                <circle cx={def.w / 2} cy={def.h / 2} r={def.h / 2 - 5} fill="#ef4444" stroke="#dc2626" strokeWidth={1.5} />
+                                <circle cx={def.w / 2} cy={def.h / 2} r={def.h / 2 - 10} fill="#fca5a5" opacity={0.7} />
+                              </>
+                            ) : (
+                              <>
+                                <circle cx={def.w / 2} cy={def.h / 2} r={def.h / 2 - 2} fill="#1c1917" stroke="#44403c" strokeWidth={1.5} />
+                                <circle cx={def.w / 2} cy={def.h / 2} r={def.h / 2 - 8} fill="#292524" opacity={0.4} />
+                              </>
+                            )}
+                            <text x={def.w / 2} y={def.h / 2 + 1} textAnchor="middle" dominantBaseline="central" fill={isOn ? "#fef2f2" : "#57534e"} fontSize={7} fontWeight={700} pointerEvents="none">{isOn ? "ON" : ""}</text>
+                          </g>
+                        )}
+
+                        {node.type === "hex-display" && (
+                          <g>
+                            <rect width={def.w} height={def.h} rx={4} fill="#0f172a" stroke={isOn ? "#38bdf8" : "#334155"} strokeWidth={1.5} />
+                            <rect x={3} y={3} width={def.w - 6} height={def.h - 6} rx={3} fill="#020617" stroke="#1e293b" strokeWidth={0.5} />
+                            <text x={def.w / 2} y={def.h / 2 + 2} textAnchor="middle" dominantBaseline="central" fill={isOn ? "#38bdf8" : "#1e293b"} fontSize={26} fontWeight={900} fontFamily="monospace" pointerEvents="none">
+                              {hexVal.toString(16).toUpperCase()}
+                            </text>
+                            <text x={def.w / 2} y={def.h - 5} textAnchor="middle" dominantBaseline="central" fill="#475569" fontSize={6} fontWeight={600} pointerEvents="none">HEX</text>
+                          </g>
+                        )}
+
+                        {!isOutput && (
+                          <>
+                            <GateSVG type={node.type} w={def.w} h={def.h} />
+
+                            {isInput && (
+                              <text x={def.w / 2} y={def.h / 2 + 1} textAnchor="middle" dominantBaseline="central"
+                                fill="white" fontSize={11} fontWeight={800} fontFamily="monospace" pointerEvents="none">
+                                {node.type === "const-0" ? "0" : node.type === "const-1" ? "1" : node.outputs.out ? "1" : "0"}
+                              </text>
+                            )}
+
+                            {!isInput && !["half-adder", "full-adder", "half-subtractor", "full-subtractor", "mux2", "mux4", "decoder", "d-latch", "d-flipflop"].includes(node.type) && (
+                              <text x={def.w / 2} y={def.h + 12} textAnchor="middle" dominantBaseline="central"
+                                fill="white" fontSize={8} fontWeight={600} fontFamily="system-ui" pointerEvents="none" opacity={0.5}>
+                                {def.label}
+                              </text>
+                            )}
+                          </>
+                        )}
 
                         <NodePorts node={node} onPortDown={handlePortDown} />
                       </g>
@@ -738,14 +865,16 @@ function PaletteCategory({ category, gates, placing, onSelect, theme }: {
   onSelect: (t: GateType) => void; theme: AppTheme;
 }) {
   const [open, setOpen] = useState(category === "Logic Gates");
+  const catColor = GATE_COLORS[category] || "#64748b";
   return (
     <div>
       <button onClick={() => setOpen(!open)} className="w-full flex items-center gap-2 px-3 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors hover:bg-white/5"
-        style={{ color: open ? theme.accent : theme.textMuted }}>
+        style={{ color: open ? catColor : theme.textMuted }}>
         <svg className={cn("w-2.5 h-2.5 transition-transform", open && "rotate-90")} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
         </svg>
         {category}
+        <span className="ml-auto text-[9px] font-normal opacity-50">{gates.length}</span>
       </button>
       {open && (
         <div className="px-2 pb-2 space-y-0.5">
@@ -753,14 +882,16 @@ function PaletteCategory({ category, gates, placing, onSelect, theme }: {
             const active = placing === g.type;
             return (
               <button key={g.type} onClick={() => onSelect(g.type)}
-                className={cn("w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all border",
+                className={cn("w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-[11px] font-medium transition-all border",
                   active ? "border-current" : "border-transparent hover:bg-white/5")}
                 style={{
                   background: active ? theme.accent + "20" : undefined,
                   color: active ? theme.accent : theme.textMuted,
                 }}>
-                <span className="w-5 h-5 rounded flex items-center justify-center shrink-0" style={{ background: GATE_COLORS[g.category] + "30" }}>
-                  <span className="w-2 h-2 rounded-sm" style={{ background: GATE_COLORS[g.category] }} />
+                <span className="w-8 h-7 rounded flex items-center justify-center shrink-0 overflow-hidden" style={{ background: theme.canvasBg, border: `1px solid ${theme.border}` }}>
+                  <svg width={32} height={28} viewBox="0 0 32 28">
+                    <GateSVG type={g.type} w={g.w * 0.32} h={g.h * 0.4} />
+                  </svg>
                 </span>
                 <span className="truncate">{g.label}</span>
               </button>
