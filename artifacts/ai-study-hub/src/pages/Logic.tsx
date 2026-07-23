@@ -3,6 +3,8 @@ import type { CircuitNode, Wire, GateType, Circuit, Settings, ThemeId } from "@/
 import { GATE_DEFS, CATEGORIES, portPos } from "@/features/logic/gates";
 import { simulate, generateTruthTable } from "@/features/logic/engine";
 import { getTheme, THEMES } from "@/features/logic/themes";
+import { TEMPLATES, TEMPLATE_CATEGORIES } from "@/features/logic/templates";
+import { generateVerilog, generateVHDL } from "@/features/logic/verilog";
 import { cn } from "@/lib/utils";
 
 let _id = 1;
@@ -140,13 +142,39 @@ export default function Logic() {
   const [showKMap, setShowKMap] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showVerilog, setShowVerilog] = useState(false);
-  const [verilogCode, setVerilogCode] = useState("// Verilog HDL\nmodule circuit(\n  input A, B,\n  output Y\n);\n  assign Y = A & B;\nendmodule");
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [templateCategory, setTemplateCategory] = useState<string>("All");
+  const [verilogCode, setVerilogCode] = useState("");
+  const [vhdlCode, setVhdlCode] = useState("");
+  const [verilogLang, setVerilogLang] = useState<"verilog" | "vhdl">("verilog");
+  const [showBooleanExpr, setShowBooleanExpr] = useState(false);
   const [saved, setSaved] = useState(true);
 
   const theme = useMemo(() => getTheme(settings.theme), [settings.theme]);
 
   const simulated = useMemo(() => simulate(circuit), [circuit]);
   const tt = useMemo(() => generateTruthTable(circuit), [circuit]);
+
+  // Auto-generate Verilog when circuit changes
+  useEffect(() => {
+    if (circuit.nodes.length > 0) {
+      setVerilogCode(generateVerilog(circuit));
+      setVhdlCode(generateVHDL(circuit));
+    }
+  }, [circuit]);
+
+  // Load template
+  const loadTemplate = useCallback((templateId: string) => {
+    const template = TEMPLATES.find((t) => t.id === templateId);
+    if (template) {
+      setCircuit(template.build());
+      setSelected(null);
+      setWireFrom(null);
+      setPlacing(null);
+      setShowTemplates(false);
+      setSaved(false);
+    }
+  }, []);
 
   const inputNodes = simulated.nodes.filter((n) => ["toggle", "const-0", "const-1", "button"].includes(n.type));
   const outputNodes = simulated.nodes.filter((n) => ["bulb", "hex-display", "led"].includes(n.type));
@@ -315,6 +343,14 @@ export default function Logic() {
             {b.label}
           </button>
         ))}
+
+        <div className="w-px h-5" style={{ background: theme.border }} />
+
+        <button onClick={() => setShowTemplates(!showTemplates)}
+          className={cn("px-2 py-1 rounded text-[11px] font-medium transition-colors", showTemplates ? "text-white" : "")}
+          style={showTemplates ? { background: theme.accent + "30", color: theme.accent } : { color: theme.textMuted }}>
+          Templates
+        </button>
 
         <div className="w-px h-5" style={{ background: theme.border }} />
 
@@ -519,16 +555,55 @@ export default function Logic() {
 
           {/* Verilog Panel */}
           {showVerilog && (
-            <div className="h-48 border-t flex flex-col" style={{ background: theme.panel, borderColor: theme.border }}>
+            <div className="h-56 border-t flex flex-col" style={{ background: theme.panel, borderColor: theme.border }}>
               <div className="flex items-center justify-between px-3 py-1.5 border-b" style={{ borderColor: theme.border }}>
-                <span className="text-[11px] font-bold" style={{ color: theme.textMuted }}>Verilog IDE</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold" style={{ color: theme.textMuted }}>
+                    {verilogLang === "verilog" ? "Verilog HDL" : "VHDL"}
+                  </span>
+                  <div className="flex gap-1">
+                    <button onClick={() => setVerilogLang("verilog")}
+                      className={cn("px-2 py-0.5 rounded text-[10px] font-medium transition-colors",
+                        verilogLang === "verilog" ? "text-white" : "")}
+                      style={verilogLang === "verilog" ? { background: theme.accent + "30", color: theme.accent } : { color: theme.textMuted }}>
+                      Verilog
+                    </button>
+                    <button onClick={() => setVerilogLang("vhdl")}
+                      className={cn("px-2 py-0.5 rounded text-[10px] font-medium transition-colors",
+                        verilogLang === "vhdl" ? "text-white" : "")}
+                      style={verilogLang === "vhdl" ? { background: theme.accent + "30", color: theme.accent } : { color: theme.textMuted }}>
+                      VHDL
+                    </button>
+                  </div>
+                </div>
                 <div className="flex gap-1">
-                  <button className="px-2 py-0.5 rounded text-[10px] font-medium" style={{ background: theme.accent + "20", color: theme.accent }}>Run</button>
+                  <button onClick={() => {
+                    navigator.clipboard.writeText(verilogLang === "verilog" ? verilogCode : vhdlCode);
+                  }}
+                    className="px-2 py-0.5 rounded text-[10px] font-medium"
+                    style={{ background: theme.accent + "20", color: theme.accent }}>
+                    Copy
+                  </button>
+                  <button onClick={() => {
+                    const code = verilogLang === "verilog" ? verilogCode : vhdlCode;
+                    const ext = verilogLang === "verilog" ? "v" : "vhd";
+                    const blob = new Blob([code], { type: "text/plain" });
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `circuit.${ext}`;
+                    a.click();
+                  }}
+                    className="px-2 py-0.5 rounded text-[10px] font-medium"
+                    style={{ background: theme.accent + "20", color: theme.accent }}>
+                    Export
+                  </button>
                 </div>
               </div>
-              <textarea value={verilogCode} onChange={(e) => setVerilogCode(e.target.value)}
-                className="flex-1 w-full p-3 text-xs font-mono resize-none outline-none"
-                style={{ background: theme.canvasBg, color: theme.text }} />
+              <textarea value={verilogLang === "verilog" ? verilogCode : vhdlCode}
+                onChange={(e) => verilogLang === "verilog" ? setVerilogCode(e.target.value) : setVhdlCode(e.target.value)}
+                className="flex-1 w-full p-3 text-[11px] font-mono resize-none outline-none"
+                style={{ background: theme.canvasBg, color: theme.text }}
+                spellCheck={false} />
             </div>
           )}
         </div>
@@ -585,6 +660,70 @@ export default function Logic() {
                     <kbd className="px-1 rounded border text-[9px] font-mono" style={{ borderColor: theme.border }}>{v}</kbd>
                   </div>
                 ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Templates Modal */}
+      {showTemplates && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60" onClick={() => setShowTemplates(false)}>
+          <div className="w-[700px] max-h-[80vh] rounded-xl border shadow-2xl flex flex-col overflow-hidden" style={{ background: theme.card, borderColor: theme.border }}
+            onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: theme.border }}>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold" style={{ color: theme.text }}>Circuit Templates</h3>
+                <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: theme.accent + "20", color: theme.accent }}>{TEMPLATES.length} templates</span>
+              </div>
+              <button onClick={() => setShowTemplates(false)} className="w-6 h-6 rounded flex items-center justify-center hover:bg-white/10" style={{ color: theme.textMuted }}>×</button>
+            </div>
+
+            {/* Category tabs */}
+            <div className="flex gap-1 px-4 py-2 border-b overflow-x-auto" style={{ borderColor: theme.border }}>
+              <button onClick={() => setTemplateCategory("All")}
+                className={cn("px-3 py-1 rounded-lg text-[10px] font-bold transition-all whitespace-nowrap",
+                  templateCategory === "All" ? "text-white" : "")}
+                style={templateCategory === "All" ? { background: theme.accent, color: "white" } : { color: theme.textMuted }}>
+                All ({TEMPLATES.length})
+              </button>
+              {TEMPLATE_CATEGORIES.map((cat) => {
+                const count = TEMPLATES.filter((t) => t.category === cat).length;
+                return (
+                  <button key={cat} onClick={() => setTemplateCategory(cat)}
+                    className={cn("px-3 py-1 rounded-lg text-[10px] font-bold transition-all whitespace-nowrap",
+                      templateCategory === cat ? "text-white" : "")}
+                    style={templateCategory === cat ? { background: theme.accent, color: "white" } : { color: theme.textMuted }}>
+                    {cat} ({count})
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Templates grid */}
+            <div className="flex-1 overflow-y-auto p-4">
+              <div className="grid grid-cols-2 gap-3">
+                {TEMPLATES
+                  .filter((t) => templateCategory === "All" || t.category === templateCategory)
+                  .map((template) => (
+                    <button key={template.id} onClick={() => loadTemplate(template.id)}
+                      className="text-left p-3 rounded-xl border transition-all hover:scale-[1.02] hover:shadow-lg"
+                      style={{ background: theme.canvasBg, borderColor: theme.border }}>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="w-2 h-2 rounded-full" style={{ background: theme.accent }} />
+                        <span className="text-[12px] font-bold" style={{ color: theme.text }}>{template.name}</span>
+                      </div>
+                      <p className="text-[10px] leading-relaxed mb-2" style={{ color: theme.textMuted }}>{template.description}</p>
+                      <div className="flex flex-wrap gap-1">
+                        {template.tags.slice(0, 3).map((tag) => (
+                          <span key={tag} className="px-1.5 py-0.5 rounded text-[8px] font-medium"
+                            style={{ background: theme.accent + "15", color: theme.accent }}>
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </button>
+                  ))}
               </div>
             </div>
           </div>
