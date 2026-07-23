@@ -53,6 +53,7 @@ const NAV_LINKS = [
 export function Header() {
   const [location] = useLocation();
   const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
@@ -63,6 +64,10 @@ export function Header() {
 
   useEffect(() => {
     document.body.style.overflow = "";
+  }, [location]);
+
+  useEffect(() => {
+    setMobileOpen(false);
   }, [location]);
 
   const isToolActive = TOOLS.some((t) => t.path === location);
@@ -167,7 +172,7 @@ export function Header() {
 
           {/* Mobile menu */}
           <div className="lg:hidden">
-            <Sheet>
+            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
                 <button className="p-2 rounded-lg text-foreground hover:bg-muted transition-colors" aria-label="Toggle menu">
                   <Menu size={22} />
@@ -190,6 +195,7 @@ export function Header() {
                         <Link
                           key={link.path}
                           href={link.path}
+                          onClick={() => setMobileOpen(false)}
                           className={cn(
                             "block px-4 py-3 rounded-lg text-sm font-medium transition-colors",
                             location === link.path
@@ -208,6 +214,7 @@ export function Header() {
                           <Link
                             key={tool.path}
                             href={tool.path}
+                            onClick={() => setMobileOpen(false)}
                             className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-foreground/80 hover:text-foreground hover:bg-muted transition-colors"
                           >
                             <tool.icon size={16} className="text-muted-foreground" />
@@ -220,6 +227,7 @@ export function Header() {
                   <div className="p-4 border-t">
                     <Link
                       href="/virtual-lab"
+                      onClick={() => setMobileOpen(false)}
                       className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors"
                     >
                       <FlaskConical size={16} />

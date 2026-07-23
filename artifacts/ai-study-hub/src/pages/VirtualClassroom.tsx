@@ -9,10 +9,10 @@ import { PollModal } from "@/components/classroom/PollModal";
 import { FileShare } from "@/components/classroom/FileShare";
 import { BreakoutRoomsPropsComponent } from "@/components/classroom/BreakoutRooms";
 import { WaitingRoom } from "@/components/classroom/WaitingRoom";
-import { getSocket, disconnectSocket } from "@/lib/socket-client";
+import { getSocket, disconnectSocket, isSocketSupported } from "@/lib/socket-client";
 import { useWebRTC } from "@/lib/useWebRTC";
 import type { Participant, ChatMessage, Poll, SharedFile, BreakoutRoom, WaitingUser, RoomState } from "@/lib/classroom-types";
-import { GraduationCap, Video, VideoOff, Mic, MicOff, Settings, Phone, MonitorUp, MonitorOff, ArrowLeft } from "lucide-react";
+import { GraduationCap, Video, VideoOff, Mic, MicOff, Settings, Phone, MonitorUp, MonitorOff, ArrowLeft, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function VirtualClassroom() {
@@ -72,6 +72,9 @@ export default function VirtualClassroom() {
     connectToPeer, replaceTrack, cleanup,
     setOnRemoteStream, setOnRemoteStreamLost,
   } = useWebRTC(localStreamRef);
+
+  // Check if Socket.io is supported (only on localhost with full server)
+  const socketSupported = isSocketSupported();
 
   // === PRE-JOIN: Request camera/mic permissions ===
   useEffect(() => {
@@ -133,6 +136,21 @@ export default function VirtualClassroom() {
 
     const socket = getSocket();
     socket.connect();
+
+    const connectTimeout = setTimeout(() => {
+      if (!socket.connected) {
+        setError("Could not connect to the classroom server. Please ensure the API server is running and try again.");
+        socket.disconnect();
+        disconnectSocket();
+      }
+    }, 10000);
+
+    socket.on("connect_error", () => {
+      setError("Connection failed. The classroom server may be offline. Please try again later.");
+      clearTimeout(connectTimeout);
+      socket.disconnect();
+      disconnectSocket();
+    });
 
     setOnRemoteStream((socketId, stream) => {
       setRemoteStreams((prev) => {
@@ -236,6 +254,7 @@ export default function VirtualClassroom() {
     socket.emit("join-room", { roomId, name: userName, role: userRole });
 
     return () => {
+      clearTimeout(connectTimeout);
       socket.removeAllListeners();
       socket.disconnect();
       disconnectSocket();
@@ -324,6 +343,41 @@ export default function VirtualClassroom() {
 
   const handleOpenChat = () => { setActivePanel(activePanel === "chat" ? null : "chat"); setUnreadChat(0); };
   const handleOpenParticipants = () => setActivePanel(activePanel === "participants" ? null : "participants");
+
+  // ===========================
+  // SERVERLESS UNSUPPORTED SCREEN
+  // ===========================
+  if (!socketSupported) {
+    return (
+      <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center p-6 bg-zinc-950">
+        <div className="text-center max-w-md">
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle size={28} className="text-amber-400" />
+          </div>
+          <h2 className="text-xl font-serif font-bold text-white mb-2">Virtual Classroom Unavailable</h2>
+          <p className="text-zinc-400 text-sm mb-4">
+            The Virtual Classroom requires a persistent server connection for real-time video and chat.
+            It is not available on this hosted version.
+          </p>
+          <p className="text-zinc-500 text-xs mb-6">
+            To use Virtual Classroom, run the project locally with the full API server:
+          </p>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-left mb-6">
+            <code className="text-xs text-emerald-400">
+              pnpm run dev<br />
+              pnpm run api
+            </code>
+          </div>
+          <button
+            onClick={() => setLocation("/virtual-classroom")}
+            className="px-6 py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:bg-primary/90 transition-colors"
+          >
+            Back to Lobby
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // ===========================
   // PRE-JOIN PERMISSIONS SCREEN

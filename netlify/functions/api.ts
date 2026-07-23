@@ -190,6 +190,78 @@ export default async (req: Request): Promise<Response> => {
       return json(result);
     }
 
+    // ---- Classroom endpoints (in-memory, serverless-safe) ----
+    const classrooms = globalThis as any;
+    if (!classrooms._rooms) classrooms._rooms = {};
+    if (!classrooms._codeToId) classrooms._codeToId = {};
+
+    if (path === "/api/classrooms" && req.method === "GET") {
+      const rooms = Object.values(classrooms._rooms).filter((r: any) => r.isActive);
+      return json(rooms.map((r: any) => ({
+        id: r.id, title: r.title, subject: r.subject,
+        teacherName: r.teacherName, participantCount: Object.keys(r.participants || {}).length, code: r.code,
+      })));
+    }
+
+    if (path === "/api/classrooms" && req.method === "POST") {
+      const body = await req.json();
+      const { title, subject, teacherId, teacherName, scheduledAt } = body;
+      if (!title || !subject || !teacherId || !teacherName) {
+        return json({ error: "title, subject, teacherId, teacherName are required" }, 400);
+      }
+      const id = crypto.randomUUID();
+      let code;
+      do { code = Math.random().toString(36).substring(2, 8).toUpperCase(); } while (classrooms._codeToId[code]);
+      const room = {
+        id, code, title, subject, teacherId, teacherName,
+        scheduledAt: scheduledAt || null,
+        createdAt: new Date().toISOString(), isActive: true,
+        isLocked: false, hasWaitingRoom: false,
+        participants: {}, waitingRoom: {}, attendance: [], messages: [], files: [], breakoutRooms: [], recordings: [],
+      };
+      classrooms._rooms[id] = room;
+      classrooms._codeToId[code] = id;
+      return json({ id, code, title, subject, teacherName, scheduledAt: room.scheduledAt }, 201);
+    }
+
+    const classroomGetMatch = path.match(/^\/api\/classrooms\/([^/]+)$/);
+    if (classroomGetMatch && req.method === "GET") {
+      const room = classrooms._rooms[classroomGetMatch[1]];
+      if (!room) return json({ error: "Room not found" }, 404);
+      return json({
+        id: room.id, code: room.code, title: room.title, subject: room.subject,
+        teacherName: room.teacherName, scheduledAt: room.scheduledAt,
+        isActive: room.isActive, participantCount: Object.keys(room.participants).length,
+      });
+    }
+
+    const codeMatch = path.match(/^\/api\/classrooms\/code\/([^/]+)$/);
+    if (codeMatch && req.method === "GET") {
+      const code = codeMatch[1].toUpperCase();
+      const roomId = classrooms._codeToId[code];
+      const room = roomId && classrooms._rooms[roomId];
+      if (!room) return json({ error: "Room not found" }, 404);
+      if (!room.isActive) return json({ error: "Class has ended" }, 410);
+      return json({ id: room.id, code: room.code, title: room.title, subject: room.subject, teacherName: room.teacherName });
+    }
+
+    // ---- Feedback endpoints ----
+    if (path === "/api/feedback" && req.method === "POST") {
+      const body = await req.json();
+      if (!body.message?.trim()) return json({ error: "Message is required" }, 400);
+      const fb = {
+        id: crypto.randomUUID(), ...body,
+        createdAt: new Date().toISOString(),
+      };
+      if (!classrooms._feedback) classrooms._feedback = [];
+      classrooms._feedback.push(fb);
+      return json({ success: true, id: fb.id }, 201);
+    }
+
+    if (path === "/api/feedback" && req.method === "GET") {
+      return json(classrooms._feedback || []);
+    }
+
     return json({ error: "Not found" }, 404);
   } catch (err: any) {
     if (err?.message === "AI_NOT_CONFIGURED") {
