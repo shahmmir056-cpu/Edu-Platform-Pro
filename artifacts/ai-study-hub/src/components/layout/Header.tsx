@@ -11,6 +11,7 @@ import {
   ClipboardList,
   Wand2,
   FlaskConical,
+  Zap,
   Facebook,
   Twitter,
   Instagram,
@@ -45,6 +46,7 @@ const NAV_LINKS = [
   { name: "Home", path: "/" },
   { name: "Math Solver", path: "/math-solver" },
   { name: "Virtual Lab", path: "/virtual-lab" },
+  { name: "Logic", path: "/logic" },
   { name: "About", path: "/about" },
   { name: "Feedback", path: "/contact" },
 ];

@@ -27,6 +27,7 @@ const TOOL_LINKS = [
   { name: "Flashcards", path: "/flashcards" },
   { name: "Math Solver", path: "/math-solver" },
   { name: "Virtual Lab", path: "/virtual-lab" },
+  { name: "Logic", path: "/logic" },
 ];
 
 const COMPANY_LINKS = [
