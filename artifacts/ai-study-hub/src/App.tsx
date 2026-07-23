@@ -21,6 +21,7 @@ import Presentation from '@/pages/Presentation';
 import TextPlayground from '@/pages/TextPlayground';
 import MathSolver from '@/pages/MathSolver';
 import VirtualLab from '@/pages/VirtualLab';
+import SurgeryLab from '@/pages/SurgeryLab';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
 
@@ -50,6 +51,7 @@ function Router() {
             <Route path="/text-playground" component={TextPlayground} />
             <Route path="/math-solver" component={MathSolver} />
             <Route path="/virtual-lab" component={VirtualLab} />
+            <Route path="/surgery-lab" component={SurgeryLab} />
             <Route path="/about" component={About} />
             <Route path="/contact" component={Contact} />
             <Route component={NotFound} />
