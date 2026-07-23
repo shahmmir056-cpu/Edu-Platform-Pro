@@ -320,7 +320,7 @@ export default function VirtualLab() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 md:p-8"
+            className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm"
             onClick={() => setActiveSimId(null)}
           >
             <motion.div
@@ -330,11 +330,13 @@ export default function VirtualLab() {
               transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
               onClick={(e) => e.stopPropagation()}
               className={cn(
-                "bg-card rounded-2xl overflow-hidden w-full flex flex-col shadow-2xl border border-card-border",
-                isCustom ? "max-w-5xl h-[90vh]" : "max-w-5xl h-[85vh]"
+                "bg-card overflow-hidden w-full flex flex-col shadow-2xl border border-card-border",
+                isCustom
+                  ? "rounded-2xl max-w-5xl mx-auto mt-[5vh] h-[90vh]"
+                  : "md:rounded-2xl rounded-t-2xl max-w-5xl absolute inset-x-3 md:inset-x-8 top-3 bottom-0"
               )}
             >
-              <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-sidebar text-sidebar-foreground">
+              <div className="flex items-center justify-between px-5 py-3 border-b border-border bg-sidebar text-sidebar-foreground shrink-0">
                 <div className="flex items-center gap-3">
                   <p className="font-serif text-lg leading-none">{activeSim.name}</p>
                   {isCustom && (
@@ -361,12 +363,18 @@ export default function VirtualLab() {
                     src={simEmbedUrl(activeSim.slug)}
                     title={activeSim.name}
                     className="absolute inset-0 w-full h-full border-0 bg-white"
-                    style={{ height: "calc(100% + 60px)", marginTop: "-60px" }}
                     allow="fullscreen"
                   />
                 )}
               </div>
             </motion.div>
+
+            {!isCustom && (
+              <div
+                className="fixed bottom-0 left-0 w-full z-[9999] bg-sidebar"
+                style={{ height: "56px" }}
+              />
+            )}
           </motion.div>
         )}
       </AnimatePresence>
