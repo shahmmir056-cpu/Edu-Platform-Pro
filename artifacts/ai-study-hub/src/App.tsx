@@ -23,8 +23,6 @@ import MathSolver from '@/pages/MathSolver';
 import VirtualLab from '@/pages/VirtualLab';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
-import ClassroomLobby from '@/pages/ClassroomLobby';
-import VirtualClassroom from '@/pages/VirtualClassroom';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -52,8 +50,6 @@ function Router() {
             <Route path="/text-playground" component={TextPlayground} />
             <Route path="/math-solver" component={MathSolver} />
             <Route path="/virtual-lab" component={VirtualLab} />
-            <Route path="/virtual-classroom" component={ClassroomLobby} />
-            <Route path="/virtual-classroom/:id" component={VirtualClassroom} />
             <Route path="/about" component={About} />
             <Route path="/contact" component={Contact} />
             <Route component={NotFound} />

@@ -45,7 +45,6 @@ const NAV_LINKS = [
   { name: "Home", path: "/" },
   { name: "Math Solver", path: "/math-solver" },
   { name: "Virtual Lab", path: "/virtual-lab" },
-  { name: "Virtual Classroom", path: "/virtual-classroom" },
   { name: "About", path: "/about" },
   { name: "Feedback", path: "/contact" },
 ];

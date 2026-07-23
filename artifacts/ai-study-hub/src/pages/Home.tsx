@@ -14,7 +14,6 @@ import {
   ShieldCheck,
   Infinity as InfinityIcon,
   Star,
-  Video,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -23,7 +22,6 @@ const SHOWCASE_TOOLS = [
   { name: "Essay Writer", path: "/essay", icon: PenTool, desc: "Draft complete essays with outlines, tailored to specific styles and word counts.", color: "bg-emerald-500/10 text-emerald-700", tag: "Writing" },
   { name: "Math Solver", path: "/math-solver", icon: Sigma, desc: "Type any equation or word problem and get a clean, numbered step-by-step solution.", color: "bg-orange-500/10 text-orange-700", tag: "New" },
   { name: "Virtual Lab", path: "/virtual-lab", icon: FlaskConical, desc: "Run real PhET science simulations for physics, chemistry, biology, and math.", color: "bg-teal-500/10 text-teal-700", tag: "New" },
-  { name: "Virtual Classroom", path: "/virtual-classroom", icon: Video, desc: "Live video classes with whiteboard, screen share, chat, polls, and breakout rooms.", color: "bg-rose-500/10 text-rose-700", tag: "New" },
   { name: "Quiz Generator", path: "/quiz", icon: HelpCircle, desc: "Test your knowledge with interactive multiple-choice quizzes and explanations.", color: "bg-purple-500/10 text-purple-700", tag: "Study" },
   { name: "Flashcard Deck", path: "/flashcards", icon: Layers, desc: "Instantly create flippable flashcards for rapid memorization and recall.", color: "bg-pink-500/10 text-pink-700", tag: "Study" },
   { name: "Study Notes", path: "/study-notes", icon: ClipboardList, desc: "Turn complex topics into structured notes with key terms and bullet points.", color: "bg-cyan-500/10 text-cyan-700", tag: "Study" },
@@ -37,7 +35,7 @@ const FEATURE_STRIP = [
 ];
 
 const STATS = [
-  { value: "9", label: "AI-Powered Tools" },
+  { value: "8", label: "AI-Powered Tools" },
   { value: "26+", label: "Virtual Lab Simulations" },
   { value: "0", label: "Sign-ups Required" },
   { value: "24/7", label: "Always Available" },
