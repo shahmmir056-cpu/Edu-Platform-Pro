@@ -79,38 +79,11 @@ export function Header() {
   const [location] = useLocation();
   const { state: gestureState, enable: enableGesture, disable: disableGesture } = useGesture();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [headerVisible, setHeaderVisible] = useState(true);
   const [scrolled, setScrolled] = useState(false);
 
-  const lastScrollY = useRef(0);
-  const ticking = useRef(false);
-
   useEffect(() => {
-    const onScroll = () => {
-      if (!ticking.current) {
-        window.requestAnimationFrame(() => {
-          const currentY = window.scrollY;
-          const atTop = currentY < 60;
-          const delta = currentY - lastScrollY.current;
-
-          setScrolled(currentY > 16);
-
-          if (atTop) {
-            setHeaderVisible(true);
-          } else if (delta > 8) {
-            setHeaderVisible(false);
-          } else if (delta < -8) {
-            setHeaderVisible(true);
-          }
-
-          lastScrollY.current = currentY;
-          ticking.current = false;
-        });
-        ticking.current = true;
-      }
-    };
-
-    lastScrollY.current = window.scrollY;
+    const onScroll = () => setScrolled(window.scrollY > 16);
+    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -121,8 +94,6 @@ export function Header() {
 
   useEffect(() => {
     setMobileOpen(false);
-    setHeaderVisible(true);
-    lastScrollY.current = 0;
     window.scrollTo(0, 0);
   }, [location]);
 
@@ -134,13 +105,10 @@ export function Header() {
       <header
         className={cn(
           "fixed top-4 left-1/2 z-50 hidden lg:flex items-center gap-0.5 transition-all duration-500 ease-out water-nav-bar",
-          scrolled ? "water-nav-bar-scrolled" : "",
-          headerVisible
-            ? "translate-y-0 opacity-100 pointer-events-auto"
-            : "-translate-y-[120%] opacity-0 pointer-events-none"
+          scrolled ? "water-nav-bar-scrolled" : ""
         )}
         style={{
-          transform: `translateX(-50%) ${headerVisible ? "" : "translateY(-120%)"}`,
+          transform: "translateX(-50%)",
           width: "min(94vw, 1100px)",
           padding: scrolled ? "6px 10px" : "7px 12px",
           borderRadius: "999px",
@@ -314,10 +282,7 @@ export function Header() {
       <header
         className={cn(
           "fixed top-4 left-2 right-8 z-50 lg:hidden flex items-center justify-between transition-all duration-500 ease-out water-nav-bar",
-          scrolled ? "water-nav-bar-scrolled" : "",
-          headerVisible
-            ? "translate-y-0 opacity-100 pointer-events-auto"
-            : "-translate-y-[120%] opacity-0 pointer-events-none"
+          scrolled ? "water-nav-bar-scrolled" : ""
         )}
         style={{
           padding: "8px 10px 8px 12px",
