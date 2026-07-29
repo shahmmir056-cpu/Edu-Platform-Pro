@@ -9,7 +9,7 @@ import { Route, Switch, Router as WouterRouter, useLocation } from 'wouter';
 import { ScrollToTop } from '@/components/layout/ScrollToTop';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageTransition } from '@/components/layout/PageTransition';
-import { GestureProvider } from '@/gesture/GestureProvider';
+import VirtualClassroom from '@/pages/VirtualClassroom';
 
 // Pages
 import Home from '@/pages/Home';
@@ -63,6 +63,7 @@ function Router() {
             <Route path="/simulations" component={SimulationsPage} />
             <Route path="/simulations-v2" component={SimulationsV2Page} />
             <Route path="/debate-mentor" component={DebateMentorPage} />
+            <Route path="/virtual-classroom" component={VirtualClassroom} />
             <Route path="/about" component={About} />
             <Route path="/contact" component={Contact} />
             <Route component={NotFound} />
@@ -79,9 +80,7 @@ function App() {
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
           <ScrollToTop />
-          <GestureProvider>
-            <Router />
-          </GestureProvider>
+          <Router />
         </WouterRouter>
         <Toaster />
       </TooltipProvider>

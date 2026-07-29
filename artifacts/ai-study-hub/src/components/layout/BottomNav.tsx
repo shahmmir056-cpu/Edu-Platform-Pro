@@ -6,14 +6,15 @@ import {
   FlaskConical,
   Cpu,
   BookOpen,
+  MonitorPlay,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TABS = [
   { name: "Home", path: "/", icon: Home },
   { name: "Tools", path: "/research", icon: Search },
+  { name: "Classroom", path: "/virtual-classroom", icon: MonitorPlay },
   { name: "Lab", path: "/virtual-lab", icon: FlaskConical },
-  { name: "Logic", path: "/logic", icon: Cpu },
   { name: "More", path: "/about", icon: BookOpen },
 ];
 
