@@ -123,28 +123,248 @@ function MagneticButton({ children, className, style }: { children: React.ReactN
   );
 }
 
-/* ─── Floating Particles enhanced ─── */
-function FloatingParticles() {
-  const particles = Array.from({ length: 28 }, (_, i) => ({
-    id: i, x: Math.random() * 100, y: Math.random() * 100,
-    size: Math.random() * 5 + 1, duration: Math.random() * 8 + 6,
-    delay: Math.random() * 5, opacity: Math.random() * 0.12 + 0.03,
-    driftX: (Math.random() - 0.5) * 40,
-  }));
+/* ─── Canvas Particle Network ─── */
+function ParticleNetwork({ mousePos }: { mousePos: { x: number; y: number } }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animId: number;
+    let w = 0; let h = 0;
+
+    const particles: { x: number; y: number; vx: number; vy: number; size: number; color: string }[] = [];
+    const PARTICLE_COUNT = 65;
+    const CONNECTION_DIST = 130;
+
+    function resize() {
+      w = canvas!.width = window.innerWidth;
+      h = canvas!.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener("resize", resize);
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        size: Math.random() * 2.5 + 1,
+        color: i % 3 === 0 ? "#FF9F4C" : i % 3 === 1 ? "#E8852E" : "#2D2D2D",
+      });
+    }
+
+    function draw() {
+      ctx!.clearRect(0, 0, w, h);
+
+      for (const p of particles) {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0 || p.x > w) p.vx *= -1;
+        if (p.y < 0 || p.y > h) p.vy *= -1;
+
+        ctx!.beginPath();
+        ctx!.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx!.fillStyle = p.color;
+        ctx!.globalAlpha = 0.5;
+        ctx!.fill();
+      }
+
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < CONNECTION_DIST) {
+            const alpha = (1 - dist / CONNECTION_DIST) * 0.15;
+            ctx!.beginPath();
+            ctx!.moveTo(particles[i].x, particles[i].y);
+            ctx!.lineTo(particles[j].x, particles[j].y);
+            ctx!.strokeStyle = "#FF9F4C";
+            ctx!.globalAlpha = alpha;
+            ctx!.lineWidth = 0.5;
+            ctx!.stroke();
+          }
+        }
+      }
+
+      // Mouse interaction - draw extra connections near cursor
+      const mx = mousePos.x * w;
+      const my = mousePos.y * h;
+      for (const p of particles) {
+        const dx = p.x - mx;
+        const dy = p.y - my;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 200) {
+          const alpha = (1 - dist / 200) * 0.25;
+          ctx!.beginPath();
+          ctx!.arc(p.x, p.y, p.size * 1.5, 0, Math.PI * 2);
+          ctx!.fillStyle = "#FF9F4C";
+          ctx!.globalAlpha = alpha;
+          ctx!.fill();
+        }
+      }
+
+      ctx!.globalAlpha = 1;
+      animId = requestAnimationFrame(draw);
+    }
+
+    draw();
+    return () => { cancelAnimationFrame(animId); window.removeEventListener("resize", resize); };
+  }, [mousePos]);
+
   return (
-    <>
-      {particles.map((p) => (
-        <motion.div key={p.id} className="absolute rounded-full pointer-events-none"
+    <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" />
+  );
+}
+
+/* ─── Animated Grid Background ─── */
+function GridBackground() {
+  return (
+    <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden opacity-[0.04]">
+      <div className="absolute inset-0"
+        style={{
+          backgroundImage: `linear-gradient(rgba(45,45,45,1) 1px, transparent 1px), linear-gradient(90deg, rgba(45,45,45,1) 1px, transparent 1px)`,
+          backgroundSize: "60px 60px",
+        }}
+      />
+      <motion.div
+        className="absolute inset-0"
+        style={{
+          backgroundImage: `linear-gradient(rgba(255,159,76,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,159,76,1) 1px, transparent 1px)`,
+          backgroundSize: "60px 60px",
+        }}
+        animate={{ opacity: [0, 0.5, 0] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+      />
+    </div>
+  );
+}
+
+/* ─── AI Holographic Visual ─── */
+function AIVisual() {
+  const cards = [
+    { label: "AI Tutors", value: "10+", x: "-15%", y: "-25%", delay: 0 },
+    { label: "Virtual Labs", value: "50+", x: "20%", y: "-30%", delay: 0.3 },
+    { label: "Smart Notes", value: "AI", x: "-20%", y: "20%", delay: 0.6 },
+    { label: "Exams", value: "Prep", x: "18%", y: "22%", delay: 0.9 },
+  ];
+
+  return (
+    <div className="relative w-full h-full flex items-center justify-center">
+      {/* Glow orbs */}
+      <motion.div
+        className="absolute rounded-full blur-[100px]"
+        style={{ width: "50%", height: "50%", background: "rgba(255,159,76,0.15)" }}
+        animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.25, 0.15] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="absolute rounded-full blur-[80px]"
+        style={{ width: "35%", height: "35%", background: "rgba(232,133,46,0.1)" }}
+        animate={{ scale: [1.1, 0.9, 1.1], opacity: [0.1, 0.2, 0.1] }}
+        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+      />
+
+      {/* Glowing orange rings */}
+      <motion.svg className="absolute w-[80%] h-[80%]" viewBox="0 0 300 300"
+        animate={{ rotate: 360 }}
+        transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+      >
+        <circle cx="150" cy="150" r="100" fill="none" stroke="#FF9F4C" strokeWidth="1" opacity="0.15"
+          strokeDasharray="8 6" />
+        <circle cx="150" cy="150" r="130" fill="none" stroke="#FF9F4C" strokeWidth="0.5" opacity="0.1"
+          strokeDasharray="4 8" />
+      </motion.svg>
+      <motion.svg className="absolute w-[80%] h-[80%]" viewBox="0 0 300 300"
+        animate={{ rotate: -360 }}
+        transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+      >
+        <circle cx="150" cy="150" r="115" fill="none" stroke="#E8852E" strokeWidth="0.8" opacity="0.12"
+          strokeDasharray="6 10" />
+      </motion.svg>
+
+      {/* Central AI brain / neural core */}
+      <motion.div
+        className="relative z-10 w-40 h-40 sm:w-48 sm:h-48 rounded-full flex items-center justify-center"
+        style={{
+          background: "radial-gradient(circle, rgba(255,159,76,0.15) 0%, rgba(255,212,168,0.05) 50%, transparent 70%)",
+          border: "1px solid rgba(255,159,76,0.15)",
+          boxShadow: "0 0 60px rgba(255,159,76,0.1), inset 0 0 60px rgba(255,159,76,0.05)",
+        }}
+        animate={{ scale: [1, 1.03, 1] }}
+        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center"
           style={{
-            width: p.size, height: p.size, left: `${p.x}%`, top: `${p.y}%`,
-            background: p.id % 4 === 0 ? "rgba(255,159,76,0.25)" : p.id % 4 === 1 ? "rgba(255,212,168,0.2)" : p.id % 4 === 2 ? "rgba(232,133,46,0.15)" : "rgba(45,45,45,0.06)",
-            filter: p.size > 3 ? "blur(0.5px)" : "none",
+            background: "radial-gradient(circle, rgba(255,159,76,0.2) 0%, rgba(255,159,76,0.05) 60%, transparent 100%)",
+            border: "1px solid rgba(255,159,76,0.2)",
+            boxShadow: "0 0 40px rgba(255,159,76,0.15)",
           }}
-          animate={{ y: [0, -30 - Math.random() * 40, 0], x: [0, p.driftX, 0], opacity: [p.opacity, p.opacity * 3, p.opacity], scale: [1, 1.2 + Math.random() * 0.5, 1] }}
-          transition={{ duration: p.duration, repeat: Infinity, delay: p.delay, ease: "easeInOut" }}
-        />
+        >
+          <Brain size={40} className="sm:w-[48px] sm:h-[48px]" style={{ color: "#FF9F4C", opacity: 0.9 }} />
+        </div>
+        {/* Neural dots orbiting */}
+        {[...Array(8)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-2 h-2 rounded-full"
+            style={{ background: i % 2 === 0 ? "#FF9F4C" : "#E8852E" }}
+            animate={{
+              x: [0, Math.cos((i / 8) * Math.PI * 2) * 70, 0],
+              y: [0, Math.sin((i / 8) * Math.PI * 2) * 70, 0],
+              opacity: [0, 0.8, 0],
+              scale: [0, 1, 0],
+            }}
+            transition={{ duration: 3 + i * 0.2, repeat: Infinity, ease: "easeInOut", delay: i * 0.15 }}
+          />
+        ))}
+      </motion.div>
+
+      {/* Floating glass cards */}
+      {cards.map((card, i) => (
+        <motion.div
+          key={card.label}
+          className="absolute rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 text-center backdrop-blur-xl"
+          style={{
+            left: `calc(50% + ${card.x})`,
+            top: `calc(50% + ${card.y})`,
+            background: "rgba(255,255,255,0.08)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.1)",
+          }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: [0, -4, 0] }}
+          transition={{ duration: 4 + i * 0.5, repeat: Infinity, ease: "easeInOut", delay: card.delay, opacity: { duration: 0.8, delay: 1 + card.delay } }}
+        >
+          <p className="text-[10px] sm:text-xs font-semibold" style={{ color: "#FF9F4C" }}>{card.value}</p>
+          <p className="text-[8px] sm:text-[10px]" style={{ color: "rgba(107,107,107,0.9)" }}>{card.label}</p>
+        </motion.div>
       ))}
-    </>
+
+      {/* Tech dots decorating the right side */}
+      {[...Array(12)].map((_, i) => {
+        const angle = (i / 12) * Math.PI * 2;
+        const r = 90 + Math.sin(i * 1.5) * 15;
+        return (
+          <motion.div
+            key={`dot-${i}`}
+            className="absolute w-1 h-1 rounded-full"
+            style={{
+              left: `calc(50% + ${Math.cos(angle) * r}px - 2px)`,
+              top: `calc(50% + ${Math.sin(angle) * r}px - 1px)`,
+              background: i % 3 === 0 ? "#FF9F4C" : i % 3 === 1 ? "#E8852E" : "rgba(45,45,45,0.3)",
+            }}
+            animate={{ opacity: [0.2, 0.8, 0.2], scale: [0.5, 1.2, 0.5] }}
+            transition={{ duration: 2 + i * 0.2, repeat: Infinity, ease: "easeInOut", delay: i * 0.1 }}
+          />
+        );
+      })}
+    </div>
   );
 }
 
@@ -199,7 +419,6 @@ export default function Home() {
   const visionImgRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll();
   const smoothScroll = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
-  const heroParallax = useTransform(smoothScroll, [0, 0.15], [0, 40]);
   const visionImgParallax = useTransform(smoothScroll, [0.15, 0.45], [0, -60]);
   const visionImgScale = useTransform(smoothScroll, [0.15, 0.45], [1, 1.08]);
 
@@ -210,95 +429,197 @@ export default function Home() {
     setMousePos({ x: (e.clientX - rect.left) / rect.width, y: (e.clientY - rect.top) / rect.height });
   }, []);
 
-  const [loaded, setLoaded] = useState(false);
-  useEffect(() => { setLoaded(true); }, []);
-
   return (
     <>
     <div className="sm:hidden"><MobileHome /></div>
     <div className="hidden sm:block pb-0 overflow-x-hidden">
       {/* ═══ HERO ═══ */}
       <section ref={heroRef} onMouseMove={handleHeroMouseMove}
-        className="relative flex flex-col items-center justify-center overflow-hidden" style={{ minHeight: "100dvh" }}>
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0"
-            style={{ background: "#1a1a2e", backgroundImage: "url(https://images.pexels.com/photos/159775/pexels-photo-159775.jpeg?auto=compress&cs=tinysrgb&w=1920)", backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat" }} />
-          <div className="absolute inset-0"
-            style={{ background: "linear-gradient(135deg, rgba(10,10,30,0.8) 0%, rgba(10,10,30,0.3) 40%, rgba(255,159,76,0.25) 100%)" }} />
-          <div className="absolute inset-0"
-            style={{ background: `radial-gradient(ellipse 80% 60% at ${mousePos.x * 100}% ${mousePos.y * 100}%, rgba(255,159,76,0.15) 0%, transparent 70%)`, transition: "background 0.3s ease" }} />
-          <motion.div animate={{ scale: [1, 1.4, 1], opacity: [0.1, 0.2, 0.1] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute rounded-full blur-[200px]" style={{ width: 800, height: 800, top: "-10%", left: "0%", background: "rgba(255,159,76,0.12)" }} />
-          <motion.div animate={{ scale: [1, 1.3, 1], opacity: [0.06, 0.15, 0.06] }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-            className="absolute rounded-full blur-[180px]" style={{ width: 600, height: 600, bottom: "0%", right: "0%", background: "rgba(255,212,168,0.1)" }} />
-          <div className="absolute inset-0 pointer-events-none opacity-30"
-            style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
-          <FloatingParticles />
-        </div>
+        className="relative flex flex-col items-center justify-center overflow-hidden" style={{ minHeight: "100dvh", background: "#FFF8F0" }}>
+        <GridBackground />
+        <ParticleNetwork mousePos={mousePos} />
 
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div className="-mt-12 sm:-mt-20 md:-mt-24 ml-0 sm:ml-1 md:ml-2 lg:ml-0 max-w-3xl" style={{ y: heroParallax }}>
-            <h1 className="text-left text-[2.5rem] sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-serif leading-[0.95] tracking-tight mb-0" style={{ color: "#ffffff" }}>
-              <span style={{ color: C.orange }}>Learn</span> smarter,{"\n"}
-            </h1>
-            <motion.h1 className="text-left text-[2.5rem] sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-serif leading-[0.95] tracking-tight mt-1">
-              <span style={{ color: "#ffffff" }}>not </span>
-              {"harder.".split("").map((char, i) => (
-                <motion.span key={i} className="inline-block"
-                  initial={{ opacity: 0, y: 50, rotateX: -40 }}
-                  animate={loaded ? { opacity: 1, y: 0, rotateX: 0 } : {}}
-                  transition={{ duration: 0.6, delay: 0.8 + i * 0.035, ease: [0.16, 1, 0.3, 1] }}
-                  style={{ color: C.orange }}>{char === " " ? "\u00A0" : char}</motion.span>
-              ))}
-            </motion.h1>
+        {/* Ambient glow orbs */}
+        <motion.div
+          className="absolute rounded-full blur-[180px] pointer-events-none z-[1]"
+          style={{ width: "50vw", height: "50vw", maxWidth: 700, maxHeight: 700, top: "-20%", left: "-10%", background: "rgba(255,159,76,0.06)" }}
+          animate={{ scale: [1, 1.3, 1], opacity: [0.06, 0.12, 0.06] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute rounded-full blur-[180px] pointer-events-none z-[1]"
+          style={{ width: "40vw", height: "40vw", maxWidth: 500, maxHeight: 500, bottom: "-10%", right: "20%", background: "rgba(232,133,46,0.05)" }}
+          animate={{ scale: [1.2, 0.9, 1.2], opacity: [0.05, 0.1, 0.05] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 3 }}
+        />
 
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.0, delay: 1.5, ease: [0.16, 1, 0.3, 1] }}
-              className="hidden sm:flex flex-wrap items-center gap-2 sm:gap-4 mt-4 sm:mt-8">
-              {[
-                { num: "01", label: "AI Tutors", color: "#FFD4A8" },
-                { num: "02", label: "Step Solver", color: "#FF9F4C" },
-                { num: "03", label: "Virtual Labs", color: "#E8852E" },
-                { num: "04", label: "100% Free", color: "#FF9F4C" },
-              ].map((feat, i) => (
-                <motion.div key={feat.label} initial={{ opacity: 0, y: 12, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ delay: 1.7 + i * 0.12, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                  className="flex items-center gap-2.5 px-4 py-2 rounded-full"
-                  style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", backdropFilter: "blur(12px)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15)" }}>
-                  <span className="font-mono text-xs font-bold" style={{ color: feat.color }}>{feat.num}</span>
-                  <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.8)" }}>{feat.label}</span>
-                </motion.div>
-              ))}
-            </motion.div>
+        {/* Mouse-follow radial glow */}
+        <motion.div
+          className="absolute z-[1] pointer-events-none rounded-full blur-[150px]"
+          style={{
+            width: 400, height: 400,
+            left: `calc(${mousePos.x * 100}% - 200px)`,
+            top: `calc(${mousePos.y * 100}% - 200px)`,
+            background: "radial-gradient(circle, rgba(255,159,76,0.06) 0%, transparent 70%)",
+            transition: "left 0.8s ease, top 0.8s ease",
+          }}
+        />
 
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.0, delay: 2.2, ease: [0.16, 1, 0.3, 1] }}
-              className="flex flex-wrap items-center gap-3 sm:gap-4 mt-6 sm:mt-10">
-              <MagneticButton>
-                <Link href="/math-solver"
-                  className="group relative inline-flex items-center justify-center gap-2 px-5 sm:px-7 py-2.5 sm:py-3.5 rounded-2xl text-xs sm:text-sm font-semibold overflow-hidden transition-all duration-500 hover:-translate-y-0.5"
-                  style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)", color: "#ffffff", backdropFilter: "blur(16px) saturate(180%)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 16px rgba(0,0,0,0.15)" }}>
-                  <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: "linear-gradient(135deg, rgba(255,159,76,0.12), rgba(232,133,46,0.06))" }} />
-                  <svg className="relative z-10 w-4 h-4 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 flex items-center">
+          <div className="w-full grid lg:grid-cols-2 gap-8 lg:gap-16 items-center pt-24 pb-12">
+            {/* ═══ LEFT: Content ═══ */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            >
+              {/* Badge */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider mb-6"
+                style={{
+                  background: "rgba(255,159,76,0.08)",
+                  border: "1px solid rgba(255,159,76,0.15)",
+                  color: "#FF9F4C",
+                }}
+              >
+                <Zap size={12} />
+                AI-Powered Smart Learning Platform
+              </motion.div>
+
+              {/* Headline */}
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-7xl font-serif leading-[1.05] tracking-tight mb-4" style={{ color: "#2D2D2D" }}>
+                Learn Smarter{" "}
+                <span className="relative inline-block">
+                  <span className="bg-clip-text text-transparent" style={{
+                    backgroundImage: "linear-gradient(135deg, #FF9F4C 0%, #E8852E 50%, #FFB366 100%)",
+                  }}>with AI.</span>
+                  <motion.div
+                    className="absolute -bottom-1 left-0 right-0 h-1 rounded-full"
+                    style={{ background: "linear-gradient(90deg, #FF9F4C, transparent)" }}
+                    initial={{ scaleX: 0, transformOrigin: "left" }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ duration: 1, delay: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                  />
+                </span>
+              </h1>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif leading-tight mb-6" style={{ color: "#6B6B6B" }}>
+                The Future of Education is Here.
+              </h2>
+
+              {/* Description */}
+              <p className="text-base sm:text-lg leading-relaxed max-w-lg mb-8" style={{ color: "#6B6B6B" }}>
+                Neural Sync is an AI-powered smart education platform that helps students learn through{" "}
+                <strong style={{ color: "#FF9F4C" }}>AI tutors, virtual labs, smart notes, exam preparation,</strong>{" "}
+                adaptive learning, and interactive educational tools — all in one place, completely free.
+              </p>
+
+              {/* CTA Buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.8 }}
+                className="flex flex-wrap items-center gap-4"
+              >
+                <Link
+                  href="/quiz"
+                  className="group relative inline-flex items-center gap-2.5 px-7 py-3.5 rounded-2xl text-sm font-bold overflow-hidden transition-all duration-500 hover:-translate-y-0.5"
+                  style={{
+                    background: "linear-gradient(135deg, #FF9F4C 0%, #E8852E 100%)",
+                    color: "#ffffff",
+                    boxShadow: "0 4px 24px rgba(255,159,76,0.25), 0 2px 8px rgba(255,159,76,0.15)",
+                  }}
+                >
+                  <span className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <span className="relative z-10">Get Started</span>
-                  <svg className="relative z-10 w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                  <ArrowRight size={16} className="relative z-10 group-hover:translate-x-1 transition-transform duration-300" />
+                  <motion.div
+                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{ boxShadow: "0 0 40px rgba(255,159,76,0.3)" }}
+                  />
                 </Link>
-              </MagneticButton>
-              <MagneticButton>
-                <Link href="/virtual-lab"
-                  className="group relative inline-flex items-center justify-center gap-2 px-5 sm:px-7 py-2.5 sm:py-3.5 rounded-2xl text-xs sm:text-sm font-semibold overflow-hidden transition-all duration-500 hover:-translate-y-0.5"
-                  style={{ background: "linear-gradient(135deg, #FF9F4C, #E8852E)", border: "2px solid #2D2D2D", color: "#FFFFFF", backdropFilter: "blur(16px) saturate(180%)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.2), 0 4px 16px rgba(255,159,76,0.2)" }}>
-                  <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05))" }} />
-                  <svg className="relative z-10 w-4 h-4 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 2v7.31M14 9.3V1.99M8.5 2h7M8 9.31A6.48 6.48 0 005.5 9c-2 0-3.5 1-3.5 2.5S3.5 14 5.5 14c1.2 0 2.2-.5 2.8-1.2" /><path d="M18.5 2h-7M16 9.31c1.3.3 2.3.95 2.8 1.69.7.9 1.2 2 1.2 3.5 0 1.5-.5 2.6-1.2 3.5-.6.7-1.5 1.2-2.8 1.69" /><circle cx="12" cy="16" r="6" /></svg>
-                  <span className="relative z-10">Explore</span>
+
+                <Link
+                  href="/virtual-lab"
+                  className="group relative inline-flex items-center gap-2.5 px-7 py-3.5 rounded-2xl text-sm font-semibold overflow-hidden transition-all duration-500 hover:-translate-y-0.5"
+                  style={{
+                    background: "rgba(255,255,255,0.6)",
+                    border: "1px solid rgba(45,45,45,0.1)",
+                    color: "#2D2D2D",
+                    backdropFilter: "blur(16px) saturate(180%)",
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6), 0 4px 16px rgba(0,0,0,0.03)",
+                  }}
+                >
+                  <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: "linear-gradient(135deg, rgba(255,159,76,0.08), rgba(232,133,46,0.04))" }} />
+                  <FlaskConical size={16} className="relative z-10" />
+                  <span className="relative z-10">Explore Features</span>
                 </Link>
-              </MagneticButton>
+              </motion.div>
+
+              {/* Trust / stats row */}
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 1.2 }}
+                className="flex flex-wrap items-center gap-6 mt-10 pt-8"
+                style={{ borderTop: "1px solid rgba(45,45,45,0.06)" }}
+              >
+                {[
+                  { value: "10+", label: "AI Tools" },
+                  { value: "50+", label: "Virtual Labs" },
+                  { value: "0$", label: "Always Free" },
+                ].map((s) => (
+                  <div key={s.label} className="flex items-center gap-2">
+                    <span className="text-lg font-bold font-serif" style={{ color: "#FF9F4C" }}>{s.value}</span>
+                    <span className="text-xs" style={{ color: "#9A9A9A" }}>{s.label}</span>
+                  </div>
+                ))}
+              </motion.div>
             </motion.div>
-          </motion.div>
+
+            {/* ═══ RIGHT: AI Holographic Visual ═══ */}
+            <motion.div
+              className="relative h-[400px] sm:h-[480px] lg:h-[560px]"
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <AIVisual />
+            </motion.div>
+          </div>
         </div>
+
+        {/* Scroll indicator */}
+        <motion.div
+          className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2, duration: 0.8 }}
+        >
+          <motion.span
+            className="text-[10px] font-semibold uppercase tracking-widest"
+            style={{ color: "#9A9A9A" }}
+            animate={{ opacity: [0.4, 1, 0.4] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            Scroll
+          </motion.span>
+          <motion.div
+            className="w-5 h-8 rounded-full border-2 flex items-start justify-center pt-1.5"
+            style={{ borderColor: "rgba(45,45,45,0.15)" }}
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <motion.div
+              className="w-1 h-2 rounded-full"
+              style={{ background: "#FF9F4C" }}
+              animate={{ y: [0, 6, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            />
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* ═══ FEATURE STRIP ═══ */}
