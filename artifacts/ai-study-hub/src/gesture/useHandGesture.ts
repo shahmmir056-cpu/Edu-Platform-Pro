@@ -186,7 +186,6 @@ export function useHandGesture() {
   const processFrame = useCallback((now: number) => {
     if (!handLandmarkerRef.current || !videoRef.current) return;
     const results = handLandmarkerRef.current.detectForVideo(videoRef.current, now);
-    const fps = Math.round(handLandmarkerRef.current.getFps());
 
     if (results.landmarks && results.landmarks.length > 0) {
       const lm = results.landmarks[0];
@@ -223,7 +222,7 @@ export function useHandGesture() {
 
       if (cooldownOk && (isGestureChange || finalGesture === "scroll_up" || finalGesture === "scroll_down")) {
         lastGestureRef.current = { gesture: finalGesture, time: nowMs };
-        setState(s => ({ ...s, activeGesture: finalGesture, confidence: finalConfidence, handDetected: true, fps }));
+        setState(s => ({ ...s, activeGesture: finalGesture, confidence: finalConfidence, handDetected: true }));
 
         if (finalGesture === "scroll_up") callbacksRef.current.onScrollUp?.();
         else if (finalGesture === "scroll_down") callbacksRef.current.onScrollDown?.();
@@ -239,7 +238,7 @@ export function useHandGesture() {
         else if (finalGesture === "wave") callbacksRef.current.onWave?.();
       }
     } else {
-      setState(s => ({ ...s, handDetected: false, activeGesture: "none", fps }));
+      setState(s => ({ ...s, handDetected: false, activeGesture: "none" }));
     }
 
     animFrameRef.current = requestAnimationFrame(processFrame);
