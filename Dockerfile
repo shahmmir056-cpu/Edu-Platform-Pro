@@ -1,6 +1,6 @@
 FROM node:20-slim AS base
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
-RUN apk add --no-cache curl
+RUN apt-get update && apt-get install -y curl
 
 # --- deps ---
 FROM base AS deps
