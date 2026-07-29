@@ -760,16 +760,30 @@ export default function Home() {
             {/* close outer perspective motion.div */}
             </motion.div>
 
-            {/* ═══ RIGHT: Cinematic AI Visual ═══ */}
-            <motion.div className="relative h-[420px] lg:h-[580px]"
+            {/* ═══ RIGHT: Hero Image ═══ */}
+            <motion.div className="relative h-[320px] sm:h-[420px] lg:h-[580px] rounded-2xl overflow-hidden"
               initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1.2, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}>
-              {/* Parallax micro-shift with mouse */}
-              <motion.div
-                animate={{ x: (mousePos.x - 0.5) * 16, y: (mousePos.y - 0.5) * 16 }}
-                transition={{ type: "spring", stiffness: 30, damping: 15 }}>
-                <AIVisual />
+              transition={{ duration: 1.2, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              style={{ boxShadow: "0 8px 40px rgba(255,159,76,0.15)" }}>
+              <img
+                src="/images/hero-orange-gradient.jpg"
+                alt="Neural Sync AI Learning Platform"
+                className="w-full h-full object-cover"
+                style={{ objectPosition: "center" }}
+              />
+              {/* Overlay gradient for depth */}
+              <div className="absolute inset-0" style={{
+                background: "linear-gradient(135deg, rgba(255,159,76,0.15) 0%, rgba(255,212,168,0.05) 50%, transparent 100%)",
+              }} />
+              {/* Floating badge */}
+              <motion.div className="absolute top-4 right-4 lg:top-6 lg:right-6 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                style={{ background: "rgba(255,255,255,0.6)", backdropFilter: "blur(12px)", color: "#FF9F4C", border: "1px solid rgba(255,159,76,0.15)" }}
+                initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2 }}>
+                AI Powered
               </motion.div>
+              {/* Bottom gradient fade */}
+              <div className="absolute bottom-0 left-0 right-0 h-1/3"
+                style={{ background: "linear-gradient(to top, rgba(245,237,228,0.4), transparent)" }} />
             </motion.div>
           </div>
         </div>
