@@ -123,8 +123,8 @@ function MagneticButton({ children, className, style }: { children: React.ReactN
   );
 }
 
-/* ─── Cinematic Particle System ─── */
-function CinematicParticles({ mousePos }: { mousePos: { x: number; y: number } }) {
+/* ─── 3D Scene: Rotating Globe + Particle Field ─── */
+function ThreeDScene({ mousePos }: { mousePos: { x: number; y: number } }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -134,16 +134,72 @@ function CinematicParticles({ mousePos }: { mousePos: { x: number; y: number } }
     if (!ctx) return;
 
     let animId: number;
-    let w = 0; let h = 0;
+    let w = 0, h = 0;
 
+    // ─── 3D Math helpers ───
+    function project(x: number, y: number, z: number, camDist: number): [number, number, number] {
+      const scale = camDist / (camDist + z);
+      return [x * scale + w / 2, -y * scale + h / 2, scale];
+    }
+
+    function rotateX(x: number, y: number, z: number, angle: number): [number, number, number] {
+      const c = Math.cos(angle), s = Math.sin(angle);
+      return [x, y * c - z * s, y * s + z * c];
+    }
+    function rotateY(x: number, y: number, z: number, angle: number): [number, number, number] {
+      const c = Math.cos(angle), s = Math.sin(angle);
+      return [x * c + z * s, y, -x * s + z * c];
+    }
+
+    // ─── Icosahedron ───
+    const phi = (1 + Math.sqrt(5)) / 2;
+    const icoVerts = [
+      [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
+      [0, -1, phi], [0, 1, phi], [0, -1, -phi], [0, 1, -phi],
+      [phi, 0, -1], [phi, 0, 1], [-phi, 0, -1], [-phi, 0, 1],
+    ];
+    const icoEdges = [
+      [0,1],[0,4],[0,5],[0,10],[0,11],[1,5],[1,7],[1,8],[1,9],
+      [2,3],[2,4],[2,6],[2,10],[2,11],[3,4],[3,6],[3,8],[3,9],
+      [4,5],[4,11],[5,9],[6,7],[6,10],[7,8],[8,9],[10,11],
+      [5,11],[7,10],[6,8],[9,11],
+    ];
+    const icoSize = 180;
+    const icoVerts3D = icoVerts.map(([x, y, z]) => [x * icoSize, y * icoSize, z * icoSize] as [number, number, number]);
+
+    // ─── Secondary inner icosahedron ───
+    const innerSize = 120;
+    const innerVerts = icoVerts.map(([x, y, z]) => [x * innerSize, y * innerSize, z * innerSize] as [number, number, number]);
+
+    // ─── 3D Particles ───
+    const PARTICLE_COUNT = 800;
     const particles: {
       x: number; y: number; z: number;
       vx: number; vy: number; vz: number;
-      size: number; color: string; glow: boolean;
-      pulse: number; pulseSpeed: number;
+      size: number; color: string; glow: boolean; pulse: number; pulseSpeed: number;
     }[] = [];
-    const COUNT = 800;
-    const CONN_DIST = 180;
+
+    const orangeShades = ["#FF9F4C", "#FFB366", "#E8852E", "#FF8C2E"];
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      const isBlack = i % 3 === 2;
+      const isGlow = !isBlack && i % 5 === 0;
+      const c = isBlack ? `rgba(45,45,45,${0.25 + Math.random() * 0.4})` : orangeShades[Math.floor(Math.random() * orangeShades.length)];
+      const range = 500;
+      particles.push({
+        x: (Math.random() - 0.5) * range * 2,
+        y: (Math.random() - 0.5) * range * 2,
+        z: (Math.random() - 0.5) * range * 2,
+        vx: (Math.random() - 0.5) * 0.15,
+        vy: (Math.random() - 0.5) * 0.15,
+        vz: (Math.random() - 0.5) * 0.15,
+        size: isGlow ? 2 + Math.random() * 3 : isBlack ? 1.2 + Math.random() * 2 : 0.8 + Math.random() * 1.8,
+        color: c, glow: isGlow,
+        pulse: Math.random() * Math.PI * 2,
+        pulseSpeed: 0.01 + Math.random() * 0.03,
+      });
+    }
+
+    let time = 0;
 
     function resize() {
       w = canvas!.width = window.innerWidth;
@@ -152,137 +208,165 @@ function CinematicParticles({ mousePos }: { mousePos: { x: number; y: number } }
     resize();
     window.addEventListener("resize", resize);
 
-    const orangeShades = ["#FF9F4C", "#FFB366", "#E8852E", "#FF8C2E"];
-    for (let i = 0; i < COUNT; i++) {
-      const isBlack = i % 3 === 2;
-      const isGlow = !isBlack && i % 5 === 0;
-      const c = isBlack
-        ? `rgba(45,45,45,${0.2 + Math.random() * 0.35})`
-        : orangeShades[Math.floor(Math.random() * orangeShades.length)];
-      particles.push({
-        x: Math.random() * w, y: Math.random() * h, z: Math.random() * 400,
-        vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3, vz: (Math.random() - 0.5) * 0.12,
-        size: isGlow ? 2.5 + Math.random() * 3 : isBlack ? 1.5 + Math.random() * 2.5 : 1 + Math.random() * 2,
-        color: c, glow: isGlow,
-        pulse: Math.random() * Math.PI * 2, pulseSpeed: 0.015 + Math.random() * 0.04,
-      });
-    }
-
     function draw() {
+      time += 0.005;
       ctx!.clearRect(0, 0, w, h);
-      const mx = mousePos.x * w;
-      const my = mousePos.y * h;
 
-      const sorted = [...particles].sort((a, b) => a.z - b.z);
+      // Mouse-driven camera rotation
+      const camRotX = (mousePos.y - 0.5) * 0.4;
+      const camRotY = (mousePos.x - 0.5) * 0.4;
+      const camDist = 550;
 
-      // Connections
-      for (let i = 0; i < sorted.length; i++) {
-        for (let j = i + 1; j < sorted.length; j++) {
-          const dx = sorted[i].x - sorted[j].x;
-          const dy = sorted[i].y - sorted[j].y;
-          const dz = (sorted[i].z - sorted[j].z) * 0.3;
-          const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-          if (dist < CONN_DIST) {
-            const alpha = (1 - dist / CONN_DIST) * 0.08;
-            const zf = 1 - sorted[i].z / 400;
+      // ─── Draw particles ───
+      // First compute all projected positions
+      const pData: { sx: number; sy: number; scale: number; size: number; color: string; glow: boolean; pulse: number; px: number; py: number; pz: number }[] = [];
+
+      for (const p of particles) {
+        p.x += p.vx; p.y += p.vy; p.z += p.vz;
+        if (Math.abs(p.x) > 500) p.vx *= -1;
+        if (Math.abs(p.y) > 500) p.vy *= -1;
+        if (Math.abs(p.z) > 500) p.vz *= -1;
+        p.pulse += p.pulseSpeed;
+
+        let [rx, ry, rz] = rotateX(p.x, p.y, p.z, camRotX);
+        [rx, ry, rz] = rotateY(rx, ry, rz, camRotY);
+        const [sx, sy, sc] = project(rx, ry, rz, camDist);
+        const ds = p.size * (0.6 + sc * 0.4) * (1 + Math.sin(p.pulse) * 0.15);
+        const alpha = 0.2 + sc * 0.6;
+        pData.push({ sx, sy, scale: sc, size: ds, color: p.color, glow: p.glow, pulse: p.pulse, px: rx, py: ry, pz: rz });
+      }
+
+      // Sort by depth (far first)
+      pData.sort((a, b) => a.scale - b.scale);
+
+      // Draw connections between close particles
+      for (let i = 0; i < pData.length; i += 2) {
+        for (let j = i + 1; j < Math.min(i + 20, pData.length); j += 2) {
+          const dx = pData[i].sx - pData[j].sx;
+          const dy = pData[i].sy - pData[j].sy;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 120) {
+            const alpha = (1 - dist / 120) * 0.06 * pData[i].scale;
             ctx!.beginPath();
-            ctx!.moveTo(sorted[i].x, sorted[i].y);
-            ctx!.lineTo(sorted[j].x, sorted[j].y);
+            ctx!.moveTo(pData[i].sx, pData[i].sy);
+            ctx!.lineTo(pData[j].sx, pData[j].sy);
             ctx!.strokeStyle = "#FF9F4C";
-            ctx!.globalAlpha = alpha * zf;
-            ctx!.lineWidth = 0.3 + zf * 0.3;
+            ctx!.globalAlpha = alpha;
+            ctx!.lineWidth = 0.3;
             ctx!.stroke();
           }
         }
       }
 
-      for (const p of particles) {
-        p.x += p.vx; p.y += p.vy; p.z += p.vz;
-        if (p.x < -60 || p.x > w + 60) p.vx *= -1;
-        if (p.y < -60 || p.y > h + 60) p.vy *= -1;
-        if (p.z < 0 || p.z > 400) p.vz *= -1;
-        p.pulse += p.pulseSpeed;
-        const zf = 1 - p.z / 400;
-        const ds = p.size * (0.4 + zf * 0.6) * (1 + Math.sin(p.pulse) * 0.15);
-        const a = 0.15 + zf * 0.45;
+      // Draw particles
+      for (const d of pData) {
+        if (d.sx < -100 || d.sx > w + 100 || d.sy < -100 || d.sy > h + 100) continue;
 
-        if (p.glow) {
-          const g = ctx!.createRadialGradient(p.x, p.y, 0, p.x, p.y, ds * 5);
+        if (d.glow) {
+          const g = ctx!.createRadialGradient(d.sx, d.sy, 0, d.sx, d.sy, d.size * 6);
           g.addColorStop(0, "#FF9F4C");
-          g.addColorStop(0.2, "rgba(255,159,76,0.25)");
+          g.addColorStop(0.15, "rgba(255,159,76,0.2)");
           g.addColorStop(1, "transparent");
           ctx!.fillStyle = g;
-          ctx!.globalAlpha = a * 0.35;
+          ctx!.globalAlpha = d.scale * 0.3;
           ctx!.fill();
         }
 
         ctx!.beginPath();
-        ctx!.arc(p.x, p.y, ds, 0, Math.PI * 2);
-        ctx!.fillStyle = p.color;
-        ctx!.globalAlpha = a;
+        ctx!.arc(d.sx, d.sy, d.size, 0, Math.PI * 2);
+        ctx!.fillStyle = d.color;
+        ctx!.globalAlpha = 0.3 + d.scale * 0.5;
         ctx!.fill();
+      }
+      ctx!.globalAlpha = 1;
 
-        const ddx = p.x - mx, ddy = p.y - my;
-        const mDist = Math.sqrt(ddx * ddx + ddy * ddy);
-        if (mDist < 200) {
-          const mA = (1 - mDist / 200) * 0.4;
+      // ─── Draw rotating icosahedron ───
+      const globeAngle = time * 0.4;
+      const counterAngle = -time * 0.25;
+      const innerAngle = time * 0.6;
+
+      // Inner glow behind globe
+      const glowGrad = ctx!.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, 250);
+      glowGrad.addColorStop(0, "rgba(255,159,76,0.03)");
+      glowGrad.addColorStop(1, "transparent");
+      ctx!.fillStyle = glowGrad;
+      ctx!.beginPath();
+      ctx!.arc(w / 2, h / 2, 250, 0, Math.PI * 2);
+      ctx!.fill();
+
+      function drawIcosahedron(verts: [number, number, number][], edges: number[][], angle: number, strokeColor: string, lineWidth: number, opacity: number, dash?: string) {
+        const transformed = verts.map(([x, y, z]) => {
+          let [rx, ry, rz] = rotateX(x, y, z, angle);
+          [rx, ry, rz] = rotateY(rx, ry, rz, angle * 0.7);
+          [rx, ry, rz] = rotateX(rx, ry, rz, camRotX);
+          [rx, ry, rz] = rotateY(rx, ry, rz, camRotY);
+          return project(rx, ry, rz, camDist);
+        });
+
+        ctx!.strokeStyle = strokeColor;
+        ctx!.globalAlpha = opacity;
+        ctx!.lineWidth = lineWidth;
+        if (dash) ctx!.setLineDash([parseFloat(dash.split(" ")[0]), parseFloat(dash.split(" ")[1])]);
+
+        for (const [i, j] of edges) {
           ctx!.beginPath();
-          ctx!.arc(p.x, p.y, ds * 3, 0, Math.PI * 2);
-          ctx!.fillStyle = "#FF9F4C";
-          ctx!.globalAlpha = mA * 0.2;
-          ctx!.fill();
-          ctx!.beginPath();
-          ctx!.moveTo(p.x, p.y);
-          ctx!.lineTo(mx, my);
-          ctx!.strokeStyle = "#FF9F4C";
-          ctx!.globalAlpha = mA * 0.1;
-          ctx!.lineWidth = 0.4;
+          ctx!.moveTo(transformed[i][0], transformed[i][1]);
+          ctx!.lineTo(transformed[j][0], transformed[j][1]);
           ctx!.stroke();
         }
+        ctx!.setLineDash([]);
+        ctx!.globalAlpha = 1;
       }
 
+      // Outer wireframe (pulsing opacity)
+      const outerOp = 0.06 + Math.sin(time * 0.5) * 0.03;
+      drawIcosahedron(icoVerts3D, icoEdges, globeAngle, "#FF9F4C", 0.6, outerOp);
+      drawIcosahedron(icoVerts3D, icoEdges, counterAngle, "#E8852E", 0.4, outerOp * 0.7);
+
+      // Inner solid wireframe
+      drawIcosahedron(innerVerts, icoEdges, innerAngle, "#FF9F4C", 0.3, 0.08, "3 5");
+      drawIcosahedron(innerVerts, icoEdges, -innerAngle, "#E8852E", 0.2, 0.05, "2 6");
+
+      // ─── Ring around globe ───
+      ctx!.globalAlpha = 0.04;
+      ctx!.strokeStyle = "#FF9F4C";
+      ctx!.lineWidth = 0.5;
+      ctx!.setLineDash([4, 8]);
+      const ringPoints = 40;
+      const ringRadius = 240;
+      for (let i = 0; i < ringPoints; i++) {
+        const a1 = (i / ringPoints) * Math.PI * 2;
+        const a2 = ((i + 1) / ringPoints) * Math.PI * 2;
+        let [x1, y1, z1] = [Math.cos(a1) * ringRadius, Math.sin(a1) * ringRadius * 0.3, Math.sin(a1) * ringRadius * 0.3];
+        [x1, y1, z1] = rotateX(x1, y1, z1, globeAngle * 0.5);
+        [x1, y1, z1] = rotateY(x1, y1, z1, globeAngle * 0.3);
+        [x1, y1, z1] = rotateX(x1, y1, z1, camRotX);
+        [x1, y1, z1] = rotateY(x1, y1, z1, camRotY);
+        const [sx1, sy1] = project(x1, y1, z1, camDist);
+
+        let [x2, y2, z2] = [Math.cos(a2) * ringRadius, Math.sin(a2) * ringRadius * 0.3, Math.sin(a2) * ringRadius * 0.3];
+        [x2, y2, z2] = rotateX(x2, y2, z2, globeAngle * 0.5);
+        [x2, y2, z2] = rotateY(x2, y2, z2, globeAngle * 0.3);
+        [x2, y2, z2] = rotateX(x2, y2, z2, camRotX);
+        [x2, y2, z2] = rotateY(x2, y2, z2, camRotY);
+        const [sx2, sy2] = project(x2, y2, z2, camDist);
+
+        ctx!.beginPath();
+        ctx!.moveTo(sx1, sy1);
+        ctx!.lineTo(sx2, sy2);
+        ctx!.stroke();
+      }
+      ctx!.setLineDash([]);
       ctx!.globalAlpha = 1;
+
       animId = requestAnimationFrame(draw);
     }
+
     draw();
     return () => { cancelAnimationFrame(animId); window.removeEventListener("resize", resize); };
   }, [mousePos]);
 
   return <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" />;
-}
-
-/* ─── Premium Mesh Gradient Background ─── */
-function MeshBackground() {
-  return (
-    <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-      {/* Base gradient */}
-      <div className="absolute inset-0" style={{
-        background: "radial-gradient(ellipse 80% 60% at 0% 0%, rgba(255,159,76,0.04) 0%, transparent 70%), radial-gradient(ellipse 60% 50% at 100% 100%, rgba(232,133,46,0.03) 0%, transparent 70%), radial-gradient(ellipse 50% 40% at 50% 100%, rgba(255,179,102,0.02) 0%, transparent 60%)"
-      }} />
-      {/* Grid pattern */}
-      <motion.div
-        className="absolute inset-0"
-        style={{
-          backgroundImage: `linear-gradient(rgba(45,45,45,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(45,45,45,0.06) 1px, transparent 1px)`,
-          backgroundSize: "100px 100px",
-        }}
-        animate={{ backgroundPosition: ["0px 0px", "100px 100px"] }}
-        transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-      />
-      {/* Fine accent grid */}
-      <motion.div
-        className="absolute inset-0"
-        style={{
-          backgroundImage: `linear-gradient(rgba(255,159,76,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,159,76,0.04) 1px, transparent 1px)`,
-          backgroundSize: "25px 25px",
-        }}
-        animate={{ backgroundPosition: ["0px 0px", "-25px -25px"] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-      />
-      {/* Soft vignette */}
-      <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at center, transparent 30%, rgba(245,237,228,0.7) 100%)" }} />
-    </div>
-  );
 }
 
 /* ─── Cinematic AI Holographic Display ─── */
@@ -520,8 +604,7 @@ export default function Home() {
       {/* ═══ CINEMATIC HERO ═══ */}
       <section ref={heroRef} onMouseMove={handleHeroMouseMove}
         className="relative flex flex-col items-center justify-center overflow-hidden" style={{ minHeight: "100dvh", background: "#F5EDE4" }}>
-        <MeshBackground />
-        <CinematicParticles mousePos={mousePos} />
+        <ThreeDScene mousePos={mousePos} />
 
         {/* Deep ambient glow orbs */}
         <motion.div className="absolute rounded-full blur-[200px] pointer-events-none z-[1]" style={{ width: "55vw", height: "55vw", maxWidth: 800, maxHeight: 800, top: "-25%", left: "-15%", background: "rgba(255,159,76,0.05)" }}
@@ -547,11 +630,19 @@ export default function Home() {
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 flex-1 flex items-center">
           <div className="w-full grid lg:grid-cols-2 gap-12 lg:gap-20 items-center pt-24 pb-16">
-            {/* ═══ LEFT: Editorial Content ═══ */}
+            {/* ═══ LEFT: Editorial Content (3D tilt) ═══ */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.6 }}>
+              transition={{ duration: 0.6 }}
+              style={{ perspective: 800 }}
+              className="origin-center">
+              <motion.div
+                animate={{
+                  rotateX: (mousePos.y - 0.5) * -3,
+                  rotateY: (mousePos.x - 0.5) * 3,
+                }}
+                transition={{ type: "spring", stiffness: 20, damping: 12 }}>
               {/* Premium badge */}
               <motion.div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[11px] font-bold uppercase tracking-[0.15em] mb-8"
                 style={{ background: "linear-gradient(135deg, rgba(255,159,76,0.1), rgba(232,133,46,0.05))", border: "1px solid rgba(255,159,76,0.12)", color: "#FF9F4C" }}
@@ -664,6 +755,9 @@ export default function Home() {
                   </motion.div>
                 ))}
               </motion.div>
+              {/* close inner tilt motion.div */}
+            </motion.div>
+            {/* close outer perspective motion.div */}
             </motion.div>
 
             {/* ═══ RIGHT: Cinematic AI Visual ═══ */}
