@@ -1,6 +1,6 @@
 import type { ChatMessage, DebateMode, InterviewStyle, DebateScore } from "../types";
 
-const API_BASE = "/api/debate-mentor";
+const API_BASE = "https://acceptable-charm-production-2ace.up.railway.app/api/debate-mentor";
 
 export async function sendDebateMessage(
   messages: ChatMessage[],

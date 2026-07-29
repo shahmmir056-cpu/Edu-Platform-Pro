@@ -46,7 +46,7 @@ export default function Feedback() {
 
     setSending(true);
     try {
-      const res = await fetch("/api/feedback", {
+      const res = await fetch("https://acceptable-charm-production-2ace.up.railway.app/api/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
