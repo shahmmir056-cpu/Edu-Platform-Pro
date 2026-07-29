@@ -5,12 +5,22 @@ import { GESTURE_COOLDOWN_MS, FIST_HOLD_MS, SCROLL_SPEED, SWIPE_THRESHOLD, MOTIO
 
 type Landmarks = NormalizedLandmark[];
 
-function isFingerExtended(lm: Landmarks, tip: number, pip: number, mcp: number): boolean {
-  return lm[tip].y < lm[pip].y && lm[pip].y < lm[mcp].y;
-}
-
 function distance(a: NormalizedLandmark, b: NormalizedLandmark): number {
   return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+}
+
+function palmCenter(lm: Landmarks): { x: number; y: number } {
+  return {
+    x: (lm[0].x + lm[5].x + lm[17].x) / 3,
+    y: (lm[0].y + lm[5].y + lm[17].y) / 3,
+  };
+}
+
+function isFingerExtended(lm: Landmarks, tip: number, pip: number, _mcp: number): boolean {
+  const pc = palmCenter(lm);
+  const tipDist = distance(lm[tip], pc);
+  const pipDist = distance(lm[pip], pc);
+  return tipDist > pipDist * 1.25;
 }
 
 const TIP = { thumb: 4, index: 8, middle: 12, ring: 16, pinky: 20 };
@@ -22,11 +32,9 @@ function detectGesture(lm: Landmarks, prevY: number | null): { gesture: Gesture;
   const middleExt = isFingerExtended(lm, TIP.middle, PIP.middle, MCP.middle);
   const ringExt = isFingerExtended(lm, TIP.ring, PIP.ring, MCP.ring);
   const pinkyExt = isFingerExtended(lm, TIP.pinky, PIP.pinky, MCP.pinky);
-  // Hand-agnostic thumb detection: thumb extended if tip is further from palm center than MCP
-  const palmCenterX = (lm[0].x + lm[5].x + lm[17].x) / 3;
-  const palmCenterY = (lm[0].y + lm[5].y + lm[17].y) / 3;
-  const tipDist = Math.sqrt((lm[TIP.thumb].x - palmCenterX) ** 2 + (lm[TIP.thumb].y - palmCenterY) ** 2);
-  const mcpDist = Math.sqrt((lm[MCP.thumb].x - palmCenterX) ** 2 + (lm[MCP.thumb].y - palmCenterY) ** 2);
+  const pc = palmCenter(lm);
+  const tipDist = distance(lm[TIP.thumb], pc);
+  const mcpDist = distance(lm[MCP.thumb], pc);
   const thumbExt = tipDist > mcpDist;
 
   const extendedCount = [indexExt, middleExt, ringExt, pinkyExt].filter(Boolean).length;
