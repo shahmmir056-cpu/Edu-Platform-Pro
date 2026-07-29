@@ -57,3 +57,6 @@ api-out.log
 api-server.log
 artifacts/data/
 vite.log
+
+# Local Netlify folder
+.netlify
