@@ -4,7 +4,7 @@ import { motion, useMotionValue, useTransform, useScroll, useSpring } from "fram
 import {
   BookOpen, PenTool, HelpCircle, Layers, ClipboardList,
   ArrowRight, Sigma, FlaskConical, Infinity as InfinityIcon,
-  Gamepad2, ClipboardCheck, Zap, Brain, Eye, Lightbulb, Cpu, Rocket,
+  Gamepad2, ClipboardCheck, Zap, Brain, Eye, Lightbulb, Cpu, Rocket, Image as ImageIcon,
 } from "lucide-react";
 import MobileHome from "./MobileHome";
 
@@ -221,30 +221,30 @@ export default function Home() {
       <section ref={heroRef} onMouseMove={handleHeroMouseMove}
         className="relative flex flex-col items-center justify-center overflow-hidden" style={{ minHeight: "100dvh" }}>
         <div className="absolute inset-0 z-0">
-          <div className="hidden md:block absolute inset-0"
-            style={{ background: "#FFF8F0", backgroundImage: "url(/images/hero-bg.jpeg)", backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat" }} />
-          <div className="md:hidden absolute inset-0"
-            style={{ background: "#FFF8F0", backgroundImage: "url(/images/hero-bg.jpeg)", backgroundSize: "contain", backgroundPosition: "center center", backgroundRepeat: "no-repeat" }} />
           <div className="absolute inset-0"
-            style={{ background: `radial-gradient(ellipse 60% 50% at ${mousePos.x * 100}% ${mousePos.y * 100}%, rgba(255,159,76,0.06) 0%, transparent 70%)`, transition: "background 0.3s ease" }} />
-          <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.04, 0.1, 0.04] }}
-            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute rounded-full blur-[160px]" style={{ width: 600, height: 600, top: "5%", left: "10%", background: "rgba(255,159,76,0.07)" }} />
-          <motion.div animate={{ scale: [1, 1.15, 1], opacity: [0.03, 0.08, 0.03] }}
-            transition={{ duration: 14, repeat: Infinity, ease: "easeInOut", delay: 4 }}
-            className="absolute rounded-full blur-[140px]" style={{ width: 500, height: 500, bottom: "10%", right: "5%", background: "rgba(255,212,168,0.06)" }} />
-          <div className="absolute inset-0 pointer-events-none opacity-30"
-            style={{ backgroundImage: "radial-gradient(rgba(255,159,76,0.12) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
+            style={{ background: "#1a1a2e", backgroundImage: "url(https://images.unsplash.com/photo-1523050854058-8df90110c7f1?w=1920&q=85)", backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat" }} />
+          <div className="absolute inset-0"
+            style={{ background: "linear-gradient(135deg, rgba(26,26,46,0.75) 0%, rgba(26,26,46,0.4) 40%, rgba(255,159,76,0.15) 100%)" }} />
+          <div className="absolute inset-0"
+            style={{ background: `radial-gradient(ellipse 80% 60% at ${mousePos.x * 100}% ${mousePos.y * 100}%, rgba(255,159,76,0.12) 0%, transparent 70%)`, transition: "background 0.3s ease" }} />
+          <motion.div animate={{ scale: [1, 1.3, 1], opacity: [0.08, 0.15, 0.08] }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute rounded-full blur-[200px]" style={{ width: 700, height: 700, top: "0%", left: "5%", background: "rgba(255,159,76,0.1)" }} />
+          <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.05, 0.12, 0.05] }}
+            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 3 }}
+            className="absolute rounded-full blur-[180px]" style={{ width: 600, height: 600, bottom: "5%", right: "0%", background: "rgba(255,212,168,0.08)" }} />
+          <div className="absolute inset-0 pointer-events-none opacity-20"
+            style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
           <FloatingParticles />
         </div>
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div className="-mt-12 sm:-mt-20 md:-mt-24 ml-0 sm:ml-1 md:ml-2 lg:ml-0 max-w-3xl" style={{ y: heroParallax }}>
-            <h1 className="text-left text-[2.5rem] sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-serif leading-[0.95] tracking-tight mb-0" style={{ color: "#2D2D2D" }}>
+            <h1 className="text-left text-[2.5rem] sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-serif leading-[0.95] tracking-tight mb-0" style={{ color: "#ffffff" }}>
               <span style={{ color: C.orange }}>Learn</span> smarter,{"\n"}
             </h1>
             <motion.h1 className="text-left text-[2.5rem] sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-serif leading-[0.95] tracking-tight mt-1">
-              <span style={{ color: "#2D2D2D" }}>not </span>
+              <span style={{ color: "#ffffff" }}>not </span>
               {"harder.".split("").map((char, i) => (
                 <motion.span key={i} className="inline-block"
                   initial={{ opacity: 0, y: 50, rotateX: -40 }}
@@ -267,9 +267,9 @@ export default function Home() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={{ delay: 1.7 + i * 0.12, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                   className="flex items-center gap-2.5 px-4 py-2 rounded-full"
-                  style={{ background: "rgba(255,255,255,0.5)", border: "2px solid #2D2D2D", backdropFilter: "blur(8px)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.4)" }}>
+                  style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", backdropFilter: "blur(12px)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15)" }}>
                   <span className="font-mono text-xs font-bold" style={{ color: feat.color }}>{feat.num}</span>
-                  <span className="text-xs font-medium" style={{ color: "#6B6B6B" }}>{feat.label}</span>
+                  <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.8)" }}>{feat.label}</span>
                 </motion.div>
               ))}
             </motion.div>
@@ -280,7 +280,7 @@ export default function Home() {
               <MagneticButton>
                 <Link href="/math-solver"
                   className="group relative inline-flex items-center justify-center gap-2 px-5 sm:px-7 py-2.5 sm:py-3.5 rounded-2xl text-xs sm:text-sm font-semibold overflow-hidden transition-all duration-500 hover:-translate-y-0.5"
-                  style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.55), rgba(255,255,255,0.25))", border: "2px solid #2D2D2D", color: "#2D2D2D", backdropFilter: "blur(16px) saturate(180%)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.5), 0 4px 16px rgba(0,0,0,0.04)" }}>
+                  style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)", color: "#ffffff", backdropFilter: "blur(16px) saturate(180%)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 16px rgba(0,0,0,0.15)" }}>
                   <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: "linear-gradient(135deg, rgba(255,159,76,0.12), rgba(232,133,46,0.06))" }} />
                   <svg className="relative z-10 w-4 h-4 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>
                   <span className="relative z-10">Get Started</span>
@@ -334,7 +334,7 @@ export default function Home() {
             <div className="relative">
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
                  <div className="col-span-3 relative overflow-hidden rounded-2xl" style={{ border: "2px solid #2D2D2D", boxShadow: "inset 0 0 0 1px rgba(255,159,76,0.1), inset 0 0 20px rgba(255,159,76,0.03)" }}>
-                  <motion.img src="/images/kid-tablet.jpg" alt="Student exploring"
+                  <motion.img src="https://images.unsplash.com/photo-1509062526246-a8fbbc2e7c5a?w=800&q=85" alt="Student exploring"
                     className="rounded-2xl object-cover h-72 w-full" loading="lazy"
                     style={{ scale: visionImgScale, y: visionImgParallax }}
                     whileHover={{ scale: 1.08 }} transition={{ duration: 0.8 }} />
@@ -342,13 +342,13 @@ export default function Home() {
                 </div>
                 <div className="col-span-2 flex flex-col gap-4">
                   <div className="relative overflow-hidden rounded-2xl flex-1" style={{ border: "2px solid #2D2D2D", boxShadow: "inset 0 0 0 1px rgba(255,159,76,0.1), inset 0 0 20px rgba(255,159,76,0.03)" }}>
-                    <motion.img src="/images/lab-colorful.jpg" alt="Science lab"
+                    <motion.img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&q=85" alt="Science lab"
                       className="rounded-2xl object-cover h-full w-full" loading="lazy"
                       whileHover={{ scale: 1.1 }} transition={{ duration: 0.8 }} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
                   </div>
                   <div className="relative overflow-hidden rounded-2xl flex-1" style={{ border: "2px solid #2D2D2D", boxShadow: "inset 0 0 0 1px rgba(255,159,76,0.1), inset 0 0 20px rgba(255,159,76,0.03)" }}>
-                    <motion.img src="/images/robot-tutor-3.jpg" alt="AI logic"
+                    <motion.img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=85" alt="AI logic"
                       className="rounded-2xl object-cover h-full w-full" loading="lazy"
                       whileHover={{ scale: 1.1 }} transition={{ duration: 0.8 }} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />

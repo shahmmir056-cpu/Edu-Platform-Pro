@@ -19,6 +19,7 @@ import {
   MessageCircle,
   MonitorPlay,
   Brain,
+  ImageIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -52,6 +53,7 @@ const NAV_LINKS = [
   { name: "Virtual Lab", path: "/virtual-lab", icon: FlaskConical },
   { name: "AI Debate", path: "/debate-mentor", icon: Brain },
   { name: "Logic", path: "/logic", icon: Cpu },
+  { name: "Pictures", path: "/pictures", icon: ImageIcon },
   { name: "Our Vision", path: "/about", icon: Info },
   { name: "Feedback", path: "/contact", icon: MessageCircle },
 ];

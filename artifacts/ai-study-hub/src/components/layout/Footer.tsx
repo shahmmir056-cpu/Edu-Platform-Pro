@@ -37,6 +37,7 @@ const TOOL_LINKS = [
 
 const COMPANY_LINKS = [
   { name: "Our Vision", path: "/about" },
+  { name: "Pictures", path: "/pictures" },
   { name: "Feedback", path: "/contact" },
   { name: "All Tools", path: "/#tools" },
   { name: "Home", path: "/" },

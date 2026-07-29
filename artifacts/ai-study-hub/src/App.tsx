@@ -29,6 +29,7 @@ import DebateMentorPage from '@/features/debate-mentor/DebateMentorPage';
 import SimulationsV2Page from '@/features/simulations/SimulationsV2Page';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
+import Pictures from '@/pages/Pictures';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -64,6 +65,7 @@ function Router() {
             <Route path="/debate-mentor" component={DebateMentorPage} />
             <Route path="/about" component={About} />
             <Route path="/contact" component={Contact} />
+            <Route path="/pictures" component={Pictures} />
             <Route component={NotFound} />
           </Switch>
         </PageTransition>
