@@ -142,7 +142,7 @@ function CinematicParticles({ mousePos }: { mousePos: { x: number; y: number } }
       size: number; color: string; glow: boolean;
       pulse: number; pulseSpeed: number;
     }[] = [];
-    const COUNT = 200;
+    const COUNT = 800;
     const CONN_DIST = 180;
 
     function resize() {
