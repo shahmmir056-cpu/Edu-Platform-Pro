@@ -222,19 +222,19 @@ export default function Home() {
         className="relative flex flex-col items-center justify-center overflow-hidden" style={{ minHeight: "100dvh" }}>
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0"
-            style={{ background: "#1a1a2e", backgroundImage: "url(https://images.unsplash.com/photo-1523050854058-8df90110c7f1?w=1920&q=85)", backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat" }} />
+            style={{ background: "#1a1a2e", backgroundImage: "url(https://images.pexels.com/photos/159775/pexels-photo-159775.jpeg?auto=compress&cs=tinysrgb&w=1920)", backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat" }} />
           <div className="absolute inset-0"
-            style={{ background: "linear-gradient(135deg, rgba(26,26,46,0.75) 0%, rgba(26,26,46,0.4) 40%, rgba(255,159,76,0.15) 100%)" }} />
+            style={{ background: "linear-gradient(135deg, rgba(10,10,30,0.8) 0%, rgba(10,10,30,0.3) 40%, rgba(255,159,76,0.25) 100%)" }} />
           <div className="absolute inset-0"
-            style={{ background: `radial-gradient(ellipse 80% 60% at ${mousePos.x * 100}% ${mousePos.y * 100}%, rgba(255,159,76,0.12) 0%, transparent 70%)`, transition: "background 0.3s ease" }} />
-          <motion.div animate={{ scale: [1, 1.3, 1], opacity: [0.08, 0.15, 0.08] }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute rounded-full blur-[200px]" style={{ width: 700, height: 700, top: "0%", left: "5%", background: "rgba(255,159,76,0.1)" }} />
-          <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.05, 0.12, 0.05] }}
-            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 3 }}
-            className="absolute rounded-full blur-[180px]" style={{ width: 600, height: 600, bottom: "5%", right: "0%", background: "rgba(255,212,168,0.08)" }} />
-          <div className="absolute inset-0 pointer-events-none opacity-20"
-            style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
+            style={{ background: `radial-gradient(ellipse 80% 60% at ${mousePos.x * 100}% ${mousePos.y * 100}%, rgba(255,159,76,0.15) 0%, transparent 70%)`, transition: "background 0.3s ease" }} />
+          <motion.div animate={{ scale: [1, 1.4, 1], opacity: [0.1, 0.2, 0.1] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute rounded-full blur-[200px]" style={{ width: 800, height: 800, top: "-10%", left: "0%", background: "rgba(255,159,76,0.12)" }} />
+          <motion.div animate={{ scale: [1, 1.3, 1], opacity: [0.06, 0.15, 0.06] }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+            className="absolute rounded-full blur-[180px]" style={{ width: 600, height: 600, bottom: "0%", right: "0%", background: "rgba(255,212,168,0.1)" }} />
+          <div className="absolute inset-0 pointer-events-none opacity-30"
+            style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
           <FloatingParticles />
         </div>
 
