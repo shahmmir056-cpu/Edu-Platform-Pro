@@ -19,9 +19,10 @@ import {
   MessageCircle,
   MonitorPlay,
   Brain,
-  ImageIcon,
+  Hand,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useGesture } from "@/gesture/GestureProvider";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,13 +54,13 @@ const NAV_LINKS = [
   { name: "Virtual Lab", path: "/virtual-lab", icon: FlaskConical },
   { name: "AI Debate", path: "/debate-mentor", icon: Brain },
   { name: "Logic", path: "/logic", icon: Cpu },
-  { name: "Pictures", path: "/pictures", icon: ImageIcon },
   { name: "Our Vision", path: "/about", icon: Info },
   { name: "Feedback", path: "/contact", icon: MessageCircle },
 ];
 
 export function Header() {
   const [location] = useLocation();
+  const { state: gestureState, enable: enableGesture, disable: disableGesture } = useGesture();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(true);
   const [scrolled, setScrolled] = useState(false);
@@ -194,6 +195,23 @@ export function Header() {
           ))}
         </nav>
 
+        {/* Gesture toggle */}
+        <button
+          onClick={() => gestureState.enabled ? disableGesture() : enableGesture().catch(() => {})}
+          className="relative z-10 flex items-center gap-1.5 px-2 lg:px-3 py-1.5 rounded-full text-[12px] font-semibold shrink-0 transition-all"
+          style={{
+            color: gestureState.enabled ? "#ffffff" : "#6B6B6B",
+            background: gestureState.enabled
+              ? "linear-gradient(135deg, #FF9F4C, #E8852E)"
+              : "transparent",
+            boxShadow: gestureState.enabled ? "0 2px 8px rgba(255,159,76,0.3)" : "none",
+          }}
+          title={gestureState.enabled ? "Disable gesture control" : "Enable gesture control"}
+        >
+          <Hand size={14} className={gestureState.enabled ? "animate-pulse" : ""} />
+          <span className="hidden xl:inline">{gestureState.enabled ? "Gestures On" : "Gestures"}</span>
+        </button>
+
         {/* Water separator */}
         <div className="relative z-10 water-separator mx-0.5" />
 
@@ -323,10 +341,23 @@ export function Header() {
                   </div>
                 </div>
               </nav>
-              <div
-                className="p-3 sm:p-4"
-                style={{ borderTop: "1px solid rgba(255,159,76,0.08)" }}
-              >
+              <div className="space-y-2 p-3 sm:p-4" style={{ borderTop: "1px solid rgba(255,159,76,0.08)" }}>
+                <button
+                  onClick={() => {
+                    gestureState.enabled ? disableGesture() : enableGesture().catch(() => {});
+                    setMobileOpen(false);
+                  }}
+                  className="water-sheet-item flex items-center gap-3 w-full px-4 py-3 text-sm font-medium rounded-xl transition-all"
+                  style={{
+                    color: gestureState.enabled ? "#ffffff" : "#6B6B6B",
+                    background: gestureState.enabled
+                      ? "linear-gradient(135deg, #FF9F4C, #E8852E)"
+                      : "transparent",
+                  }}
+                >
+                  <Hand size={16} />
+                  {gestureState.enabled ? "Disable Gesture Control" : "Enable Gesture Control"}
+                </button>
                 <Link
                   href="/virtual-lab"
                   onClick={() => setMobileOpen(false)}

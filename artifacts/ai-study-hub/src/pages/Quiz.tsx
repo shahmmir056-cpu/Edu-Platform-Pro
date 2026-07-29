@@ -51,7 +51,7 @@ export default function Quiz() {
   };
 
   const score = Object.entries(selectedAnswers).reduce((total, [qIdx, aIdx]) => {
-    return total + (quiz?.questions[Number(qIdx)].correctIndex === aIdx ? 1 : 0);
+    return total + (quiz?.questions[Number(qIdx)]?.correctIndex === aIdx ? 1 : 0);
   }, 0);
 
   return (

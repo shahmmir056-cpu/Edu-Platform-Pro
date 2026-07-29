@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { GestureToggle } from "@/gesture/GestureToggle";
 import { cn } from "@/lib/utils";
 
 export function AppLayout({ children }: { children: ReactNode }) {
@@ -33,6 +34,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       </main>
       {!isLogicPage && <Footer />}
       {!isLogicPage && <BottomNav />}
+      <GestureToggle />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useMemo, useState, Suspense, lazy } from "react";
+import { useMemo, useState, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FlaskConical,
@@ -237,12 +237,12 @@ export default function VirtualLab() {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search PhET simulations..."
                 className="w-full rounded-xl pl-11 pr-4 py-3.5 outline-none focus:ring-2 transition-all"
-                style={{
-                  background: "rgba(255,255,255,0.5)",
-                  border: "1px solid rgba(0,0,0,0.08)",
-                  color: "#2D2D2D",
-                  ["--tw-ring-color" as string]: "rgba(255,159,76,0.4)",
-                }}
+                  style={{
+                    background: "rgba(255,255,255,0.5)",
+                    border: "1px solid rgba(0,0,0,0.08)",
+                    color: "#2D2D2D",
+                    "--tw-ring-color": "rgba(255,159,76,0.4)",
+                  } as React.CSSProperties}
               />
             </div>
             <div className="flex gap-2 overflow-x-auto pb-1">
@@ -531,7 +531,6 @@ export default function VirtualLab() {
                     allow="fullscreen; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-modals"
                     referrerPolicy="no-referrer"
-                    onError={() => setIframeFailed(true)}
                   />
                 )}
               </div>

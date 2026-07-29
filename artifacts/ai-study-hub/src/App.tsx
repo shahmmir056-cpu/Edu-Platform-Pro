@@ -9,6 +9,7 @@ import { Route, Switch, Router as WouterRouter, useLocation } from 'wouter';
 import { ScrollToTop } from '@/components/layout/ScrollToTop';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageTransition } from '@/components/layout/PageTransition';
+import { GestureProvider } from '@/gesture/GestureProvider';
 
 // Pages
 import Home from '@/pages/Home';
@@ -29,7 +30,6 @@ import DebateMentorPage from '@/features/debate-mentor/DebateMentorPage';
 import SimulationsV2Page from '@/features/simulations/SimulationsV2Page';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
-import Pictures from '@/pages/Pictures';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -65,7 +65,6 @@ function Router() {
             <Route path="/debate-mentor" component={DebateMentorPage} />
             <Route path="/about" component={About} />
             <Route path="/contact" component={Contact} />
-            <Route path="/pictures" component={Pictures} />
             <Route component={NotFound} />
           </Switch>
         </PageTransition>
@@ -80,7 +79,9 @@ function App() {
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
           <ScrollToTop />
-          <Router />
+          <GestureProvider>
+            <Router />
+          </GestureProvider>
         </WouterRouter>
         <Toaster />
       </TooltipProvider>

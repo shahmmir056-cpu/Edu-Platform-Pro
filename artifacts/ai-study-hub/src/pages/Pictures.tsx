@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, ImageIcon } from "lucide-react";
 
@@ -138,10 +138,10 @@ export default function Pictures() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
-  const filtered = IMAGES.filter(
+  const filtered = useMemo(() => IMAGES.filter(
     (img) => activeCategory === "All" || img.category === activeCategory
-  );
-  const displayed = shuffleArray(filtered);
+  ), [activeCategory]);
+  const displayed = useMemo(() => shuffleArray(filtered), [filtered]);
 
   const openLightbox = (index: number) => setLightboxIndex(index);
   const closeLightbox = () => setLightboxIndex(null);
@@ -209,6 +209,15 @@ export default function Pictures() {
           animate="show"
           className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 auto-rows-[180px] sm:auto-rows-[220px]"
         >
+          {displayed.length === 0 && (
+            <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4" style={{ background: "rgba(255,255,255,0.5)" }}>
+                <ImageIcon size={24} style={{ color: "#9A9A9A" }} />
+              </div>
+              <p className="font-medium text-lg mb-1" style={{ color: "#6B6B6B" }}>No images found</p>
+              <p className="text-sm" style={{ color: "#9A9A9A" }}>Try selecting a different category</p>
+            </div>
+          )}
           {displayed.map((img, index) => (
             <motion.div
               key={`${img.src}-${index}`}

@@ -38,7 +38,7 @@ export default function NotFound() {
         <motion.div variants={fadeUp} className="flex flex-wrap items-center justify-center gap-4">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-7 py-3.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-bold hover:from-blue-600 hover:to-blue-700 transition-all shadow-md"
+            className="inline-flex items-center gap-2 px-7 py-3.5 bg-gradient-to-r from-[#FF9F4C] to-[#E8852E] text-white rounded-xl font-bold hover:from-[#E8852E] hover:to-[#d97724] transition-all shadow-md"
           >
             <Home size={18} /> Back to Home
           </Link>

@@ -115,7 +115,8 @@ export default function DebateMentorPage() {
       messagesRef.current = final;
       setMessages(final);
       await speakRef.current(reply);
-    } catch {
+    } catch (err) {
+      console.error("Debate mentor chat error:", err);
       const errMsg: ChatMessage = { id: `e-${Date.now()}`, role: "assistant", content: "I encountered an error. Please try again.", timestamp: Date.now() };
       setMessages((prev) => [...prev, errMsg]);
     } finally {
@@ -134,7 +135,8 @@ export default function DebateMentorPage() {
     try {
       const s = await generateScore(messages, mode, topicActive);
       setScore(s);
-    } catch {
+    } catch (err) {
+      console.error("Debate mentor score error:", err);
       setScore({
         overall: 65, confidence: 60, communication: 70, grammar: 65,
         criticalThinking: 60, debatePerformance: 65,

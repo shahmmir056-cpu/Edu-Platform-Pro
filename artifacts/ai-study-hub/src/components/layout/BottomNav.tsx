@@ -80,7 +80,7 @@ export function BottomNav() {
             <tab.icon size={compact ? 16 : 20} strokeWidth={isActive ? 2.5 : 2} />
             <span
               className={cn(
-                "transition-all duration-400 overflow-hidden whitespace-nowrap",
+                "transition-all duration-500 overflow-hidden whitespace-nowrap",
                 compact ? "max-w-0 opacity-0 ml-0" : "max-w-[80px] opacity-100 ml-1"
               )}
               style={{ lineHeight: 1 }}
