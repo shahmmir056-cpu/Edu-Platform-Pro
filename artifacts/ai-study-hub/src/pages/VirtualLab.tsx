@@ -535,10 +535,6 @@ export default function VirtualLab() {
                 )}
               </div>
             </motion.div>
-            <div
-              className="fixed bottom-0 left-0 w-full z-[9999] bg-white/80 backdrop-blur-xl"
-              style={{ height: "56px", borderTop: "2px solid #2D2D2D" }}
-            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -602,10 +598,6 @@ export default function VirtualLab() {
                 </Suspense>
               </div>
             </motion.div>
-            <div
-              className="fixed bottom-0 left-0 w-full z-[9999] bg-white/80 backdrop-blur-xl"
-              style={{ height: "56px", borderTop: "2px solid #2D2D2D" }}
-            />
           </motion.div>
         )}
       </AnimatePresence>

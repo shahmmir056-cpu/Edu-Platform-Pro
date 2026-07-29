@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 export function AppLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const isLogicPage = location === "/logic";
+  const isLabPage = location.startsWith("/virtual-lab");
 
   return (
     <div className={cn("flex w-full flex-col", isLogicPage ? "h-dvh overflow-hidden" : "min-h-[100dvh]")}>
@@ -25,14 +26,15 @@ export function AppLayout({ children }: { children: ReactNode }) {
         id="main-content"
         className={cn(
           "flex-1 min-w-0 max-w-full overflow-x-hidden relative z-10",
-          !isLogicPage && "pt-20 pb-20 lg:pb-0",
-          isLogicPage && "overflow-hidden"
+          !isLogicPage && !isLabPage && "pt-20 pb-20 lg:pb-0",
+          isLogicPage && "overflow-hidden",
+          isLabPage && "pt-20"
         )}
       >
         {children}
       </main>
-      {!isLogicPage && <Footer />}
-      {!isLogicPage && <BottomNav />}
+      {!isLogicPage && !isLabPage && <Footer />}
+      {!isLogicPage && !isLabPage && <BottomNav />}
     </div>
   );
 }
