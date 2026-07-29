@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useEffect } from "react";
+import React, { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { Link } from "wouter";
 import { motion, useMotionValue, useTransform, useScroll, useSpring } from "framer-motion";
 import {
@@ -123,8 +123,8 @@ function MagneticButton({ children, className, style }: { children: React.ReactN
   );
 }
 
-/* ─── Canvas Particle Network ─── */
-function ParticleNetwork({ mousePos }: { mousePos: { x: number; y: number } }) {
+/* ─── Cinematic Particle System ─── */
+function CinematicParticles({ mousePos }: { mousePos: { x: number; y: number } }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -136,9 +136,14 @@ function ParticleNetwork({ mousePos }: { mousePos: { x: number; y: number } }) {
     let animId: number;
     let w = 0; let h = 0;
 
-    const particles: { x: number; y: number; vx: number; vy: number; size: number; color: string }[] = [];
-    const PARTICLE_COUNT = 65;
-    const CONNECTION_DIST = 130;
+    const particles: {
+      x: number; y: number; z: number;
+      vx: number; vy: number; vz: number;
+      size: number; color: string; glow: boolean;
+      pulse: number; pulseSpeed: number;
+    }[] = [];
+    const COUNT = 140;
+    const CONN_DIST = 160;
 
     function resize() {
       w = canvas!.width = window.innerWidth;
@@ -147,223 +152,298 @@ function ParticleNetwork({ mousePos }: { mousePos: { x: number; y: number } }) {
     resize();
     window.addEventListener("resize", resize);
 
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
+    for (let i = 0; i < COUNT; i++) {
+      const glow = i % 6 === 0;
+      const c = i % 4 === 0 ? "#FF9F4C" : i % 4 === 1 ? "#FFB366" : i % 4 === 2 ? "#E8852E" : "rgba(45,45,45,0.35)";
       particles.push({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: (Math.random() - 0.5) * 0.4,
-        size: Math.random() * 2.5 + 1,
-        color: i % 3 === 0 ? "#FF9F4C" : i % 3 === 1 ? "#E8852E" : "#2D2D2D",
+        x: Math.random() * w, y: Math.random() * h, z: Math.random() * 400,
+        vx: (Math.random() - 0.5) * 0.25, vy: (Math.random() - 0.5) * 0.25, vz: (Math.random() - 0.5) * 0.12,
+        size: glow ? 2 + Math.random() * 2.5 : 0.8 + Math.random() * 1.5,
+        color: c, glow,
+        pulse: Math.random() * Math.PI * 2, pulseSpeed: 0.015 + Math.random() * 0.04,
       });
     }
 
     function draw() {
       ctx!.clearRect(0, 0, w, h);
+      const mx = mousePos.x * w;
+      const my = mousePos.y * h;
 
-      for (const p of particles) {
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0 || p.x > w) p.vx *= -1;
-        if (p.y < 0 || p.y > h) p.vy *= -1;
+      const sorted = [...particles].sort((a, b) => a.z - b.z);
 
-        ctx!.beginPath();
-        ctx!.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx!.fillStyle = p.color;
-        ctx!.globalAlpha = 0.5;
-        ctx!.fill();
-      }
-
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < CONNECTION_DIST) {
-            const alpha = (1 - dist / CONNECTION_DIST) * 0.15;
+      // Connections
+      for (let i = 0; i < sorted.length; i++) {
+        for (let j = i + 1; j < sorted.length; j++) {
+          const dx = sorted[i].x - sorted[j].x;
+          const dy = sorted[i].y - sorted[j].y;
+          const dz = (sorted[i].z - sorted[j].z) * 0.3;
+          const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+          if (dist < CONN_DIST) {
+            const alpha = (1 - dist / CONN_DIST) * 0.08;
+            const zf = 1 - sorted[i].z / 400;
             ctx!.beginPath();
-            ctx!.moveTo(particles[i].x, particles[i].y);
-            ctx!.lineTo(particles[j].x, particles[j].y);
+            ctx!.moveTo(sorted[i].x, sorted[i].y);
+            ctx!.lineTo(sorted[j].x, sorted[j].y);
             ctx!.strokeStyle = "#FF9F4C";
-            ctx!.globalAlpha = alpha;
-            ctx!.lineWidth = 0.5;
+            ctx!.globalAlpha = alpha * zf;
+            ctx!.lineWidth = 0.3 + zf * 0.3;
             ctx!.stroke();
           }
         }
       }
 
-      // Mouse interaction - draw extra connections near cursor
-      const mx = mousePos.x * w;
-      const my = mousePos.y * h;
       for (const p of particles) {
-        const dx = p.x - mx;
-        const dy = p.y - my;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 200) {
-          const alpha = (1 - dist / 200) * 0.25;
-          ctx!.beginPath();
-          ctx!.arc(p.x, p.y, p.size * 1.5, 0, Math.PI * 2);
-          ctx!.fillStyle = "#FF9F4C";
-          ctx!.globalAlpha = alpha;
+        p.x += p.vx; p.y += p.vy; p.z += p.vz;
+        if (p.x < -60 || p.x > w + 60) p.vx *= -1;
+        if (p.y < -60 || p.y > h + 60) p.vy *= -1;
+        if (p.z < 0 || p.z > 400) p.vz *= -1;
+        p.pulse += p.pulseSpeed;
+        const zf = 1 - p.z / 400;
+        const ds = p.size * (0.4 + zf * 0.6) * (1 + Math.sin(p.pulse) * 0.15);
+        const a = 0.15 + zf * 0.45;
+
+        if (p.glow) {
+          const g = ctx!.createRadialGradient(p.x, p.y, 0, p.x, p.y, ds * 5);
+          g.addColorStop(0, "#FF9F4C");
+          g.addColorStop(0.2, "rgba(255,159,76,0.25)");
+          g.addColorStop(1, "transparent");
+          ctx!.fillStyle = g;
+          ctx!.globalAlpha = a * 0.35;
           ctx!.fill();
+        }
+
+        ctx!.beginPath();
+        ctx!.arc(p.x, p.y, ds, 0, Math.PI * 2);
+        ctx!.fillStyle = p.color;
+        ctx!.globalAlpha = a;
+        ctx!.fill();
+
+        const ddx = p.x - mx, ddy = p.y - my;
+        const mDist = Math.sqrt(ddx * ddx + ddy * ddy);
+        if (mDist < 200) {
+          const mA = (1 - mDist / 200) * 0.4;
+          ctx!.beginPath();
+          ctx!.arc(p.x, p.y, ds * 3, 0, Math.PI * 2);
+          ctx!.fillStyle = "#FF9F4C";
+          ctx!.globalAlpha = mA * 0.2;
+          ctx!.fill();
+          ctx!.beginPath();
+          ctx!.moveTo(p.x, p.y);
+          ctx!.lineTo(mx, my);
+          ctx!.strokeStyle = "#FF9F4C";
+          ctx!.globalAlpha = mA * 0.1;
+          ctx!.lineWidth = 0.4;
+          ctx!.stroke();
         }
       }
 
       ctx!.globalAlpha = 1;
       animId = requestAnimationFrame(draw);
     }
-
     draw();
     return () => { cancelAnimationFrame(animId); window.removeEventListener("resize", resize); };
   }, [mousePos]);
 
-  return (
-    <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" />
-  );
+  return <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" />;
 }
 
-/* ─── Animated Grid Background ─── */
-function GridBackground() {
+/* ─── Premium Mesh Gradient Background ─── */
+function MeshBackground() {
   return (
-    <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden opacity-[0.04]">
-      <div className="absolute inset-0"
-        style={{
-          backgroundImage: `linear-gradient(rgba(45,45,45,1) 1px, transparent 1px), linear-gradient(90deg, rgba(45,45,45,1) 1px, transparent 1px)`,
-          backgroundSize: "60px 60px",
-        }}
-      />
+    <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+      {/* Base gradient */}
+      <div className="absolute inset-0" style={{
+        background: "radial-gradient(ellipse 80% 60% at 0% 0%, rgba(255,159,76,0.04) 0%, transparent 70%), radial-gradient(ellipse 60% 50% at 100% 100%, rgba(232,133,46,0.03) 0%, transparent 70%), radial-gradient(ellipse 50% 40% at 50% 100%, rgba(255,179,102,0.02) 0%, transparent 60%)"
+      }} />
+      {/* Grid pattern */}
       <motion.div
         className="absolute inset-0"
         style={{
-          backgroundImage: `linear-gradient(rgba(255,159,76,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,159,76,1) 1px, transparent 1px)`,
-          backgroundSize: "60px 60px",
+          backgroundImage: `linear-gradient(rgba(45,45,45,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(45,45,45,0.06) 1px, transparent 1px)`,
+          backgroundSize: "100px 100px",
         }}
-        animate={{ opacity: [0, 0.5, 0] }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        animate={{ backgroundPosition: ["0px 0px", "100px 100px"] }}
+        transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
       />
+      {/* Fine accent grid */}
+      <motion.div
+        className="absolute inset-0"
+        style={{
+          backgroundImage: `linear-gradient(rgba(255,159,76,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,159,76,0.04) 1px, transparent 1px)`,
+          backgroundSize: "25px 25px",
+        }}
+        animate={{ backgroundPosition: ["0px 0px", "-25px -25px"] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+      />
+      {/* Soft vignette */}
+      <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at center, transparent 30%, rgba(245,237,228,0.7) 100%)" }} />
     </div>
   );
 }
 
-/* ─── AI Holographic Visual ─── */
+/* ─── Cinematic AI Holographic Display ─── */
 function AIVisual() {
   const cards = [
-    { label: "AI Tutors", value: "10+", x: "-15%", y: "-25%", delay: 0 },
-    { label: "Virtual Labs", value: "50+", x: "20%", y: "-30%", delay: 0.3 },
-    { label: "Smart Notes", value: "AI", x: "-20%", y: "20%", delay: 0.6 },
-    { label: "Exams", value: "Prep", x: "18%", y: "22%", delay: 0.9 },
+    { label: "AI Tutors", value: "10+", x: "-20%", y: "-28%", delay: 0 },
+    { label: "Virtual Labs", value: "50+", x: "24%", y: "-34%", delay: 0.3 },
+    { label: "Smart Notes", value: "AI", x: "-24%", y: "24%", delay: 0.6 },
+    { label: "Exams", value: "Prep", x: "22%", y: "26%", delay: 0.9 },
   ];
 
+  const dataStreams = useMemo(() => [...Array(25)].map((_, i) => ({
+    id: i, x: Math.random() * 100, delay: Math.random() * 5,
+    dur: 2.5 + Math.random() * 4, h: 2 + Math.random() * 4, o: 0.15 + Math.random() * 0.35,
+  })), []);
+
   return (
-    <div className="relative w-full h-full flex items-center justify-center">
-      {/* Glow orbs */}
-      <motion.div
-        className="absolute rounded-full blur-[100px]"
-        style={{ width: "50%", height: "50%", background: "rgba(255,159,76,0.15)" }}
-        animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.25, 0.15] }}
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        className="absolute rounded-full blur-[80px]"
-        style={{ width: "35%", height: "35%", background: "rgba(232,133,46,0.1)" }}
-        animate={{ scale: [1.1, 0.9, 1.1], opacity: [0.1, 0.2, 0.1] }}
-        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-      />
+    <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+      {/* Deep ambient glow */}
+      <motion.div className="absolute rounded-full blur-[150px]" style={{ width: "65%", height: "65%", background: "rgba(255,159,76,0.08)" }}
+        animate={{ scale: [1, 1.25, 1], opacity: [0.08, 0.18, 0.08] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} />
+      <motion.div className="absolute rounded-full blur-[120px]" style={{ width: "45%", height: "45%", background: "rgba(232,133,46,0.06)" }}
+        animate={{ scale: [1.3, 0.7, 1.3], opacity: [0.06, 0.14, 0.06] }}
+        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 2 }} />
 
-      {/* Glowing orange rings */}
+      {/* Large rotating wireframe globe */}
       <motion.svg className="absolute w-[80%] h-[80%]" viewBox="0 0 300 300"
-        animate={{ rotate: 360 }}
-        transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-      >
-        <circle cx="150" cy="150" r="100" fill="none" stroke="#FF9F4C" strokeWidth="1" opacity="0.15"
-          strokeDasharray="8 6" />
-        <circle cx="150" cy="150" r="130" fill="none" stroke="#FF9F4C" strokeWidth="0.5" opacity="0.1"
-          strokeDasharray="4 8" />
-      </motion.svg>
-      <motion.svg className="absolute w-[80%] h-[80%]" viewBox="0 0 300 300"
-        animate={{ rotate: -360 }}
-        transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-      >
-        <circle cx="150" cy="150" r="115" fill="none" stroke="#E8852E" strokeWidth="0.8" opacity="0.12"
-          strokeDasharray="6 10" />
+        animate={{ rotate: [0, 360] }}
+        transition={{ duration: 25, repeat: Infinity, ease: "linear" }}>
+        {[...Array(10)].map((_, i) => (
+          <ellipse key={`gl-${i}`} cx="150" cy="150" rx={i % 2 === 0 ? 95 : 65} ry={95}
+            fill="none" stroke={i % 2 === 0 ? "#FF9F4C" : "#E8852E"}
+            strokeWidth={i % 2 === 0 ? 0.35 : 0.25} opacity={i % 2 === 0 ? 0.1 : 0.06}
+            transform={`rotate(${(i / 10) * 180}, 150, 150)`}
+            strokeDasharray={i % 2 === 0 ? "4 7" : "2 9"} />
+        ))}
+        {[...Array(5)].map((_, i) => (
+          <ellipse key={`gl-lat-${i}`} cx="150" cy="150" rx={95 - i * 16} ry={38 - i * 7}
+            fill="none" stroke="#FF9F4C" strokeWidth="0.25" opacity={0.06 + i * 0.01} strokeDasharray="3 6" />
+        ))}
+        <ellipse cx="150" cy="150" rx="95" ry="22" fill="none" stroke="#FF9F4C" strokeWidth="0.5" opacity="0.12" />
       </motion.svg>
 
-      {/* Central AI brain / neural core */}
-      <motion.div
-        className="relative z-10 w-40 h-40 sm:w-48 sm:h-48 rounded-full flex items-center justify-center"
+      {/* Counter-rotating ring */}
+      <motion.svg className="absolute w-[90%] h-[90%]" viewBox="0 0 300 300"
+        animate={{ rotate: [360, 0] }}
+        transition={{ duration: 40, repeat: Infinity, ease: "linear" }}>
+        <circle cx="150" cy="150" r="120" fill="none" stroke="#2D2D2D" strokeWidth="0.4" opacity="0.06" strokeDasharray="2 12" />
+        <circle cx="150" cy="150" r="135" fill="none" stroke="#FF9F4C" strokeWidth="0.2" opacity="0.04" strokeDasharray="1 15" />
+      </motion.svg>
+
+      {/* Energy pulse rings */}
+      {[...Array(4)].map((_, i) => (
+        <motion.div key={`pr-${i}`} className="absolute rounded-full"
+          style={{ width: 50 + i * 35, height: 50 + i * 35, border: "1px solid rgba(255,159,76,0.12)" }}
+          animate={{ scale: [0.4, 2.2 + i * 0.4], opacity: [0.5, 0] }}
+          transition={{ duration: 3.5 + i * 0.4, repeat: Infinity, ease: "easeOut", delay: i * 1.0 }} />
+      ))}
+
+      {/* Orbiting nodes */}
+      {[...Array(8)].map((_, i) => {
+        const angle = (i / 8) * Math.PI * 2;
+        const r = 80 + (i % 3) * 12;
+        return (
+          <React.Fragment key={`on-${i}`}>
+            <motion.div className="absolute w-[5px] h-[5px] rounded-full z-10"
+              style={{ background: i % 3 === 0 ? "#FF9F4C" : i % 3 === 1 ? "#E8852E" : "#FFB366", boxShadow: `0 0 8px ${i % 3 === 0 ? "#FF9F4C" : "#E8852E"}` }}
+              animate={{
+                left: [`calc(50% + ${Math.cos(angle) * r}px)`, `calc(50% + ${Math.cos(angle + Math.PI) * r}px)`],
+                top: [`calc(50% + ${Math.sin(angle) * r}px)`, `calc(50% + ${Math.sin(angle + Math.PI) * r}px)`],
+                opacity: [0.9, 0.1, 0.9], scale: [1, 0.4, 1],
+              }}
+              transition={{ duration: 5 + i * 0.25, repeat: Infinity, ease: "linear", delay: i * 0.15 }} />
+            <motion.div className="absolute w-[2px] h-[2px] rounded-full" style={{ background: "#FF9F4C" }}
+              animate={{
+                left: [`calc(50% + ${Math.cos(angle) * (r + 8)}px)`, `calc(50% + ${Math.cos(angle + Math.PI) * (r + 8)}px)`],
+                top: [`calc(50% + ${Math.sin(angle) * (r + 8)}px)`, `calc(50% + ${Math.sin(angle + Math.PI) * (r + 8)}px)`],
+                opacity: [0.4, 0, 0.4],
+              }}
+              transition={{ duration: 5 + i * 0.25, repeat: Infinity, ease: "linear", delay: i * 0.15 + 0.6 }} />
+          </React.Fragment>
+        );
+      })}
+
+      {/* Data stream particles */}
+      {dataStreams.map((p) => (
+        <motion.div key={`ds-${p.id}`} className="absolute" style={{ width: 1.5, height: p.h * 3, background: `linear-gradient(to top, transparent, #FF9F4C)`, left: `${p.x}%`, filter: "blur(0.3px)" }}
+          animate={{ top: ["110%", "-10%"], opacity: [0, p.o, 0] }}
+          transition={{ duration: p.dur, repeat: Infinity, ease: "linear", delay: p.delay }} />
+      ))}
+
+      {/* Central core */}
+      <motion.div className="relative z-10 w-[140px] h-[140px] lg:w-[170px] lg:h-[170px] rounded-full flex items-center justify-center"
         style={{
-          background: "radial-gradient(circle, rgba(255,159,76,0.15) 0%, rgba(255,212,168,0.05) 50%, transparent 70%)",
-          border: "1px solid rgba(255,159,76,0.15)",
-          boxShadow: "0 0 60px rgba(255,159,76,0.1), inset 0 0 60px rgba(255,159,76,0.05)",
+          background: "radial-gradient(circle, rgba(255,159,76,0.18) 0%, rgba(255,159,76,0.06) 35%, rgba(255,212,168,0.02) 65%, transparent 85%)",
+          border: "1.5px solid rgba(255,159,76,0.1)", boxShadow: "0 0 100px rgba(255,159,76,0.06), inset 0 0 100px rgba(255,159,76,0.03)",
         }}
-        animate={{ scale: [1, 1.03, 1] }}
-        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-      >
-        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center"
-          style={{
-            background: "radial-gradient(circle, rgba(255,159,76,0.2) 0%, rgba(255,159,76,0.05) 60%, transparent 100%)",
-            border: "1px solid rgba(255,159,76,0.2)",
-            boxShadow: "0 0 40px rgba(255,159,76,0.15)",
-          }}
-        >
-          <Brain size={40} className="sm:w-[48px] sm:h-[48px]" style={{ color: "#FF9F4C", opacity: 0.9 }} />
+        animate={{ scale: [1, 1.05, 1] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
+        <motion.div className="absolute inset-[18%] rounded-full"
+          style={{ border: "1px solid rgba(255,159,76,0.12)", background: "radial-gradient(circle, rgba(255,159,76,0.12) 0%, transparent 70%)" }}
+          animate={{ rotate: 360 }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }} />
+        <div className="w-[64px] h-[64px] lg:w-[76px] lg:h-[76px] rounded-full flex items-center justify-center"
+          style={{ background: "radial-gradient(circle, rgba(255,159,76,0.2) 0%, rgba(255,159,76,0.05) 60%, transparent 100%)", border: "1px solid rgba(255,159,76,0.12)", boxShadow: "0 0 40px rgba(255,159,76,0.1)" }}>
+          <motion.div animate={{ rotate: [0, 4, -4, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}>
+            <Brain size={32} className="lg:w-[40px] lg:h-[40px]" style={{ color: "#FF9F4C", opacity: 0.85 }} />
+          </motion.div>
         </div>
-        {/* Neural dots orbiting */}
-        {[...Array(8)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-2 h-2 rounded-full"
-            style={{ background: i % 2 === 0 ? "#FF9F4C" : "#E8852E" }}
+        {[...Array(12)].map((_, i) => (
+          <motion.div key={`ns-${i}`} className="absolute w-[3px] h-[3px] rounded-full"
+            style={{ background: i % 3 === 0 ? "#FF9F4C" : i % 3 === 1 ? "#E8852E" : "#FFB366", boxShadow: `0 0 5px ${i % 3 === 0 ? "#FF9F4C" : "#E8852E"}` }}
             animate={{
-              x: [0, Math.cos((i / 8) * Math.PI * 2) * 70, 0],
-              y: [0, Math.sin((i / 8) * Math.PI * 2) * 70, 0],
-              opacity: [0, 0.8, 0],
-              scale: [0, 1, 0],
+              x: [0, Math.cos((i / 12) * Math.PI * 2) * 50, 0],
+              y: [0, Math.sin((i / 12) * Math.PI * 2) * 50, 0],
+              opacity: [0, 1, 0], scale: [0, 1.8, 0],
             }}
-            transition={{ duration: 3 + i * 0.2, repeat: Infinity, ease: "easeInOut", delay: i * 0.15 }}
-          />
+            transition={{ duration: 2.8 + i * 0.2, repeat: Infinity, ease: "easeInOut", delay: i * 0.1 }} />
         ))}
       </motion.div>
 
       {/* Floating glass cards */}
       {cards.map((card, i) => (
-        <motion.div
-          key={card.label}
-          className="absolute rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 text-center backdrop-blur-xl"
+        <motion.div key={card.label} className="absolute rounded-xl px-3 py-2 lg:px-4 lg:py-2.5 text-center backdrop-blur-2xl"
           style={{
-            left: `calc(50% + ${card.x})`,
-            top: `calc(50% + ${card.y})`,
-            background: "rgba(255,255,255,0.08)",
-            border: "1px solid rgba(255,255,255,0.12)",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.1)",
+            left: `calc(50% + ${card.x})`, top: `calc(50% + ${card.y})`,
+            background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.06)",
           }}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: [0, -4, 0] }}
-          transition={{ duration: 4 + i * 0.5, repeat: Infinity, ease: "easeInOut", delay: card.delay, opacity: { duration: 0.8, delay: 1 + card.delay } }}
-        >
-          <p className="text-[10px] sm:text-xs font-semibold" style={{ color: "#FF9F4C" }}>{card.value}</p>
-          <p className="text-[8px] sm:text-[10px]" style={{ color: "rgba(107,107,107,0.9)" }}>{card.label}</p>
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: [0, -6, 0] }}
+          transition={{ duration: 5 + i * 0.4, repeat: Infinity, ease: "easeInOut", delay: card.delay, opacity: { duration: 0.8, delay: 1.2 + card.delay } }}>
+          <motion.p className="text-[11px] lg:text-xs font-bold" style={{ color: "#FF9F4C" }}
+            animate={{ scale: [1, 1.12, 1] }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: card.delay }}>
+            {card.value}
+          </motion.p>
+          <p className="text-[9px] lg:text-[10px]" style={{ color: "rgba(107,107,107,0.85)" }}>{card.label}</p>
         </motion.div>
       ))}
 
-      {/* Tech dots decorating the right side */}
-      {[...Array(12)].map((_, i) => {
-        const angle = (i / 12) * Math.PI * 2;
-        const r = 90 + Math.sin(i * 1.5) * 15;
+      {/* Helix tech dots */}
+      {[...Array(20)].map((_, i) => {
+        const angle = (i / 20) * Math.PI * 2;
+        const r = 110 + Math.sin(i * 2.5) * 18;
         return (
-          <motion.div
-            key={`dot-${i}`}
-            className="absolute w-1 h-1 rounded-full"
+          <motion.div key={`ht-${i}`} className="absolute w-[3px] h-[3px] rounded-full"
             style={{
-              left: `calc(50% + ${Math.cos(angle) * r}px - 2px)`,
-              top: `calc(50% + ${Math.sin(angle) * r}px - 1px)`,
-              background: i % 3 === 0 ? "#FF9F4C" : i % 3 === 1 ? "#E8852E" : "rgba(45,45,45,0.3)",
+              left: `calc(50% + ${Math.cos(angle) * r}px - 1.5px)`, top: `calc(50% + ${Math.sin(angle) * r}px - 1.5px)`,
+              background: i % 4 === 0 ? "#FF9F4C" : i % 4 === 1 ? "#E8852E" : i % 4 === 2 ? "#FFB366" : "rgba(45,45,45,0.15)",
             }}
-            animate={{ opacity: [0.2, 0.8, 0.2], scale: [0.5, 1.2, 0.5] }}
-            transition={{ duration: 2 + i * 0.2, repeat: Infinity, ease: "easeInOut", delay: i * 0.1 }}
-          />
+            animate={{ opacity: [0.08, 1, 0.08], scale: [0.2, 1.5, 0.2] }}
+            transition={{ duration: 1.8 + i * 0.12, repeat: Infinity, ease: "easeInOut", delay: i * 0.06 }} />
         );
       })}
+
+      {/* Ambient shapes */}
+      <motion.div className="absolute w-[18px] h-[18px] border border-[#FF9F4C]/15 rounded-sm" style={{ top: "8%", left: "6%" }}
+        animate={{ rotate: 360, opacity: [0.08, 0.25, 0.08] }} transition={{ duration: 14, repeat: Infinity, ease: "linear" }} />
+      <motion.div className="absolute w-[12px] h-[12px] border border-[#E8852E]/10 rounded-full" style={{ top: "12%", right: "8%" }}
+        animate={{ scale: [1, 1.4, 1], opacity: [0.08, 0.2, 0.08] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} />
+      <motion.div className="absolute w-[14px] h-[14px] border border-[#FF9F4C]/10" style={{ bottom: "15%", right: "6%", clipPath: "polygon(50% 0%, 100% 100%, 0% 100%)" }}
+        animate={{ rotate: [0, 360], opacity: [0.06, 0.18, 0.06] }} transition={{ duration: 18, repeat: Infinity, ease: "linear" }} />
+      <motion.div className="absolute w-[8px] h-[8px] bg-[#FF9F4C]/10 rounded-full" style={{ bottom: "25%", left: "10%" }}
+        animate={{ scale: [1, 2, 1], opacity: [0.1, 0.3, 0.1] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} />
     </div>
   );
 }
@@ -433,335 +513,316 @@ export default function Home() {
     <>
     <div className="sm:hidden"><MobileHome /></div>
     <div className="hidden sm:block pb-0 overflow-x-hidden">
-      {/* ═══ HERO ═══ */}
+      {/* ═══ CINEMATIC HERO ═══ */}
       <section ref={heroRef} onMouseMove={handleHeroMouseMove}
-        className="relative flex flex-col items-center justify-center overflow-hidden" style={{ minHeight: "100dvh", background: "#FFF8F0" }}>
-        <GridBackground />
-        <ParticleNetwork mousePos={mousePos} />
+        className="relative flex flex-col items-center justify-center overflow-hidden" style={{ minHeight: "100dvh", background: "#F5EDE4" }}>
+        <MeshBackground />
+        <CinematicParticles mousePos={mousePos} />
 
-        {/* Ambient glow orbs */}
-        <motion.div
-          className="absolute rounded-full blur-[180px] pointer-events-none z-[1]"
-          style={{ width: "50vw", height: "50vw", maxWidth: 700, maxHeight: 700, top: "-20%", left: "-10%", background: "rgba(255,159,76,0.06)" }}
-          animate={{ scale: [1, 1.3, 1], opacity: [0.06, 0.12, 0.06] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute rounded-full blur-[180px] pointer-events-none z-[1]"
-          style={{ width: "40vw", height: "40vw", maxWidth: 500, maxHeight: 500, bottom: "-10%", right: "20%", background: "rgba(232,133,46,0.05)" }}
-          animate={{ scale: [1.2, 0.9, 1.2], opacity: [0.05, 0.1, 0.05] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 3 }}
-        />
+        {/* Deep ambient glow orbs */}
+        <motion.div className="absolute rounded-full blur-[200px] pointer-events-none z-[1]" style={{ width: "55vw", height: "55vw", maxWidth: 800, maxHeight: 800, top: "-25%", left: "-15%", background: "rgba(255,159,76,0.05)" }}
+          animate={{ scale: [1, 1.4, 1], opacity: [0.05, 0.1, 0.05] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} />
+        <motion.div className="absolute rounded-full blur-[200px] pointer-events-none z-[1]" style={{ width: "45vw", height: "45vw", maxWidth: 600, maxHeight: 600, bottom: "-15%", right: "15%", background: "rgba(232,133,46,0.04)" }}
+          animate={{ scale: [1.3, 0.8, 1.3], opacity: [0.04, 0.08, 0.04] }} transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 4 }} />
+        <motion.div className="absolute rounded-full blur-[160px] pointer-events-none z-[1]" style={{ width: "35vw", height: "35vw", maxWidth: 450, maxHeight: 450, top: "35%", right: "3%", background: "rgba(255,179,102,0.03)" }}
+          animate={{ scale: [0.7, 1.5, 0.7], opacity: [0.03, 0.06, 0.03] }} transition={{ duration: 14, repeat: Infinity, ease: "easeInOut", delay: 6 }} />
 
-        {/* Mouse-follow radial glow */}
-        <motion.div
-          className="absolute z-[1] pointer-events-none rounded-full blur-[150px]"
-          style={{
-            width: 400, height: 400,
-            left: `calc(${mousePos.x * 100}% - 200px)`,
-            top: `calc(${mousePos.y * 100}% - 200px)`,
-            background: "radial-gradient(circle, rgba(255,159,76,0.06) 0%, transparent 70%)",
-            transition: "left 0.8s ease, top 0.8s ease",
-          }}
-        />
+        {/* Floating geometric elements */}
+        <motion.div className="absolute z-[1] pointer-events-none" style={{ top: "12%", left: "4%", width: 24, height: 24, border: "1px solid rgba(255,159,76,0.07)", borderRadius: 4 }}
+          animate={{ rotate: 360, y: [-12, 12, -12] }} transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }} />
+        <motion.div className="absolute z-[1] pointer-events-none" style={{ top: "55%", left: "2%", width: 10, height: 10, background: "rgba(255,159,76,0.03)", borderRadius: "50%" }}
+          animate={{ scale: [1, 1.8, 1], opacity: [0.2, 0.5, 0.2] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }} />
+        <motion.div className="absolute z-[1] pointer-events-none" style={{ top: "20%", right: "5%", width: 18, height: 18, border: "1px solid rgba(232,133,46,0.05)", clipPath: "polygon(50% 0%, 100% 100%, 0% 100%)" }}
+          animate={{ rotate: [0, 360], y: [-10, 10, -10] }} transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }} />
+        <motion.div className="absolute z-[1] pointer-events-none" style={{ bottom: "18%", right: "12%", width: 7, height: 7, background: "rgba(255,159,76,0.04)", borderRadius: "50%" }}
+          animate={{ scale: [1, 2.5, 1], opacity: [0.15, 0.4, 0.15] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1.5 }} />
 
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 flex items-center">
-          <div className="w-full grid lg:grid-cols-2 gap-8 lg:gap-16 items-center pt-24 pb-12">
-            {/* ═══ LEFT: Content ═══ */}
+        {/* Mouse-follow glow */}
+        <motion.div className="absolute z-[1] pointer-events-none rounded-full blur-[180px]"
+          style={{ width: 450, height: 450, left: `calc(${mousePos.x * 100}% - 225px)`, top: `calc(${mousePos.y * 100}% - 225px)`, background: "radial-gradient(circle, rgba(255,159,76,0.04) 0%, transparent 70%)", transition: "left 0.8s ease, top 0.8s ease" }} />
+
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 flex-1 flex items-center">
+          <div className="w-full grid lg:grid-cols-2 gap-12 lg:gap-20 items-center pt-24 pb-16">
+            {/* ═══ LEFT: Editorial Content ═══ */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            >
-              {/* Badge */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider mb-6"
-                style={{
-                  background: "rgba(255,159,76,0.08)",
-                  border: "1px solid rgba(255,159,76,0.15)",
-                  color: "#FF9F4C",
-                }}
-              >
-                <Zap size={12} />
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6 }}>
+              {/* Premium badge */}
+              <motion.div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[11px] font-bold uppercase tracking-[0.15em] mb-8"
+                style={{ background: "linear-gradient(135deg, rgba(255,159,76,0.1), rgba(232,133,46,0.05))", border: "1px solid rgba(255,159,76,0.12)", color: "#FF9F4C" }}
+                initial={{ opacity: 0, y: 8, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.5, delay: 0.15 }}>
+                <motion.span className="w-1.5 h-1.5 rounded-full" style={{ background: "#FF9F4C" }}
+                  animate={{ scale: [1, 1.6, 1], opacity: [1, 0.4, 1] }} transition={{ duration: 2, repeat: Infinity }} />
                 AI-Powered Smart Learning Platform
               </motion.div>
 
-              {/* Headline */}
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-7xl font-serif leading-[1.05] tracking-tight mb-4" style={{ color: "#2D2D2D" }}>
-                Learn Smarter{" "}
-                <span className="relative inline-block">
-                  <span className="bg-clip-text text-transparent" style={{
-                    backgroundImage: "linear-gradient(135deg, #FF9F4C 0%, #E8852E 50%, #FFB366 100%)",
-                  }}>with AI.</span>
-                  <motion.div
-                    className="absolute -bottom-1 left-0 right-0 h-1 rounded-full"
-                    style={{ background: "linear-gradient(90deg, #FF9F4C, transparent)" }}
-                    initial={{ scaleX: 0, transformOrigin: "left" }}
-                    animate={{ scaleX: 1 }}
-                    transition={{ duration: 1, delay: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                  />
+              {/* Cinematic headline */}
+              <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-serif leading-[0.95] tracking-[-0.03em] mb-5 overflow-hidden" style={{ color: "#1A1A1A" }}>
+                {"Learn".split("").map((ch, i) => (
+                  <motion.span key={`l-${i}`} className="inline-block"
+                    initial={{ opacity: 0, y: 80, rotateZ: -3 }} animate={{ opacity: 1, y: 0, rotateZ: 0 }}
+                    transition={{ duration: 0.9, delay: 0.4 + i * 0.04, ease: [0.16, 1, 0.3, 1] }}>
+                    {ch}
+                  </motion.span>
+                ))}
+                <span className="inline-block mx-[0.08em]">
+                  <motion.span className="inline-block bg-clip-text text-transparent" style={{ backgroundImage: "linear-gradient(135deg, #FF9F4C 0%, #E8852E 50%, #FFB366 100%)" }}
+                    initial={{ opacity: 0, y: 80, rotateZ: -3 }} animate={{ opacity: 1, y: 0, rotateZ: 0 }}
+                    transition={{ duration: 0.9, delay: 0.68, ease: [0.16, 1, 0.3, 1] }}>
+                    Smarter
+                  </motion.span>
+                </span>
+                <span className="inline-block mx-[0.08em]">
+                  <motion.span className="inline-block"
+                    initial={{ opacity: 0, y: 80, rotateZ: -3 }} animate={{ opacity: 1, y: 0, rotateZ: 0 }}
+                    transition={{ duration: 0.9, delay: 0.88, ease: [0.16, 1, 0.3, 1] }}>
+                    with
+                  </motion.span>
+                </span>
+                <span className="inline-block">
+                  <motion.span className="inline-block bg-clip-text text-transparent" style={{ backgroundImage: "linear-gradient(135deg, #FF9F4C 0%, #E8852E 50%, #FFD4A8 100%)" }}
+                    initial={{ opacity: 0, y: 80, rotateZ: -3 }} animate={{ opacity: 1, y: 0, rotateZ: 0 }}
+                    transition={{ duration: 0.9, delay: 1.0, ease: [0.16, 1, 0.3, 1] }}>
+                    AI.
+                  </motion.span>
+                  <motion.span className="absolute bottom-1 left-0 right-0 h-[3px] rounded-full bg-[#FF9F4C]/30"
+                    initial={{ scaleX: 0, transformOrigin: "left" }} animate={{ scaleX: 1 }}
+                    transition={{ duration: 1.2, delay: 1.4, ease: [0.16, 1, 0.3, 1] }} />
                 </span>
               </h1>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif leading-tight mb-6" style={{ color: "#6B6B6B" }}>
-                The Future of Education is Here.
+
+              {/* Subheadline */}
+              <h2 className="text-xl md:text-2xl lg:text-3xl font-serif leading-tight mb-6 overflow-hidden" style={{ color: "#5A5A5A" }}>
+                {"The Future of Education is Here".split(" ").map((word, i) => (
+                  <motion.span key={`sh-${i}`} className="inline-block mr-[0.3em]"
+                    initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 1.3 + i * 0.07, ease: [0.16, 1, 0.3, 1] }}>
+                    {word}
+                  </motion.span>
+                ))}
               </h2>
 
               {/* Description */}
-              <p className="text-base sm:text-lg leading-relaxed max-w-lg mb-8" style={{ color: "#6B6B6B" }}>
+              <motion.p className="text-base lg:text-lg leading-relaxed max-w-lg mb-10" style={{ color: "#6B6B6B" }}
+                initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 1.9 }}>
                 Neural Sync is an AI-powered smart education platform that helps students learn through{" "}
-                <strong style={{ color: "#FF9F4C" }}>AI tutors, virtual labs, smart notes, exam preparation,</strong>{" "}
+                <span style={{ color: "#FF9F4C", fontWeight: 600 }}>AI tutors, virtual labs, smart notes, exam preparation,</span>{" "}
                 adaptive learning, and interactive educational tools — all in one place, completely free.
-              </p>
+              </motion.p>
 
               {/* CTA Buttons */}
-              <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.8 }}
-                className="flex flex-wrap items-center gap-4"
-              >
-                <Link
-                  href="/quiz"
-                  className="group relative inline-flex items-center gap-2.5 px-7 py-3.5 rounded-2xl text-sm font-bold overflow-hidden transition-all duration-500 hover:-translate-y-0.5"
-                  style={{
-                    background: "linear-gradient(135deg, #FF9F4C 0%, #E8852E 100%)",
-                    color: "#ffffff",
-                    boxShadow: "0 4px 24px rgba(255,159,76,0.25), 0 2px 8px rgba(255,159,76,0.15)",
-                  }}
-                >
-                  <span className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <motion.div className="flex flex-wrap items-center gap-4"
+                initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 2.2 }}>
+                <Link href="/quiz"
+                  className="group relative inline-flex items-center gap-3 px-9 py-4 rounded-xl text-sm font-bold overflow-hidden transition-all duration-500 hover:-translate-y-1"
+                  style={{ color: "#fff" }}>
+                  <motion.div className="absolute inset-0 rounded-xl" style={{ background: "linear-gradient(135deg, #FF9F4C 0%, #E8852E 100%)" }}
+                    animate={{ background: ["linear-gradient(135deg, #FF9F4C 0%, #E8852E 100%)", "linear-gradient(135deg, #E8852E 0%, #D97726 100%)", "linear-gradient(135deg, #FF9F4C 0%, #E8852E 100%)"] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} />
+                  <motion.div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100"
+                    style={{ background: "linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%)" }}
+                    animate={{ x: ["-100%", "200%"] }} transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }} />
+                  <motion.div className="absolute inset-0 rounded-xl"
+                    animate={{ boxShadow: ["0 0 24px rgba(255,159,76,0.25)", "0 0 48px rgba(255,159,76,0.4)", "0 0 24px rgba(255,159,76,0.25)"] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} />
                   <span className="relative z-10">Get Started</span>
-                  <ArrowRight size={16} className="relative z-10 group-hover:translate-x-1 transition-transform duration-300" />
-                  <motion.div
-                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                    style={{ boxShadow: "0 0 40px rgba(255,159,76,0.3)" }}
-                  />
+                  <motion.span className="relative z-10" animate={{ x: [0, 4, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}>
+                    <ArrowRight size={16} />
+                  </motion.span>
                 </Link>
 
-                <Link
-                  href="/virtual-lab"
-                  className="group relative inline-flex items-center gap-2.5 px-7 py-3.5 rounded-2xl text-sm font-semibold overflow-hidden transition-all duration-500 hover:-translate-y-0.5"
-                  style={{
-                    background: "rgba(255,255,255,0.6)",
-                    border: "1px solid rgba(45,45,45,0.1)",
-                    color: "#2D2D2D",
-                    backdropFilter: "blur(16px) saturate(180%)",
-                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6), 0 4px 16px rgba(0,0,0,0.03)",
-                  }}
-                >
-                  <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: "linear-gradient(135deg, rgba(255,159,76,0.08), rgba(232,133,46,0.04))" }} />
-                  <FlaskConical size={16} className="relative z-10" />
+                <Link href="/virtual-lab"
+                  className="group relative inline-flex items-center gap-2.5 px-9 py-4 rounded-xl text-sm font-semibold overflow-hidden transition-all duration-500 hover:-translate-y-1"
+                  style={{ background: "rgba(255,255,255,0.4)", border: "1px solid rgba(45,45,45,0.06)", color: "#2D2D2D", backdropFilter: "blur(20px)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.5), 0 4px 20px rgba(0,0,0,0.02)" }}>
+                  <motion.span className="absolute inset-0 rounded-xl" style={{ background: "linear-gradient(135deg, rgba(255,159,76,0.05), rgba(232,133,46,0.02))" }}
+                    initial={{ opacity: 0 }} whileHover={{ opacity: 1 }} transition={{ duration: 0.4 }} />
+                  <motion.div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{ boxShadow: "inset 0 0 0 1px rgba(255,159,76,0.12), 0 0 30px rgba(255,159,76,0.04)" }} />
+                  <FlaskConical size={16} className="relative z-10 group-hover:rotate-[-12deg] transition-transform duration-500" />
                   <span className="relative z-10">Explore Features</span>
                 </Link>
               </motion.div>
 
-              {/* Trust / stats row */}
-              <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 1.2 }}
-                className="flex flex-wrap items-center gap-6 mt-10 pt-8"
-                style={{ borderTop: "1px solid rgba(45,45,45,0.06)" }}
-              >
+              {/* Stats row */}
+              <motion.div className="flex flex-wrap items-center gap-10 mt-12 pt-8"
+                style={{ borderTop: "1px solid rgba(45,45,45,0.05)" }}
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 2.6 }}>
                 {[
                   { value: "10+", label: "AI Tools" },
                   { value: "50+", label: "Virtual Labs" },
                   { value: "0$", label: "Always Free" },
-                ].map((s) => (
-                  <div key={s.label} className="flex items-center gap-2">
-                    <span className="text-lg font-bold font-serif" style={{ color: "#FF9F4C" }}>{s.value}</span>
-                    <span className="text-xs" style={{ color: "#9A9A9A" }}>{s.label}</span>
-                  </div>
+                ].map((s, i) => (
+                  <motion.div key={s.label} className="flex items-center gap-3 group"
+                    initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 2.7 + i * 0.12 }}>
+                    <span className="text-xl font-bold font-serif group-hover:scale-110 transition-transform duration-300" style={{ color: "#FF9F4C" }}>{s.value}</span>
+                    <span className="text-xs tracking-wide" style={{ color: "#9A9A9A" }}>{s.label}</span>
+                  </motion.div>
                 ))}
               </motion.div>
             </motion.div>
 
-            {/* ═══ RIGHT: AI Holographic Visual ═══ */}
-            <motion.div
-              className="relative h-[400px] sm:h-[480px] lg:h-[560px]"
-              initial={{ opacity: 0, scale: 0.92 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <AIVisual />
+            {/* ═══ RIGHT: Cinematic AI Visual ═══ */}
+            <motion.div className="relative h-[420px] lg:h-[580px]"
+              initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1.2, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}>
+              {/* Parallax micro-shift with mouse */}
+              <motion.div
+                animate={{ x: (mousePos.x - 0.5) * 16, y: (mousePos.y - 0.5) * 16 }}
+                transition={{ type: "spring", stiffness: 30, damping: 15 }}>
+                <AIVisual />
+              </motion.div>
             </motion.div>
           </div>
         </div>
 
         {/* Scroll indicator */}
-        <motion.div
-          className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 2, duration: 0.8 }}
-        >
-          <motion.span
-            className="text-[10px] font-semibold uppercase tracking-widest"
-            style={{ color: "#9A9A9A" }}
-            animate={{ opacity: [0.4, 1, 0.4] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
+        <motion.div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-3"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 3, duration: 0.8 }}>
+          <motion.span className="text-[9px] font-semibold uppercase tracking-[0.25em]" style={{ color: "#9A9A9A" }}
+            animate={{ opacity: [0.2, 0.7, 0.2] }} transition={{ duration: 2.5, repeat: Infinity }}>
             Scroll
           </motion.span>
-          <motion.div
-            className="w-5 h-8 rounded-full border-2 flex items-start justify-center pt-1.5"
-            style={{ borderColor: "rgba(45,45,45,0.15)" }}
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            <motion.div
-              className="w-1 h-2 rounded-full"
-              style={{ background: "#FF9F4C" }}
-              animate={{ y: [0, 6, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-            />
+          <motion.div className="flex flex-col items-center gap-[3px]" animate={{ y: [0, 5, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
+            <motion.div className="w-[14px] h-[1.5px] rounded-full" style={{ background: "#FF9F4C" }}
+              animate={{ opacity: [0.3, 1, 0.3], width: ["10px", "14px", "10px"] }} transition={{ duration: 2, repeat: Infinity }} />
+            <motion.div className="w-[10px] h-[1.5px] rounded-full" style={{ background: "#FF9F4C" }}
+              animate={{ opacity: [0.15, 0.5, 0.15], width: ["7px", "10px", "7px"] }} transition={{ duration: 2, repeat: Infinity, delay: 0.35 }} />
           </motion.div>
         </motion.div>
       </section>
 
-      {/* ═══ FEATURE STRIP ═══ */}
-      <section className="px-4 sm:pl-8 sm:pr-6 -mt-12 md:-mt-16 relative z-20">
-        <motion.div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
-          variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }}>
-          {FEATURE_STRIP.map((f) => (
-            <motion.div key={f.title} variants={fadeUp}>
-              <InteractiveCard intensity={3}
-                className="lg-card group relative rounded-2xl p-6 transition-all duration-700 h-full overflow-hidden text-center"
-                style={{ background: "rgba(255,255,255,0.5)", backdropFilter: "blur(16px)", border: "2px solid #2D2D2D", boxShadow: "inset 0 0 0 1px rgba(255,159,76,0.1), inset 0 0 20px rgba(255,159,76,0.03), inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 8px rgba(0,0,0,0.03)" }}>
-                <ShimmerOverlay color="rgba(255,255,255,0.06)" />
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
-                  style={{ background: `radial-gradient(circle at 50% 0%, ${f.accent}06 0%, transparent 70%)` }} />
-                <div className="flex justify-center mb-4">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:rotate-[-5deg]"
-                    style={{ background: `${f.accent}10`, border: `1px solid ${f.accent}18` }}>
-                    <f.icon size={22} style={{ color: f.accent }} />
+      {/* ═══ PREMIUM FEATURE STRIP ═══ */}
+      <section className="relative px-6 -mt-16 md:-mt-20 z-20">
+        <div className="max-w-7xl mx-auto">
+          <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+            variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }}>
+            {FEATURE_STRIP.map((f) => (
+              <motion.div key={f.title} variants={fadeUp}>
+                <InteractiveCard intensity={4}
+                  className="group relative rounded-2xl p-7 transition-all duration-700 h-full overflow-hidden text-center"
+                  style={{ background: "rgba(255,255,255,0.45)", backdropFilter: "blur(24px)", border: "1px solid rgba(45,45,45,0.05)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.5), 0 8px 32px rgba(0,0,0,0.02)" }}>
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
+                    style={{ background: `radial-gradient(circle at 50% 0%, ${f.accent}06 0%, transparent 70%)` }} />
+                  <div className="flex justify-center mb-5">
+                    <div className="w-[52px] h-[52px] rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:rotate-[-6deg]"
+                      style={{ background: `${f.accent}08`, border: `1px solid ${f.accent}12` }}>
+                      <f.icon size={24} style={{ color: f.accent }} />
+                    </div>
                   </div>
-                </div>
-                <h3 className="font-serif text-lg font-medium mb-2" style={{ color: C.darkSlate }}>{f.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "#6B6B6B" }}>{f.desc}</p>
-              </InteractiveCard>
-            </motion.div>
-          ))}
-        </motion.div>
+                  <h3 className="font-serif text-lg font-medium mb-2.5" style={{ color: "#2D2D2D" }}>{f.title}</h3>
+                  <p className="text-sm leading-relaxed" style={{ color: "#6B6B6B" }}>{f.desc}</p>
+                  <motion.div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{ background: `linear-gradient(90deg, transparent, ${f.accent}, transparent)` }} />
+                </InteractiveCard>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
       </section>
 
-      {/* ═══ OUR VISION ═══ */}
-      <section className="px-4 sm:px-6 py-24 md:py-32 max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+      {/* ═══ IMMERSIVE VISION ═══ */}
+      <section className="relative px-6 py-28 lg:py-36 max-w-7xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+          {/* Left: Image mosaic */}
           <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }}>
             <div className="relative">
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-                 <div className="col-span-3 relative overflow-hidden rounded-2xl" style={{ border: "2px solid #2D2D2D", boxShadow: "inset 0 0 0 1px rgba(255,159,76,0.1), inset 0 0 20px rgba(255,159,76,0.03)" }}>
-                  <motion.img src="https://images.unsplash.com/photo-1509062526246-a8fbbc2e7c5a?w=800&q=85" alt="Student exploring"
-                    className="rounded-2xl object-cover h-72 w-full" loading="lazy"
+              <div className="grid grid-cols-5 gap-4">
+                <div className="col-span-3 relative overflow-hidden rounded-2xl" style={{ border: "1px solid rgba(45,45,45,0.04)", boxShadow: "0 4px 24px rgba(0,0,0,0.02)" }}>
+                  <motion.img src="https://images.unsplash.com/photo-1509062526246-a8fbbc2e7c5a?w=800&q=85" alt="Student"
+                    className="rounded-2xl object-cover h-80 w-full" loading="lazy"
                     style={{ scale: visionImgScale, y: visionImgParallax }}
-                    whileHover={{ scale: 1.08 }} transition={{ duration: 0.8 }} />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
+                    whileHover={{ scale: 1.06 }} transition={{ duration: 0.8 }} />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none" />
                 </div>
                 <div className="col-span-2 flex flex-col gap-4">
-                  <div className="relative overflow-hidden rounded-2xl flex-1" style={{ border: "2px solid #2D2D2D", boxShadow: "inset 0 0 0 1px rgba(255,159,76,0.1), inset 0 0 20px rgba(255,159,76,0.03)" }}>
-                    <motion.img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&q=85" alt="Science lab"
+                  <div className="relative overflow-hidden rounded-2xl flex-1" style={{ border: "1px solid rgba(45,45,45,0.04)" }}>
+                    <motion.img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&q=85" alt="Science"
                       className="rounded-2xl object-cover h-full w-full" loading="lazy"
-                      whileHover={{ scale: 1.1 }} transition={{ duration: 0.8 }} />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
+                      whileHover={{ scale: 1.08 }} transition={{ duration: 0.8 }} />
                   </div>
-                  <div className="relative overflow-hidden rounded-2xl flex-1" style={{ border: "2px solid #2D2D2D", boxShadow: "inset 0 0 0 1px rgba(255,159,76,0.1), inset 0 0 20px rgba(255,159,76,0.03)" }}>
-                    <motion.img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=85" alt="AI logic"
+                  <div className="relative overflow-hidden rounded-2xl flex-1" style={{ border: "1px solid rgba(45,45,45,0.04)" }}>
+                    <motion.img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=85" alt="AI"
                       className="rounded-2xl object-cover h-full w-full" loading="lazy"
-                      whileHover={{ scale: 1.1 }} transition={{ duration: 0.8 }} />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
+                      whileHover={{ scale: 1.08 }} transition={{ duration: 0.8 }} />
                   </div>
                 </div>
               </div>
-              <motion.div initial={{ opacity: 0, scale: 0.8 }} whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.5, type: "spring", stiffness: 200 }}
-                className="absolute -bottom-8 left-1/2 -translate-x-1/2 rounded-2xl shadow-xl px-6 py-4 text-center w-48"
-                style={{ background: "linear-gradient(135deg, #FF9F4C 0%, #FFD4A8 100%)", color: "#ffffff", boxShadow: "0 4px 20px rgba(255,159,76,0.2)" }}>
-                <motion.p className="text-3xl font-serif font-bold leading-none"
-                  animate={{ scale: [1, 1.05, 1] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>100%</motion.p>
-                <p className="text-xs font-bold uppercase tracking-wider mt-1">Free Access</p>
+              {/* Floating badge */}
+              <motion.div className="absolute -bottom-6 left-1/2 -translate-x-1/2 rounded-2xl px-7 py-4 text-center w-44 shadow-lg"
+                style={{ background: "linear-gradient(135deg, #FF9F4C 0%, #FFD4A8 100%)", color: "#fff", boxShadow: "0 8px 32px rgba(255,159,76,0.2)" }}
+                initial={{ opacity: 0, scale: 0.8 }} whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.5, type: "spring", stiffness: 200 }}>
+                <motion.p className="text-3xl font-serif font-bold leading-none" animate={{ scale: [1, 1.06, 1] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>100%</motion.p>
+                <p className="text-[10px] font-bold uppercase tracking-wider mt-1.5 opacity-90">Free Access</p>
               </motion.div>
             </div>
           </motion.div>
 
+          {/* Right: Vision copy */}
           <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} transition={{ delay: 0.35 }}>
-            <div className="lg:pl-4 text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider mb-6"
-                style={{ background: "rgba(255,159,76,0.08)", border: "1px solid rgba(255,159,76,0.15)", color: "#FF9F4C" }}>
-                <Eye size={15} /> Our Vision
-              </div>
-              <div className="relative mb-6">
-                <h2 className="text-3xl md:text-4xl font-serif leading-tight" style={{ color: "#2D2D2D" }}>
-                  {"The future of education".split(" ").map((word, i) => (
-                    <motion.span key={i} className="inline-block mr-[0.25em]"
-                      initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 + i * 0.08 }}>
-                      {word}
-                    </motion.span>
-                  ))}
-                  <br />
-                  {"is".split(" ").map((word, i) => (
-                    <motion.span key={i} className="inline-block mr-[0.25em]"
+            <div className="lg:pl-4">
+              <motion.div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full text-[11px] font-bold uppercase tracking-[0.15em] mb-8"
+                style={{ background: "rgba(255,159,76,0.06)", border: "1px solid rgba(255,159,76,0.1)", color: "#FF9F4C" }}
+                initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
+                <Eye size={14} /> Our Vision
+              </motion.div>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif leading-[1.1] mb-6" style={{ color: "#1A1A1A" }}>
+                {"The future of education".split(" ").map((word, i) => (
+                  <motion.span key={i} className="inline-block mr-[0.25em]"
+                    initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 + i * 0.08 }}>
+                    {word}
+                  </motion.span>
+                ))}
+                <br />
+                <span style={{ color: "#FF9F4C" }}>
+                  {"is not inside textbooks.".split(" ").map((word, i) => (
+                    <motion.span key={`v-${i}`} className="inline-block mr-[0.25em]"
                       initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.5 + i * 0.08 }}>
                       {word}
                     </motion.span>
-                  ))}{" "}
-                  <motion.span style={{ color: "#FF9F4C" }}
-                    initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.6 }}>
-                    not inside
-                  </motion.span>
-                  <br />
-                  <motion.span style={{ color: "#FF9F4C" }}
-                    initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.7 }}>
-                    textbooks.
-                  </motion.span>
-                </h2>
-                <div className="flex items-center justify-center gap-2 mt-4">
-                  <div className="h-px w-8" style={{ background: "rgba(255,159,76,0.3)" }} />
-                  <motion.div className="w-1.5 h-1.5 rounded-full" style={{ background: "#FF9F4C" }}
-                    animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }} transition={{ duration: 2, repeat: Infinity }} />
-                  <div className="h-px w-8" style={{ background: "rgba(255,159,76,0.3)" }} />
-                </div>
+                  ))}
+                </span>
+              </h2>
+              <div className="flex items-center gap-3 mb-8">
+                <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, rgba(255,159,76,0.3), transparent)" }} />
+                <motion.div className="w-2 h-2 rounded-full" style={{ background: "#FF9F4C" }}
+                  animate={{ scale: [1, 1.6, 1], opacity: [1, 0.4, 1] }} transition={{ duration: 2, repeat: Infinity }} />
+                <div className="h-px flex-1" style={{ background: "linear-gradient(270deg, rgba(255,159,76,0.3), transparent)" }} />
               </div>
-              <p className="text-base sm:text-lg leading-relaxed mb-8" style={{ color: "#6B6B6B" }}>
+              <p className="text-base lg:text-lg leading-relaxed mb-10" style={{ color: "#6B6B6B" }}>
                 We believe it exists in experiences. Instead of asking students to memorize facts, we help them
-                <strong style={{ color: "#FF9F4C" }}> see, explore, and understand</strong> through realistic simulations,
+                <span style={{ color: "#FF9F4C", fontWeight: 600 }}> see, explore, and understand</span> through realistic simulations,
                 interactive AI, circuit building, and practical examples — because when learning feels real, curiosity grows
                 and knowledge stays.
               </p>
-              <div className="grid sm:grid-cols-3 gap-5 mb-10">
+              <div className="grid sm:grid-cols-3 gap-6 mb-10">
                 {[
                   { icon: Lightbulb, title: "See It, Don't Memorize It", desc: "We turn abstract concepts into visual, interactive experiences.", accent: "#FF9F4C" },
                   { icon: FlaskConical, title: "Real Simulations", desc: "Official PhET labs for physics, chemistry & biology.", accent: "#E8852E" },
                   { icon: Cpu, title: "Build Real Circuits", desc: "A full logic simulator with 60+ components, truth tables & Verilog.", accent: "#D4761A" },
                 ].map((item) => (
                   <motion.div key={item.title} className="flex flex-col items-center text-center gap-3 group"
-                    whileHover={{ y: -3 }} transition={{ duration: 0.3 }}>
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-all duration-500 group-hover:scale-110 group-hover:rotate-[-5deg]"
-                      style={{ background: `${item.accent}10`, border: `1px solid ${item.accent}18` }}>
-                      <item.icon size={18} style={{ color: item.accent }} />
+                    whileHover={{ y: -4 }} transition={{ duration: 0.3 }}>
+                    <div className="w-[44px] h-[44px] rounded-xl flex items-center justify-center shrink-0 transition-all duration-500 group-hover:scale-110 group-hover:rotate-[-6deg]"
+                      style={{ background: `${item.accent}08`, border: `1px solid ${item.accent}12` }}>
+                      <item.icon size={20} style={{ color: item.accent }} />
                     </div>
                     <div>
-                      <p className="font-bold mb-1" style={{ color: "#2D2D2D" }}>{item.title}</p>
-                      <p className="text-sm" style={{ color: "#6B6B6B" }}>{item.desc}</p>
+                      <p className="font-bold mb-1.5 text-sm" style={{ color: "#2D2D2D" }}>{item.title}</p>
+                      <p className="text-xs leading-relaxed" style={{ color: "#6B6B6B" }}>{item.desc}</p>
                     </div>
                   </motion.div>
                 ))}
               </div>
-              <div className="flex justify-center">
-                <Link href="/about"
-                  className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-bold transition-all duration-500 hover:-translate-y-0.5"
-                  style={{ background: "linear-gradient(135deg, #FF9F4C 0%, #FFD4A8 100%)", color: "#ffffff", boxShadow: "0 4px 16px rgba(255,159,76,0.2)" }}>
-                  Discover Our Vision
-                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-500" />
-                </Link>
-              </div>
+              <Link href="/about"
+                className="group inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold transition-all duration-500 hover:-translate-y-0.5"
+                style={{ background: "linear-gradient(135deg, #FF9F4C 0%, #FFD4A8 100%)", color: "#fff", boxShadow: "0 8px 24px rgba(255,159,76,0.15)" }}>
+                Discover Our Vision
+                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-500" />
+              </Link>
             </div>
           </motion.div>
         </div>
