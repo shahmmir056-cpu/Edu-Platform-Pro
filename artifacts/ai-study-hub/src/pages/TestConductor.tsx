@@ -20,13 +20,23 @@ import {
   ChevronRight,
   Send,
   Zap,
+  GraduationCap,
+  Atom,
+  Calculator,
+  Globe,
+  BookMarked,
+  Beaker,
+  Landmark,
+  Cpu,
+  ChevronDown,
+  Sparkles,
+  BarChart3,
 } from "lucide-react";
 import { ToolHeader } from "@/components/ui/ToolHeader";
 import { cn } from "@/lib/utils";
 
 type TestPhase = "hub" | "config" | "taking" | "results";
 type TestCategory = "mcq" | "true-false" | "fill-blank" | "short-answer" | "essay" | "speed";
-type Topic = "Science" | "Math" | "History" | "English" | "General Knowledge";
 type Difficulty = "Easy" | "Medium" | "Hard";
 
 interface QuestionResult {
@@ -38,16 +48,67 @@ interface QuestionResult {
 
 interface TestConfig {
   type: TestCategory;
-  topic: Topic;
+  classNumber: number;
+  subject: string;
   numQuestions: number;
   difficulty: Difficulty;
   timerMinutes: number;
 }
 
-const TOPICS: Topic[] = ["Science", "Math", "History", "English", "General Knowledge"];
 const DIFFICULTIES: Difficulty[] = ["Easy", "Medium", "Hard"];
 const NUM_OPTIONS = [5, 10, 15, 20];
 const TIMER_OPTIONS = [0, 5, 10, 20];
+
+const CLASS_SUBJECTS: Record<number, { subjects: string[]; icon: any; color: string; label: string }> = {
+  1:  { subjects: ["English", "Mathematics", "Environmental Studies"], icon: Sparkles, color: "#FF9F4C", label: "Class 1" },
+  2:  { subjects: ["English", "Mathematics", "Environmental Studies"], icon: Sparkles, color: "#FF9F4C", label: "Class 2" },
+  3:  { subjects: ["English", "Mathematics", "Environmental Studies", "General Knowledge"], icon: BookOpen, color: "#FF9F4C", label: "Class 3" },
+  4:  { subjects: ["English", "Mathematics", "Environmental Studies", "General Knowledge"], icon: BookOpen, color: "#FF9F4C", label: "Class 4" },
+  5:  { subjects: ["English", "Mathematics", "Science", "Social Studies"], icon: Globe, color: "#FF9F4C", label: "Class 5" },
+  6:  { subjects: ["English", "Mathematics", "Science", "Social Science"], icon: Atom, color: "#FF9F4C", label: "Class 6" },
+  7:  { subjects: ["English", "Mathematics", "Science", "Social Science"], icon: Atom, color: "#FF9F4C", label: "Class 7" },
+  8:  { subjects: ["English", "Mathematics", "Science", "Social Science"], icon: Calculator, color: "#FF9F4C", label: "Class 8" },
+  9:  { subjects: ["English", "Mathematics", "Science", "Social Science"], icon: Beaker, color: "#FF9F4C", label: "Class 9" },
+  10: { subjects: ["English", "Mathematics", "Science", "Social Science"], icon: Beaker, color: "#FF9F4C", label: "Class 10" },
+  11: { subjects: ["Physics", "Chemistry", "Mathematics", "Biology", "English", "History", "Geography", "Political Science", "Economics", "Computer Science"], icon: GraduationCap, color: "#FF9F4C", label: "Class 11" },
+  12: { subjects: ["Physics", "Chemistry", "Mathematics", "Biology", "English", "History", "Geography", "Political Science", "Economics", "Computer Science"], icon: GraduationCap, color: "#FF9F4C", label: "Class 12" },
+};
+
+const SUBJECT_TOPIC_MAP: Record<string, string> = {
+  "English": "English",
+  "Mathematics": "Math",
+  "Science": "Science",
+  "Environmental Studies": "Science",
+  "Social Studies": "History",
+  "Social Science": "History",
+  "General Knowledge": "General Knowledge",
+  "Physics": "Science",
+  "Chemistry": "Science",
+  "Biology": "Science",
+  "History": "History",
+  "Geography": "History",
+  "Political Science": "History",
+  "Economics": "General Knowledge",
+  "Computer Science": "General Knowledge",
+};
+
+const SUBJECT_ICONS: Record<string, any> = {
+  "English": BookMarked,
+  "Mathematics": Calculator,
+  "Science": Atom,
+  "Environmental Studies": Globe,
+  "Social Studies": Landmark,
+  "Social Science": Landmark,
+  "General Knowledge": Brain,
+  "Physics": Atom,
+  "Chemistry": Beaker,
+  "Biology": Atom,
+  "History": Landmark,
+  "Geography": Globe,
+  "Political Science": Landmark,
+  "Economics": BarChart3,
+  "Computer Science": Cpu,
+};
 
 const QUESTION_BANK = {
   Science: {
@@ -213,7 +274,7 @@ const QUESTION_BANK = {
       { q: "Which sport uses the term 'love' for zero?", opts: ["Soccer", "Basketball", "Tennis", "Golf"], correct: 2, exp: "In tennis, 'love' means zero." },
       { q: "What is the tallest mountain in the world?", opts: ["K2", "Kangchenjunga", "Everest", "Lhotse"], correct: 2, exp: "Mount Everest is 8,849m tall." },
       { q: "How many days are in a leap year?", opts: ["364", "365", "366", "367"], correct: 2, exp: "A leap year has 366 days." },
-      { q: "What language has the most native speakers?", opts: ["English", "Hindi", "Spanish", "Mandarin Chinese"], correct: 3, exp: "Mandarin Chinese has the most native speakers." },
+      { q: "Which planet is known as the Red Planet?", opts: ["Venus", "Mars", "Jupiter", "Saturn"], correct: 1, exp: "Mars appears red due to iron oxide on its surface." },
     ],
     tf: [
       { s: "The Eiffel Tower is in London.", c: false, exp: "It's in Paris, France." },
@@ -262,12 +323,24 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+function getTopicForSubject(subject: string): keyof typeof QUESTION_BANK {
+  const mapped = SUBJECT_TOPIC_MAP[subject] || "General Knowledge";
+  return mapped as keyof typeof QUESTION_BANK;
+}
+
+function getClassDifficulty(classNumber: number, baseDifficulty: Difficulty): Difficulty {
+  if (classNumber <= 4) return "Easy";
+  if (classNumber <= 8) return baseDifficulty === "Hard" ? "Medium" : baseDifficulty;
+  return baseDifficulty;
+}
+
 const fadeUp = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] as const } } };
-const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
+const scaleIn = { hidden: { opacity: 0, scale: 0.9 }, show: { opacity: 1, scale: 1, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as const } } };
 
 export default function TestConductor() {
   const [phase, setPhase] = useState<TestPhase>("hub");
-  const [config, setConfig] = useState<TestConfig>({ type: "mcq", topic: "Science", numQuestions: 10, difficulty: "Medium", timerMinutes: 10 });
+  const [config, setConfig] = useState<TestConfig>({ type: "mcq", classNumber: 1, subject: "English", numQuestions: 10, difficulty: "Medium", timerMinutes: 10 });
   const [questions, setQuestions] = useState<any[]>([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [answers, setAnswers] = useState<(string | number | boolean | null)[]>([]);
@@ -288,13 +361,15 @@ export default function TestConductor() {
   }, [timeLeft, phase]);
 
   const startTest = () => {
-    const bank = QUESTION_BANK[config.topic];
+    const topic = getTopicForSubject(config.subject);
+    const bank = QUESTION_BANK[topic];
+    const maxQ = Math.min(config.numQuestions, bank.mcq.length, bank.tf.length, bank.fill.length);
     let pool: any[] = [];
-    if (config.type === "mcq" || config.type === "speed") pool = shuffle(bank.mcq).slice(0, config.numQuestions);
-    else if (config.type === "true-false") pool = shuffle(bank.tf).slice(0, config.numQuestions);
-    else if (config.type === "fill-blank") pool = shuffle(bank.fill).slice(0, config.numQuestions);
-    else if (config.type === "short-answer") pool = shuffle(bank.fill).slice(0, config.numQuestions);
-    else pool = [...shuffle(bank.mcq.slice(0, Math.min(3, config.numQuestions))), ...shuffle(bank.tf).slice(0, Math.min(2, config.numQuestions))];
+    if (config.type === "mcq" || config.type === "speed") pool = shuffle(bank.mcq).slice(0, maxQ);
+    else if (config.type === "true-false") pool = shuffle(bank.tf).slice(0, maxQ);
+    else if (config.type === "fill-blank") pool = shuffle(bank.fill).slice(0, maxQ);
+    else if (config.type === "short-answer") pool = shuffle(bank.fill).slice(0, maxQ);
+    else pool = [...shuffle(bank.mcq.slice(0, Math.min(3, maxQ))), ...shuffle(bank.tf).slice(0, Math.min(2, maxQ))];
 
     setQuestions(pool);
     setAnswers(new Array(pool.length).fill(null));
@@ -340,12 +415,11 @@ export default function TestConductor() {
     setAnswers((prev) => { const n = [...prev]; n[currentIdx] = ans; return n; });
   };
 
-  const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
   const pct = questions.length > 0 ? Math.round((score / (questions.length * 10)) * 100) : 0;
 
   return (
-    <div className="max-w-5xl mx-auto p-6 md:p-10 min-h-[calc(100vh-4rem)]">
-      <ToolHeader title="Test Conductor" description="Challenge yourself with various types of tests across multiple subjects." icon={ClipboardCheck} />
+    <div className="max-w-5xl mx-auto p-4 sm:p-6 md:p-10 min-h-[calc(100vh-4rem)]">
+      <ToolHeader title="Test Conductor" description="Practice with class-specific tests across all subjects." icon={ClipboardCheck} />
       <AnimatePresence mode="wait">
         {phase === "hub" && <Hub key="hub" config={config} setConfig={setConfig} onStart={startTest} />}
         {phase === "taking" && (
@@ -362,69 +436,173 @@ export default function TestConductor() {
 }
 
 function Hub({ config, setConfig, onStart }: { config: TestConfig; setConfig: React.Dispatch<React.SetStateAction<TestConfig>>; onStart: () => void }) {
-  const types: { id: TestCategory; name: string; desc: string; icon: any; color: string }[] = [
-    { id: "mcq", name: "Multiple Choice", desc: "Pick the best answer from 4 options", icon: Target, color: "bg-primary/10 text-primary" },
-    { id: "true-false", name: "True or False", desc: "Decide if statements are correct", icon: CheckCircle2, color: "bg-accent/10 text-accent-foreground" },
-    { id: "fill-blank", name: "Fill in the Blank", desc: "Complete sentences with the right word", icon: PenTool, color: "bg-primary/10 text-primary" },
-    { id: "short-answer", name: "Short Answer", desc: "Write brief answers to questions", icon: MessageSquare, color: "bg-accent/10 text-accent-foreground" },
-    { id: "essay", name: "Essay Test", desc: "Write longer responses with structure", icon: FileText, color: "bg-primary/10 text-primary" },
-    { id: "speed", name: "Speed Challenge", desc: "Rapid-fire questions under time pressure", icon: Zap, color: "bg-accent/10 text-accent-foreground" },
+  const [showAllClasses, setShowAllClasses] = useState(false);
+  const currentClass = CLASS_SUBJECTS[config.classNumber];
+  const subjects = currentClass?.subjects || [];
+  const visibleClasses = showAllClasses ? Array.from({ length: 12 }, (_, i) => i + 1) : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
+
+
+  const types: { id: TestCategory; name: string; desc: string; icon: any }[] = [
+    { id: "mcq", name: "Multiple Choice", desc: "Pick the best answer from 4 options", icon: Target },
+    { id: "true-false", name: "True or False", desc: "Decide if statements are correct", icon: CheckCircle2 },
+    { id: "fill-blank", name: "Fill in the Blank", desc: "Complete sentences with the right word", icon: PenTool },
+    { id: "short-answer", name: "Short Answer", desc: "Write brief answers to questions", icon: MessageSquare },
+    { id: "essay", name: "Essay Test", desc: "Write longer responses with structure", icon: FileText },
+    { id: "speed", name: "Speed Challenge", desc: "Rapid-fire questions under time pressure", icon: Zap },
   ];
 
   return (
     <motion.div initial="hidden" animate="show" variants={stagger}>
-      <motion.h2 variants={fadeUp} className="text-2xl font-serif font-bold text-foreground mb-2 mt-8">Choose Test Type</motion.h2>
-      <motion.p variants={fadeUp} className="text-muted-foreground mb-6">Select a format and configure your test below.</motion.p>
-
-      <motion.div variants={stagger} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
-        {types.map((t) => (
-          <motion.button key={t.id} variants={fadeUp} onClick={() => setConfig((c) => ({ ...c, type: t.id }))}
-            className={cn("text-left p-6 rounded-2xl border-2 transition-all duration-300 hover:shadow-lg",
-              config.type === t.id ? "border-primary bg-primary/5 shadow-md" : "border-card-border bg-card hover:border-primary/30")}>
-            <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center mb-3", t.color)}><t.icon size={22} /></div>
-            <h3 className="font-serif font-bold text-foreground text-lg mb-1">{t.name}</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">{t.desc}</p>
-          </motion.button>
-        ))}
+      {/* Step 1: Class Selection */}
+      <motion.div variants={fadeUp}>
+        <div className="flex items-center gap-3 mb-2 mt-6">
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm" style={{ background: "#FF9F4C" }}>1</div>
+          <h2 className="text-xl font-serif font-bold text-foreground">Choose Your Class</h2>
+        </div>
+        <p className="text-sm text-muted-foreground mb-4 ml-11">Select the class you're studying in</p>
       </motion.div>
 
-      <motion.div variants={fadeUp} className="bg-card border border-card-border rounded-2xl p-8 mb-8">
-        <h3 className="font-serif font-bold text-foreground text-lg mb-6">Test Settings</h3>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <motion.div variants={stagger} className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2.5 mb-8">
+        {visibleClasses.map((num) => {
+          const cls = CLASS_SUBJECTS[num];
+          const Icon = cls.icon;
+          const active = config.classNumber === num;
+          return (
+            <motion.button key={num} variants={scaleIn} onClick={() => setConfig((c) => ({ ...c, classNumber: num, subject: cls.subjects[0] }))}
+              className={cn(
+                "relative p-4 rounded-2xl border-2 transition-all duration-300 text-center group overflow-hidden",
+                active
+                  ? "border-transparent shadow-lg scale-[1.03]"
+                  : "border-black/[0.06] bg-white/[0.5] hover:border-black/[0.12] hover:shadow-md"
+              )}
+              style={active ? { background: "rgba(255,159,76,0.1)", borderColor: "#FF9F4C" } : {}}>
+              {active && <div className="absolute inset-0 opacity-10" style={{ background: "radial-gradient(circle at 50% 0%, #FF9F4C, transparent 70%)" }} />}
+              <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-2 transition-all", active ? "shadow-md" : "bg-black/[0.04] group-hover:bg-black/[0.06]")}
+                style={active ? { background: "#FF9F4C", color: "#fff" } : { color: "#FF9F4C" }}>
+                <Icon size={20} />
+              </div>
+              <span className="text-xs font-bold block" style={active ? { color: "#FF9F4C" } : { color: "#2D2D2D" }}>{cls.label}</span>
+            </motion.button>
+          );
+        })}
+      </motion.div>
+
+      {/* Step 2: Subject Selection */}
+      <motion.div variants={fadeUp}>
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm" style={{ background: "#FF9F4C" }}>2</div>
+          <h2 className="text-xl font-serif font-bold text-foreground">Choose Subject</h2>
+        </div>
+        <p className="text-sm text-muted-foreground mb-4 ml-11">Pick a subject for Class {config.classNumber}</p>
+      </motion.div>
+
+      <motion.div variants={stagger} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 mb-8">
+        {subjects.map((sub) => {
+          const Icon = SUBJECT_ICONS[sub] || BookOpen;
+          const active = config.subject === sub;
+          return (
+            <motion.button key={sub} variants={scaleIn} onClick={() => setConfig((c) => ({ ...c, subject: sub }))}
+              className={cn(
+                "p-3.5 rounded-2xl border-2 transition-all duration-300 text-left group",
+                active
+                  ? "border-transparent shadow-lg"
+                  : "border-black/[0.06] bg-white/[0.5] hover:border-black/[0.12] hover:shadow-md"
+              )}
+              style={active ? { background: "rgba(255,159,76,0.1)", borderColor: "#FF9F4C" } : {}}>
+              <div className="flex items-center gap-2.5">
+                <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all", active ? "shadow-md" : "bg-black/[0.04] group-hover:bg-black/[0.06]")}
+                  style={active ? { background: "#FF9F4C", color: "#fff" } : { color: "#FF9F4C" }}>
+                  <Icon size={17} />
+                </div>
+                <div className="min-w-0">
+                  <span className="text-sm font-bold block truncate" style={active ? { color: "#FF9F4C" } : { color: "#2D2D2D" }}>{sub}</span>
+                  <span className="text-[10px]" style={{ color: "#6B6B6B" }}>{SUBJECT_TOPIC_MAP[sub]}</span>
+                </div>
+              </div>
+            </motion.button>
+          );
+        })}
+      </motion.div>
+
+      {/* Step 3: Test Type */}
+      <motion.div variants={fadeUp}>
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm" style={{ background: "#FF9F4C" }}>3</div>
+          <h2 className="text-xl font-serif font-bold text-foreground">Select Test Type</h2>
+        </div>
+        <p className="text-sm text-muted-foreground mb-4 ml-11">Choose how you want to be tested</p>
+      </motion.div>
+
+      <motion.div variants={stagger} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
+        {types.map((t) => {
+          const Icon = t.icon;
+          const active = config.type === t.id;
+          return (
+            <motion.button key={t.id} variants={scaleIn} onClick={() => setConfig((c) => ({ ...c, type: t.id }))}
+              className={cn(
+                "text-left p-4 rounded-2xl border-2 transition-all duration-300 group",
+                active
+                  ? "border-transparent shadow-lg"
+                  : "border-black/[0.06] bg-white/[0.5] hover:border-black/[0.12] hover:shadow-md"
+              )}
+              style={active ? { background: `${currentClass.color}10`, borderColor: currentClass.color } : {}}>
+              <div className="flex items-start gap-3">
+                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-white shadow-md")}
+                  style={{ background: "linear-gradient(135deg, #FF9F4C, #E8852E)" }}>
+                  <Icon size={18} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-foreground text-sm mb-0.5">{t.name}</h3>
+                  <p className="text-xs leading-relaxed" style={{ color: "#6B6B6B" }}>{t.desc}</p>
+                </div>
+              </div>
+            </motion.button>
+          );
+        })}
+      </motion.div>
+
+      {/* Step 4: Settings */}
+      <motion.div variants={fadeUp} className="rounded-2xl p-4 sm:p-6 mb-8" style={{ background: "rgba(255,255,255,0.5)", border: "2px solid rgba(0,0,0,0.06)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7), 0 4px 16px rgba(0,0,0,0.04)" }}>
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm" style={{ background: "#FF9F4C" }}>4</div>
+          <h3 className="font-serif font-bold text-foreground text-lg">Test Settings</h3>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Topic</label>
-            <select value={config.topic} onChange={(e) => setConfig((c) => ({ ...c, topic: e.target.value as Topic }))}
-              className="w-full bg-background border border-input rounded-xl p-3 focus:ring-2 focus:ring-ring outline-none">
-              {TOPICS.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Questions</label>
-            <div className="flex gap-2">
+            <label className="text-xs font-bold uppercase tracking-wider block mb-2" style={{ color: "#6B6B6B" }}>Questions</label>
+            <div className="flex gap-1.5">
               {NUM_OPTIONS.map((n) => (
                 <button key={n} onClick={() => setConfig((c) => ({ ...c, numQuestions: n }))}
-                  className={cn("flex-1 py-2.5 rounded-lg text-sm font-bold transition-all",
-                    config.numQuestions === n ? "bg-primary text-primary-foreground" : "bg-muted text-foreground hover:bg-muted/80")}>{n}</button>
+                  className={cn("flex-1 py-2.5 rounded-xl text-sm font-bold transition-all border-2",
+                    config.numQuestions === n ? "text-white shadow-md" : "bg-white/[0.5] hover:bg-white/[0.7] border-black/[0.06]")}
+                  style={config.numQuestions === n ? { background: "#FF9F4C", borderColor: "#FF9F4C" } : { color: "#2D2D2D" }}>
+                  {n}
+                </button>
               ))}
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Difficulty</label>
-            <div className="flex gap-2">
+            <label className="text-xs font-bold uppercase tracking-wider block mb-2" style={{ color: "#6B6B6B" }}>Difficulty</label>
+            <div className="flex gap-1.5">
               {DIFFICULTIES.map((d) => (
                 <button key={d} onClick={() => setConfig((c) => ({ ...c, difficulty: d }))}
-                  className={cn("flex-1 py-2.5 rounded-lg text-xs font-bold transition-all",
-                    config.difficulty === d ? "bg-primary text-primary-foreground" : "bg-muted text-foreground hover:bg-muted/80")}>{d}</button>
+                  className={cn("flex-1 py-2.5 rounded-xl text-xs font-bold transition-all border-2",
+                    config.difficulty === d ? "text-white shadow-md" : "bg-white/[0.5] hover:bg-white/[0.7] border-black/[0.06]")}
+                  style={config.difficulty === d ? { background: "#FF9F4C", borderColor: "#FF9F4C" } : { color: "#2D2D2D" }}>
+                  {d}
+                </button>
               ))}
             </div>
           </div>
           <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Timer</label>
-            <div className="flex gap-2">
+            <label className="text-xs font-bold uppercase tracking-wider block mb-2" style={{ color: "#6B6B6B" }}>Timer</label>
+            <div className="flex gap-1.5">
               {TIMER_OPTIONS.map((t) => (
                 <button key={t} onClick={() => setConfig((c) => ({ ...c, timerMinutes: t }))}
-                  className={cn("flex-1 py-2.5 rounded-lg text-xs font-bold transition-all",
-                    config.timerMinutes === t ? "bg-primary text-primary-foreground" : "bg-muted text-foreground hover:bg-muted/80")}>
+                  className={cn("flex-1 py-2.5 rounded-xl text-xs font-bold transition-all border-2",
+                    config.timerMinutes === t ? "text-white shadow-md" : "bg-white/[0.5] hover:bg-white/[0.7] border-black/[0.06]")}
+                  style={config.timerMinutes === t ? { background: "#FF9F4C", borderColor: "#FF9F4C" } : { color: "#2D2D2D" }}>
                   {t === 0 ? "∞" : `${t}m`}
                 </button>
               ))}
@@ -433,11 +611,20 @@ function Hub({ config, setConfig, onStart }: { config: TestConfig; setConfig: Re
         </div>
       </motion.div>
 
-      <motion.div variants={fadeUp} className="flex justify-center">
-        <button onClick={onStart} className="px-10 py-4 bg-primary text-primary-foreground font-bold rounded-xl hover:bg-primary/90 transition-all shadow-md flex items-center gap-2 text-lg">
-          <ClipboardCheck size={20} /> Start Test
+      {/* Start Button */}
+      <motion.div variants={fadeUp} className="flex flex-col items-center gap-3 pb-8">
+        <button onClick={onStart}
+          className="px-12 py-4 text-white font-bold rounded-2xl transition-all shadow-xl flex items-center gap-3 text-lg hover:scale-[1.02] active:scale-[0.98]"
+          style={{ background: "linear-gradient(135deg, #FF9F4C, #E8852E)" }}>
+          <ClipboardCheck size={22} /> Start Test
+          <span className="text-sm opacity-80 ml-1">Class {config.classNumber} · {config.subject}</span>
         </button>
+        <p className="text-xs" style={{ color: "#6B6B6B" }}>
+          {config.numQuestions} questions · {config.difficulty} · {config.timerMinutes === 0 ? "No timer" : `${config.timerMinutes} min`}
+        </p>
       </motion.div>
+
+
     </motion.div>
   );
 }
@@ -450,55 +637,60 @@ function Taking({ config, questions, currentIdx, setCurrentIdx, answers, setAnsw
   const q = questions[currentIdx];
   const progress = ((currentIdx + 1) / questions.length) * 100;
   const answered = answers.filter((a) => a !== null).length;
-
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-bold text-muted-foreground">Question {currentIdx + 1} of {questions.length}</span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold px-2 py-0.5 rounded-lg" style={{ background: "rgba(255,159,76,0.1)", color: "#FF9F4C" }}>Class {config.classNumber}</span>
+            <span className="text-xs font-bold px-2 py-0.5 rounded-lg" style={{ background: "rgba(255,159,76,0.1)", color: "#FF9F4C" }}>{config.subject}</span>
+            <span className="text-sm font-bold text-muted-foreground">Question {currentIdx + 1} of {questions.length}</span>
+          </div>
           {config.timerMinutes > 0 && (
             <span className={cn("flex items-center gap-1.5 text-sm font-mono font-bold", timeLeft < 60 ? "text-destructive" : "text-muted-foreground")}>
               <Timer size={14} /> {formatTime(timeLeft)}
             </span>
           )}
-          <span className="text-sm text-muted-foreground">{answered}/{questions.length} answered</span>
+          <span className="text-sm" style={{ color: "#6B6B6B" }}>{answered}/{questions.length} answered</span>
         </div>
-        <div className="h-2 bg-muted rounded-full overflow-hidden">
-          <motion.div className="h-full bg-primary rounded-full" animate={{ width: `${progress}%` }} transition={{ duration: 0.3 }} />
+        <div className="h-2 bg-black/[0.06] rounded-full overflow-hidden">
+          <motion.div className="h-full rounded-full" style={{ background: "#FF9F4C" }} animate={{ width: `${progress}%` }} transition={{ duration: 0.3 }} />
         </div>
       </div>
 
       <AnimatePresence mode="wait">
         <motion.div key={currentIdx} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-          className="bg-card border border-card-border rounded-2xl p-8 mb-6">
+          className="rounded-2xl p-4 sm:p-6 md:p-8 mb-6" style={{ background: "rgba(255,255,255,0.5)", border: "2px solid rgba(0,0,0,0.06)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7), 0 4px 16px rgba(0,0,0,0.04)" }}>
           <p className="text-xl font-serif font-bold text-foreground mb-8">
             {(config.type === "mcq" || config.type === "speed") && q.q}
             {config.type === "true-false" && q.s}
             {config.type === "fill-blank" && q.s}
-            {config.type === "short-answer" && q.q || q.s}
+            {config.type === "short-answer" && (q.q || q.s)}
             {config.type === "essay" && q.q}
           </p>
 
           {(config.type === "mcq" || config.type === "speed") && (
-            <div className="grid sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {q.opts.map((opt: string, i: number) => (
                 <button key={i} onClick={() => setAnswer(i)}
                   className={cn("p-4 rounded-xl border-2 text-left font-medium transition-all duration-200",
-                    answers[currentIdx] === i ? "border-primary bg-primary/10 text-foreground" : "border-input bg-background hover:border-primary/30")}>
-                  <span className="font-mono text-sm text-muted-foreground mr-2">{String.fromCharCode(65 + i)}.</span> {opt}
+                    answers[currentIdx] === i ? "shadow-md" : "bg-white/[0.5] hover:border-black/[0.15]")}
+                  style={answers[currentIdx] === i ? { background: "rgba(255,159,76,0.1)", borderColor: "#FF9F4C", color: "#2D2D2D" } : { borderColor: "rgba(0,0,0,0.08)", color: "#2D2D2D" }}>
+                  <span className="font-mono text-sm mr-2" style={{ color: "#6B6B6B" }}>{String.fromCharCode(65 + i)}.</span> {opt}
                 </button>
               ))}
             </div>
           )}
 
           {config.type === "true-false" && (
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
               {[true, false].map((val) => (
                 <button key={String(val)} onClick={() => setAnswer(val)}
                   className={cn("flex-1 py-5 rounded-xl border-2 text-lg font-bold transition-all duration-200",
-                    answers[currentIdx] === val ? "border-primary bg-primary/10 text-foreground" : "border-input bg-background hover:border-primary/30")}>
+                    answers[currentIdx] === val ? "shadow-md" : "bg-white/[0.5] hover:border-black/[0.15]")}
+                  style={answers[currentIdx] === val ? { background: "rgba(255,159,76,0.1)", borderColor: "#FF9F4C", color: "#2D2D2D" } : { borderColor: "rgba(0,0,0,0.08)", color: "#2D2D2D" }}>
                   {val ? "True" : "False"}
                 </button>
               ))}
@@ -508,36 +700,42 @@ function Taking({ config, questions, currentIdx, setCurrentIdx, answers, setAnsw
           {(config.type === "fill-blank" || config.type === "short-answer") && (
             <input type="text" value={String(answers[currentIdx] || "")} onChange={(e) => setAnswer(e.target.value)}
               placeholder="Type your answer..."
-              className="w-full bg-background border border-input rounded-xl p-4 text-lg outline-none focus:ring-2 focus:ring-ring transition-all" />
+              className="w-full border-2 rounded-xl p-4 text-lg outline-none transition-all"
+              style={{ background: "#FFFFFF", color: "#2D2D2D", borderColor: "rgba(0,0,0,0.08)" }} />
           )}
 
           {config.type === "essay" && (
             <textarea value={String(answers[currentIdx] || "")} onChange={(e) => setAnswer(e.target.value)}
               placeholder="Write your essay response here..."
-              className="w-full bg-background border border-input rounded-xl p-4 min-h-[200px] text-lg outline-none focus:ring-2 focus:ring-ring transition-all resize-none" />
+              className="w-full border-2 rounded-xl p-4 min-h-[200px] text-lg outline-none transition-all resize-none"
+              style={{ background: "#FFFFFF", color: "#2D2D2D", borderColor: "rgba(0,0,0,0.08)" }} />
           )}
         </motion.div>
       </AnimatePresence>
 
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
         <button onClick={() => setCurrentIdx(Math.max(0, currentIdx - 1))} disabled={currentIdx === 0}
-          className="px-5 py-2.5 border border-input bg-background hover:bg-muted rounded-xl font-bold disabled:opacity-30 transition-all flex items-center gap-1">
+          className="px-5 py-2.5 border-2 bg-white/[0.5] hover:bg-white/[0.7] rounded-xl font-bold disabled:opacity-30 transition-all flex items-center gap-1"
+          style={{ borderColor: "rgba(0,0,0,0.08)", color: "#2D2D2D" }}>
           <ChevronLeft size={16} /> Previous
         </button>
-        <div className="flex gap-1.5 overflow-x-auto max-w-[60vw] sm:max-w-none py-1">
+        <div className="flex gap-1.5 overflow-x-auto max-w-[80vw] sm:max-w-none py-1">
           {questions.map((_: any, i: number) => (
             <button key={i} onClick={() => setCurrentIdx(i)}
               className={cn("w-2.5 h-2.5 rounded-full transition-all shrink-0",
-                i === currentIdx ? "bg-primary scale-125" : answers[i] !== null ? "bg-primary/40" : "bg-muted")} />
+                i === currentIdx ? "scale-125" : answers[i] !== null ? "opacity-60" : "")}
+              style={i === currentIdx ? { background: "#FF9F4C" } : answers[i] !== null ? { background: "#FF9F4C", opacity: 0.4 } : { background: "#D1D5DB" }} />
           ))}
         </div>
         {currentIdx < questions.length - 1 ? (
           <button onClick={() => setCurrentIdx(currentIdx + 1)}
-            className="px-5 py-2.5 bg-primary text-primary-foreground rounded-xl font-bold hover:bg-primary/90 transition-all flex items-center gap-1">
+            className="px-5 py-2.5 text-white rounded-xl font-bold transition-all flex items-center gap-1 shadow-md"
+            style={{ background: "#FF9F4C" }}>
             Next <ChevronRight size={16} />
           </button>
         ) : (
-          <button onClick={onSubmit} className="px-6 py-2.5 bg-accent text-accent-foreground rounded-xl font-bold hover:bg-accent/90 transition-all flex items-center gap-1 shadow-md">
+          <button onClick={onSubmit} className="px-6 py-2.5 text-white rounded-xl font-bold transition-all flex items-center gap-1 shadow-md"
+            style={{ background: "#FF9F4C" }}>
             Submit <Send size={16} />
           </button>
         )}
@@ -558,29 +756,30 @@ function Results({ score, total, results, questions, config, pct, onRetake, onHu
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
       <div className="text-center mb-10">
         <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", delay: 0.2 }}
-          className="w-28 h-28 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-          <Trophy size={48} className="text-primary" />
+          className="w-28 h-28 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: "rgba(255,159,76,0.1)" }}>
+          <Trophy size={48} style={{ color: "#FF9F4C" }} />
         </motion.div>
         <motion.h2 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
           className="text-4xl font-serif font-bold text-foreground mb-2">Test Complete!</motion.h2>
+        <p className="text-sm font-bold" style={{ color: "#FF9F4C" }}>Class {config.classNumber} · {config.subject}</p>
 
         <motion.div initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5, type: "spring" }}
           className="flex items-center justify-center gap-6 my-8">
           <div className="text-center">
-            <p className="text-5xl font-mono font-bold text-primary">{pct}%</p>
-            <p className="text-sm text-muted-foreground uppercase tracking-wider mt-1">Score</p>
+            <p className="text-5xl font-mono font-bold" style={{ color: "#FF9F4C" }}>{pct}%</p>
+            <p className="text-sm uppercase tracking-wider mt-1" style={{ color: "#6B6B6B" }}>Score</p>
           </div>
-          <div className="w-px h-16 bg-border" />
+          <div className="w-px h-16" style={{ background: "rgba(0,0,0,0.1)" }} />
           <div className="text-center">
-            <p className="text-5xl font-serif font-bold text-primary">{grade}</p>
-            <p className="text-sm text-muted-foreground uppercase tracking-wider mt-1">Grade</p>
+            <p className="text-5xl font-serif font-bold" style={{ color: "#FF9F4C" }}>{grade}</p>
+            <p className="text-sm uppercase tracking-wider mt-1" style={{ color: "#6B6B6B" }}>Grade</p>
           </div>
         </motion.div>
 
-        <div className="flex justify-center gap-6 mb-8">
+        <div className="flex justify-center gap-4 sm:gap-6 mb-8 flex-wrap">
           <div className="flex items-center gap-2 text-emerald-600"><CheckCircle2 size={18} /> {correct} Correct</div>
           <div className="flex items-center gap-2 text-destructive"><XCircle size={18} /> {wrong} Wrong</div>
-          <div className="text-muted-foreground flex items-center gap-1"><Star size={16} /> {score}/{total * 10} pts</div>
+          <div className="flex items-center gap-1" style={{ color: "#6B6B6B" }}><Star size={16} /> {score}/{total * 10} pts</div>
         </div>
       </div>
 
@@ -590,29 +789,29 @@ function Results({ score, total, results, questions, config, pct, onRetake, onHu
           const q = questions[i];
           return (
             <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
-              className={cn("p-4 rounded-xl border-2", r.correct ? "border-emerald-300 bg-emerald-50/50" : "border-red-300 bg-red-50/50")}>
+              className={cn("p-4 rounded-xl border-2", r.correct ? "border-emerald-500/30 bg-emerald-500/5" : "border-red-500/30 bg-red-500/5")}>
               <div className="flex items-start gap-3">
-                {r.correct ? <CheckCircle2 size={18} className="text-emerald-600 mt-0.5 shrink-0" /> : <XCircle size={18} className="text-destructive mt-0.5 shrink-0" />}
+                {r.correct ? <CheckCircle2 size={18} className="text-emerald-400 mt-0.5 shrink-0" /> : <XCircle size={18} className="text-destructive mt-0.5 shrink-0" />}
                 <div className="flex-1">
                   <p className="font-medium text-foreground text-sm">
                     {q.q || q.s || q.question}
                   </p>
                   {(config.type === "mcq" || config.type === "speed") && (
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-xs mt-1" style={{ color: "#6B6B6B" }}>
                       Your answer: {r.userAnswer !== null ? q.opts[r.userAnswer as number] : "Unanswered"} {r.correct ? "" : `— Correct: ${q.opts[q.correct]}`}
                     </p>
                   )}
                   {config.type === "true-false" && (
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-xs mt-1" style={{ color: "#6B6B6B" }}>
                       Your answer: {r.userAnswer !== null ? String(r.userAnswer) : "Unanswered"} {r.correct ? "" : `— Correct: ${q.c}`}
                     </p>
                   )}
                   {(config.type === "fill-blank" || config.type === "short-answer") && (
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-xs mt-1" style={{ color: "#6B6B6B" }}>
                       Your answer: {String(r.userAnswer || "Unanswered")} — Expected: {q.a}
                     </p>
                   )}
-                  {q.exp && <p className="text-xs text-muted-foreground mt-1 italic">{q.exp}</p>}
+                  {q.exp && <p className="text-xs mt-1 italic" style={{ color: "#6B6B6B" }}>{q.exp}</p>}
                 </div>
               </div>
             </motion.div>
@@ -620,11 +819,13 @@ function Results({ score, total, results, questions, config, pct, onRetake, onHu
         })}
       </div>
 
-      <div className="flex justify-center gap-4 pb-16">
-        <button onClick={onRetake} className="px-6 py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:bg-primary/90 transition-all flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row justify-center gap-4 pb-16">
+        <button onClick={onRetake} className="px-6 py-3 text-white font-bold rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2"
+          style={{ background: "linear-gradient(135deg, #FF9F4C, #E8852E)" }}>
           <RotateCcw size={16} /> Retake Test
         </button>
-        <button onClick={onHub} className="px-6 py-3 border-2 border-input bg-background hover:bg-muted font-bold rounded-xl transition-colors">
+        <button onClick={onHub} className="px-6 py-3 border-2 bg-white/[0.5] hover:bg-white/[0.7] font-bold text-foreground rounded-2xl transition-colors"
+          style={{ borderColor: "rgba(0,0,0,0.08)" }}>
           All Tests
         </button>
       </div>

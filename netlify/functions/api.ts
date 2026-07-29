@@ -1,52 +1,81 @@
-import OpenAI from "openai";
+import https from "node:https";
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const GROQ_HOST = "api.groq.com";
+const GROQ_PATH = "/openai/v1/chat/completions";
+const GROQ_MODEL = "llama-3.3-70b-versatile";
 
-function getClient() {
-  return new OpenAI({
-    apiKey: GROQ_API_KEY,
-    baseURL: "https://api.groq.com/openai/v1",
-    fetch: globalThis.fetch,
+function httpsPost(
+  hostname: string,
+  path: string,
+  headers: Record<string, string>,
+  body: string,
+): Promise<{ status: number; data: any; headers: Record<string, string | string[] | undefined> }> {
+  return new Promise((resolve, reject) => {
+    const req = https.request(
+      { hostname, path, method: "POST", headers: { ...headers, "Content-Length": Buffer.byteLength(body) } },
+      (res) => {
+        const chunks: Buffer[] = [];
+        res.on("data", (chunk: Buffer) => chunks.push(chunk));
+        res.on("end", () => {
+          const raw = Buffer.concat(chunks).toString("utf-8");
+          let data: any;
+          try { data = JSON.parse(raw); } catch { data = { error: raw }; }
+          resolve({ status: res.statusCode ?? 500, data, headers: res.headers });
+        });
+        res.on("error", reject);
+      },
+    );
+    req.on("error", reject);
+    req.setTimeout(120_000, () => req.destroy(new Error("Timeout")));
+    req.write(body);
+    req.end();
   });
 }
 
-async function generateJson<T>(params: {
-  system: string;
-  user: string;
-  maxTokens?: number;
-}): Promise<T> {
+function getRetryAfterMs(headers: Record<string, string | string[] | undefined>, data: any): number {
+  const ra = headers["retry-after"];
+  if (ra) { const s = Number(ra); if (!Number.isNaN(s) && s > 0) return s * 1000; }
+  const msg = data?.error?.message || "";
+  const m = msg.match(/try again in ([\d.]+)s/);
+  if (m) return Math.ceil(Number(m[1]) * 1000);
+  return 30_000;
+}
+
+function sleep(ms: number): Promise<void> { return new Promise((r) => setTimeout(r, ms)); }
+
+type ChatMessage = { role: string; content: string };
+
+async function generateJson<T>(params: { system: string; user: string; maxTokens?: number }): Promise<T> {
   if (!GROQ_API_KEY) throw new Error("AI_NOT_CONFIGURED");
   const { system, user, maxTokens = 4000 } = params;
-  const openai = getClient();
-  const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
-    { role: "system", content: system },
-    { role: "user", content: user },
-  ];
+  const messages: ChatMessage[] = [{ role: "system", content: system }, { role: "user", content: user }];
 
   for (let attempt = 0; attempt < 3; attempt++) {
+    const body = JSON.stringify({ model: GROQ_MODEL, max_tokens: maxTokens, messages, response_format: { type: "json_object" } });
+    const { status, data, headers } = await httpsPost(GROQ_HOST, GROQ_PATH, {
+      "Authorization": `Bearer ${GROQ_API_KEY}`,
+      "Content-Type": "application/json",
+    }, body);
+
+    if (status === 429) {
+      const wait = getRetryAfterMs(headers, data);
+      console.warn(`Rate limited, waiting ${wait}ms`);
+      if (attempt < 2) { await sleep(wait); continue; }
+      break;
+    }
+
+    if (status !== 200) {
+      const errMsg = data?.error?.message || JSON.stringify(data);
+      throw new Error(`Groq API error ${status}: ${errMsg}`);
+    }
+
+    const content: string = data.choices?.[0]?.message?.content ?? "";
     try {
-      const completion = await openai.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
-        max_tokens: maxTokens,
-        messages,
-        response_format: { type: "json_object" },
-      });
-      const content = completion.choices[0]?.message?.content ?? "";
-      try {
-        return JSON.parse(content) as T;
-      } catch {
-        messages.push({ role: "assistant", content });
-        messages.push({
-          role: "user",
-          content: "That was not valid JSON. Reply with ONLY a single valid JSON object, no markdown fences.",
-        });
-      }
-    } catch (err: any) {
-      if (attempt === 2) throw err;
-      messages.push({
-        role: "user",
-        content: "Your previous reply failed. Reply again with ONLY a single valid JSON object.",
-      });
+      return JSON.parse(content) as T;
+    } catch {
+      messages.push({ role: "assistant", content });
+      messages.push({ role: "user", content: "That was not valid JSON. Reply with ONLY a single valid JSON object, no markdown fences." });
     }
   }
   throw new Error("AI generation failed after retries");
@@ -75,10 +104,8 @@ export default async (req: Request): Promise<Response> => {
   const path = url.pathname;
 
   try {
-    // Health
     if (path === "/api/healthz") return json({ status: "ok" });
 
-    // Research
     if (path === "/api/ai-tools/research" && req.method === "POST") {
       const { topic, depth = "standard" } = await req.json();
       if (!topic?.trim()) return json({ error: "Topic is required" }, 400);
@@ -92,7 +119,6 @@ export default async (req: Request): Promise<Response> => {
       return json(result);
     }
 
-    // Essay
     if (path === "/api/ai-tools/essay" && req.method === "POST") {
       const { topic, essayType = "argumentative", wordCount = 500, tone } = await req.json();
       if (!topic?.trim()) return json({ error: "Topic is required" }, 400);
@@ -105,7 +131,6 @@ export default async (req: Request): Promise<Response> => {
       return json(result);
     }
 
-    // Quiz
     if (path === "/api/ai-tools/quiz" && req.method === "POST") {
       const { topic, numQuestions = 5, difficulty = "medium" } = await req.json();
       if (!topic?.trim()) return json({ error: "Topic is required" }, 400);
@@ -118,7 +143,6 @@ export default async (req: Request): Promise<Response> => {
       return json(result);
     }
 
-    // Flashcards
     if (path === "/api/ai-tools/flashcards" && req.method === "POST") {
       const { topic, numCards = 10 } = await req.json();
       if (!topic?.trim()) return json({ error: "Topic is required" }, 400);
@@ -131,7 +155,6 @@ export default async (req: Request): Promise<Response> => {
       return json(result);
     }
 
-    // Study Notes
     if (path === "/api/ai-tools/study-notes" && req.method === "POST") {
       const { topic } = await req.json();
       if (!topic?.trim()) return json({ error: "Topic is required" }, 400);
@@ -144,7 +167,6 @@ export default async (req: Request): Promise<Response> => {
       return json(result);
     }
 
-    // Presentation
     if (path === "/api/ai-tools/presentation" && req.method === "POST") {
       const { topic, numSlides = 8 } = await req.json();
       if (!topic?.trim()) return json({ error: "Topic is required" }, 400);
@@ -157,7 +179,6 @@ export default async (req: Request): Promise<Response> => {
       return json(result);
     }
 
-    // Math Solver
     if (path === "/api/ai-tools/math-solver" && req.method === "POST") {
       const { problem } = await req.json();
       if (!problem?.trim()) return json({ error: "Problem is required" }, 400);
@@ -170,7 +191,6 @@ export default async (req: Request): Promise<Response> => {
       return json(result);
     }
 
-    // Text Playground
     if (path === "/api/ai-tools/text-playground" && req.method === "POST") {
       const { text, mode = "rewrite", targetLanguage } = await req.json();
       if (!text?.trim()) return json({ error: "Text is required" }, 400);
@@ -190,17 +210,13 @@ export default async (req: Request): Promise<Response> => {
       return json(result);
     }
 
-    // ---- Feedback endpoints ----
     const store = globalThis as any;
     if (!store._feedback) store._feedback = [];
 
     if (path === "/api/feedback" && req.method === "POST") {
       const body = await req.json();
       if (!body.message?.trim()) return json({ error: "Message is required" }, 400);
-      const fb = {
-        id: crypto.randomUUID(), ...body,
-        createdAt: new Date().toISOString(),
-      };
+      const fb = { id: crypto.randomUUID(), ...body, createdAt: new Date().toISOString() };
       store._feedback.push(fb);
       return json({ success: true, id: fb.id }, 201);
     }

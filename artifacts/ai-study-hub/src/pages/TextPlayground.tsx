@@ -43,7 +43,6 @@ export default function TextPlayground() {
   }, [result]);
 
   const handleSubmit = () => {
-    if (!text.trim()) return;
     transformText.mutate({ data: { text, mode, targetLanguage: mode === 'translate' ? targetLanguage : undefined } });
   };
 
@@ -66,12 +65,12 @@ export default function TextPlayground() {
       <div className="grid lg:grid-cols-2 gap-6 mt-8">
         
         {/* Editor Side */}
-        <div className="bg-card border border-card-border rounded-2xl overflow-hidden flex flex-col shadow-sm">
-          <div className="p-4 border-b border-border bg-secondary/30 flex flex-wrap gap-2 items-center">
+        <div className="bg-white/[0.5] border border-black/[0.06] rounded-2xl overflow-hidden flex flex-col shadow-sm backdrop-blur-xl" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7), 0 4px 16px rgba(0,0,0,0.04)" }}>
+          <div className="p-4 border-b border-black/[0.06] bg-white/[0.3] flex flex-wrap gap-2 items-center">
             <select
               value={mode}
               onChange={(e) => setMode(e.target.value as Mode)}
-              className="bg-background border border-input text-sm font-medium rounded-lg px-3 py-1.5 outline-none focus:border-primary"
+              className="bg-white/[0.5] border border-black/[0.08] text-sm font-medium text-foreground rounded-lg px-3 py-1.5 outline-none focus:border-primary"
             >
               <option value="summarize">Summarize</option>
               <option value="expand">Expand</option>
@@ -87,7 +86,7 @@ export default function TextPlayground() {
                 value={targetLanguage}
                 onChange={(e) => setTargetLanguage(e.target.value)}
                 placeholder="e.g., Spanish, Japanese..."
-                className="bg-background border border-input text-sm rounded-lg px-3 py-1.5 w-32 outline-none focus:border-primary"
+                className="bg-white/[0.5] border border-black/[0.08] text-sm text-foreground rounded-lg px-3 py-1.5 w-32 outline-none focus:border-primary placeholder:text-muted-foreground"
               />
             )}
 
@@ -96,7 +95,7 @@ export default function TextPlayground() {
             <button
               onClick={() => { setText(""); transformText.reset(); }}
               disabled={!text.trim()}
-              className="text-muted-foreground hover:text-foreground px-2 py-1.5 rounded-lg hover:bg-background transition-colors disabled:opacity-30"
+              className="text-muted-foreground hover:text-foreground px-2 py-1.5 rounded-lg hover:bg-black/[0.06] transition-colors disabled:opacity-30"
               title="Clear text"
             >
               <RotateCcw size={14} />
@@ -106,10 +105,10 @@ export default function TextPlayground() {
               onClick={handleSubmit}
               disabled={!text.trim() || transformText.isPending || (mode === 'translate' && !targetLanguage.trim())}
               className={cn(
-                "bg-primary text-primary-foreground font-bold px-4 py-1.5 rounded-lg text-sm flex items-center gap-2 transition-colors",
+                "lg-button text-white font-bold px-4 py-1.5 rounded-lg text-sm flex items-center gap-2 transition-colors shadow-lg",
                 (!text.trim() || transformText.isPending || (mode === 'translate' && !targetLanguage.trim()))
-                  ? "opacity-50 cursor-not-allowed"
-                  : "hover:bg-primary/90"
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
               )}
             >
               <Wand2 size={14} />
@@ -125,7 +124,7 @@ export default function TextPlayground() {
           />
 
           {/* Input Stats Bar */}
-          <div className="px-4 py-2.5 border-t border-border bg-secondary/20 flex items-center gap-4 text-xs text-muted-foreground">
+          <div className="px-4 py-2.5 border-t border-black/[0.06] bg-white/[0.3] flex items-center gap-4 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <Type size={12} />
               {stats.words} words
@@ -138,24 +137,24 @@ export default function TextPlayground() {
         </div>
 
         {/* Result Side */}
-        <div className="bg-muted/30 border border-border rounded-2xl overflow-hidden flex flex-col relative">
+        <div className="bg-white/[0.5] border border-black/[0.06] rounded-2xl overflow-hidden flex flex-col relative backdrop-blur-xl" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7), 0 4px 16px rgba(0,0,0,0.04)" }}>
           
           {transformText.isPending ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm z-10">
+            <div className="absolute inset-0 flex items-center justify-center bg-white/[0.8] backdrop-blur-sm z-10">
               <LoadingState title="Working magic..." messages={["Analyzing text..."]} />
             </div>
           ) : transformText.isError ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm z-10">
+            <div className="absolute inset-0 flex items-center justify-center bg-white/[0.8] backdrop-blur-sm z-10">
               <ErrorState onRetry={() => handleSubmit()} />
             </div>
           ) : null}
 
-          <div className="p-4 border-b border-border bg-secondary/30 flex justify-between items-center h-[61px]">
+          <div className="p-4 border-b border-black/[0.06] bg-white/[0.3] flex justify-between items-center h-[61px]">
             <span className="text-sm font-bold uppercase tracking-wider text-muted-foreground px-2">Result</span>
             {result && (
               <button 
                 onClick={handleCopy}
-                className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-sm font-medium px-2 py-1 rounded hover:bg-secondary transition-colors"
+                className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-sm font-medium px-2 py-1 rounded hover:bg-black/[0.06] transition-colors"
               >
                 {copied ? <Check size={14} className="text-primary" /> : <Copy size={14} />}
                 {copied ? "Copied" : "Copy"}
@@ -165,12 +164,12 @@ export default function TextPlayground() {
           
           <div className="flex-1 p-6 overflow-y-auto">
             {result ? (
-              <div className="text-lg leading-relaxed text-foreground font-serif whitespace-pre-wrap">
+              <div className="text-base sm:text-lg leading-relaxed text-foreground font-serif whitespace-pre-wrap">
                 {result}
               </div>
             ) : (
-              <div className="h-full flex flex-col items-center justify-center text-muted-foreground/40 py-16">
-                <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
+              <div className="h-full flex flex-col items-center justify-center text-muted-foreground py-16">
+                <div className="w-16 h-16 rounded-2xl bg-white/[0.5] flex items-center justify-center mb-4">
                   <Wand2 size={28} className="opacity-30" />
                 </div>
                 <p className="font-medium text-lg mb-1">Results will appear here</p>
@@ -181,7 +180,7 @@ export default function TextPlayground() {
 
           {/* Result Stats Bar */}
           {resultStats && (
-            <div className="px-4 py-2.5 border-t border-border bg-secondary/20 flex items-center gap-4 text-xs text-muted-foreground">
+            <div className="px-4 py-2.5 border-t border-black/[0.06] bg-white/[0.3] flex items-center gap-4 text-xs text-muted-foreground">
               <span>{resultStats.words} words</span>
               <span>{resultStats.chars} chars</span>
               <div className="flex-1" />

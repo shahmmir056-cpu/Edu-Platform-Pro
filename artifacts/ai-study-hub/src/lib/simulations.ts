@@ -35,13 +35,9 @@ export const SIMULATIONS: Simulation[] = [
   { id: "molarity", name: "Molarity", slug: "molarity", subject: "Chemistry", description: "Explore concentration by dissolving solutes in water.", type: "phet" },
   { id: "reactants-products-and-leftovers", name: "Reactants, Products, and Leftovers", slug: "reactants-products-and-leftovers", subject: "Chemistry", description: "Explore limiting reagents and chemical reactions with sandwich-making.", type: "phet" },
   { id: "acid-base-solutions", name: "Acid-Base Solutions", slug: "acid-base-solutions", subject: "Chemistry", description: "Explore pH, indicators, and the strength of acids and bases.", type: "phet" },
-  { id: "solutions", name: "Solutions", slug: "solutions", subject: "Chemistry", description: "Explore how solutions form and factors affecting solubility.", type: "phet" },
   { id: "density", name: "Density", slug: "density", subject: "Chemistry", description: "Explore how density relates to mass and volume of objects and fluids.", type: "phet" },
   { id: "beers-law-lab", name: "Beer's Law Lab", slug: "beers-law-lab", subject: "Chemistry", description: "Explore the relationship between light absorption and concentration.", type: "phet" },
   { id: "molecule-polarity", name: "Molecule Polarity", slug: "molecule-polarity", subject: "Chemistry", description: "Explore bond and molecular polarity with electrostatic potential maps.", type: "phet" },
-  { id: "ionic-bonds", name: "Ionic Bonds", slug: "ionic-bonds", subject: "Chemistry", description: "Explore how ionic bonds form between positive and negative ions.", type: "phet" },
-  { id: "covalent-bonds", name: "Covalent Bonds", slug: "covalent-bonds", subject: "Chemistry", description: "Explore how atoms share electrons to form covalent bonds.", type: "phet" },
-  { id: "electron-domain", name: "Electron Domain", slug: "electron-domain", subject: "Chemistry", description: "Explore electron domain geometry and VSEPR molecular shapes.", type: "phet" },
 
   // ====== PHYSICS ======
   { id: "forces-and-motion-basics", name: "Forces and Motion: Basics", slug: "forces-and-motion-basics", subject: "Physics", description: "Apply forces to objects and observe the resulting motion with friction and gravity.", type: "phet" },
@@ -60,39 +56,15 @@ export const SIMULATIONS: Simulation[] = [
   { id: "color-vision", name: "Color Vision", slug: "color-vision", subject: "Physics", description: "Explore how the eye perceives color through red, green, and blue cones.", type: "phet" },
   { id: "coulombs-law", name: "Coulomb's Law", slug: "coulombs-law", subject: "Physics", description: "Explore electrostatic forces between charged particles.", type: "phet" },
   { id: "my-solar-system", name: "My Solar System", slug: "my-solar-system", subject: "Physics", description: "Build your own solar system and watch gravitational interactions.", type: "phet" },
-  { id: "coulomb-and-charge", name: "Coulomb and Charge", slug: "coulomb-and-charge", subject: "Physics", description: "Explore how charged particles interact through electrostatic force.", type: "phet" },
   { id: "ohms-law", name: "Ohm's Law", slug: "ohms-law", subject: "Physics", description: "Explore the relationships between voltage, current, and resistance.", type: "phet" },
   { id: "faradays-law", name: "Faraday's Law", slug: "faradays-law", subject: "Physics", description: "Explore how a changing magnetic field induces an electric current.", type: "phet" },
-  { id: "radioactive-date-finding", name: "Radioactive Date Finding", slug: "radioactive-date-finding", subject: "Physics", description: "Use radioactive decay to date objects in this virtual lab.", type: "phet" },
-  { id: "nuclear-physics", name: "Nuclear Physics", slug: "nuclear-physics", subject: "Physics", description: "Explore nuclear reactions, fission, fusion, and radioactive decay.", type: "phet" },
   { id: "blackbody-spectrum", name: "Blackbody Spectrum", slug: "blackbody-spectrum", subject: "Physics", description: "Explore how the color of light emitted depends on an object's temperature.", type: "phet" },
   { id: "geometric-optics", name: "Geometric Optics", slug: "geometric-optics", subject: "Physics", description: "Explore reflection and refraction with mirrors and lenses.", type: "phet" },
-  { id: "lasers", name: "Lasers", slug: "lasers", subject: "Physics", description: "Explore how lasers work with stimulated emission of radiation.", type: "phet" },
-  { id: "sun-and-spectra", name: "Sun and Spectra", slug: "sun-and-spectra", subject: "Physics", description: "Explore the sun's spectrum and how elements absorb light.", type: "phet" },
 
   // ====== BIOLOGY ======
   { id: "natural-selection", name: "Natural Selection", slug: "natural-selection", subject: "Biology", description: "See how traits are selected over generations in a rabbit population.", type: "phet" },
   { id: "gene-expression-essentials", name: "Gene Expression Essentials", slug: "gene-expression-essentials", subject: "Biology", description: "Explore how genes are expressed through transcription and translation.", type: "phet" },
-  { id: "bacterial-growth", name: "Bacterial Growth", slug: "bacterial-growth", subject: "Biology", description: "Explore exponential bacterial growth and environmental factors.", type: "phet" },
-  { id: "natural-selection-lab", name: "Natural Selection", slug: "natural-selection-lab", subject: "Biology", description: "Observe how environmental pressures shape populations over time.", type: "phet" },
-  { id: "evolution-natural-and-artificial", name: "Evolution: Natural and Artificial Selection", slug: "evolution-natural-and-artificial", subject: "Biology", description: "Explore how natural and artificial selection drive evolution.", type: "phet" },
-  { id: "dna-replication", name: "DNA Replication", slug: "dna-replication", subject: "Biology", description: "Explore how DNA replicates before cell division.", type: "phet" },
   { id: "neuron", name: "Neuron", slug: "neuron", subject: "Biology", description: "Explore how neurons fire action potentials and transmit signals.", type: "phet" },
-  { id: "membrane-channels", name: "Membrane Channels", slug: "membrane-channels", subject: "Biology", description: "Explore how ions move through membrane channels in cells.", type: "phet" },
-
-  // ====== BIOTECHNOLOGY (Custom) ======
-  { id: "gel-electrophoresis", name: "Gel Electrophoresis", slug: "gel-electrophoresis", subject: "Biotechnology", description: "Separate DNA fragments by size using an electric field through an agarose gel.", type: "custom", difficulty: "Intermediate", estimatedMinutes: 10, tags: ["lab-simulation", "dna", "molecular-biology"] },
-  { id: "light-microscope", name: "Using a Light Microscope", slug: "light-microscope", subject: "Biology", description: "Learn to focus and use a compound light microscope to examine specimens.", type: "custom", difficulty: "Beginner", estimatedMinutes: 8, tags: ["lab-simulation", "microscopy"] },
-  { id: "osmosis-sim", name: "Osmosis & Diffusion", slug: "osmosis-sim", subject: "Biology", description: "Explore how water moves across semi-permeable membranes in different solutions.", type: "custom", difficulty: "Beginner", estimatedMinutes: 7, tags: ["lab-simulation", "cell-biology"] },
-  { id: "cell-structure", name: "Cell Structure Explorer", slug: "cell-structure", subject: "Biology", description: "Explore animal and plant cell organelles and their functions interactively.", type: "custom", difficulty: "Beginner", estimatedMinutes: 5, tags: ["interactive", "cell-biology"] },
-  { id: "mitosis-sim", name: "Mitosis & Cytokinesis", slug: "mitosis-sim", subject: "Biology", description: "Walk through the stages of mitosis and observe cell division in real time.", type: "custom", difficulty: "Intermediate", estimatedMinutes: 8, tags: ["lab-simulation", "cell-division"] },
-  { id: "photosynthesis-sim", name: "Photosynthesis & Cellular Respiration", slug: "photosynthesis-sim", subject: "Biology", description: "Explore how plants convert light energy into chemical energy and how cells release it.", type: "custom", difficulty: "Intermediate", estimatedMinutes: 10, tags: ["lab-simulation", "bioenergetics"] },
-  { id: "hardy-weinberg", name: "Hardy-Weinberg Equilibrium", slug: "hardy-weinberg", subject: "Biology", description: "Model allele frequencies in populations and test for evolution.", type: "custom", difficulty: "Advanced", estimatedMinutes: 8, tags: ["simulation", "population-genetics"] },
-  { id: "epidemic-sim", name: "Epidemic Simulation", slug: "epidemic-sim", subject: "Biology", description: "Model how infectious diseases spread through a population with adjustable parameters.", type: "custom", difficulty: "Intermediate", estimatedMinutes: 7, tags: ["simulation", "epidemiology"] },
-  { id: "spectrophotometer", name: "Spectrophotometer Lab", slug: "spectrophotometer", subject: "Biotechnology", description: "Measure light absorbance of solutions to determine concentration using Beer's law.", type: "custom", difficulty: "Intermediate", estimatedMinutes: 8, tags: ["lab-simulation", "analytical-chemistry"] },
-  { id: "plant-dissection", name: "Plant Dissection Lab", slug: "plant-dissection", subject: "Biology", description: "Dissect a flower to identify and label its reproductive structures.", type: "custom", difficulty: "Beginner", estimatedMinutes: 6, tags: ["lab-simulation", "botany"] },
-  { id: "mendelian-genetics", name: "Mendelian Genetics", slug: "mendelian-genetics", subject: "Biology", description: "Cross pea plants and explore dominant/recessive traits, Punnett squares, and heredity.", type: "custom", difficulty: "Beginner", estimatedMinutes: 7, tags: ["simulation", "genetics"] },
-  { id: "enzyme-kinetics", name: "Enzyme Kinetics", slug: "enzyme-kinetics", subject: "Biology", description: "Explore how temperature and pH affect enzyme activity with substrate concentration curves.", type: "custom", difficulty: "Advanced", estimatedMinutes: 9, tags: ["lab-simulation", "biochemistry"] },
 
   // ====== MATH ======
   { id: "graphing-lines", name: "Graphing Lines", slug: "graphing-lines", subject: "Math", description: "Explore slope-intercept form and graph linear equations interactively.", type: "phet" },
@@ -103,8 +75,5 @@ export const SIMULATIONS: Simulation[] = [
   { id: "arithmetic", name: "Arithmetic", slug: "arithmetic", subject: "Math", description: "Practice addition, subtraction, multiplication, and division interactively.", type: "phet" },
   { id: "trig-tour", name: "Trig Tour", slug: "trig-tour", subject: "Math", description: "Explore sine, cosine, and tangent with right triangles and the unit circle.", type: "phet" },
   { id: "area-builder", name: "Area Builder", slug: "area-builder", subject: "Math", description: "Build shapes and calculate area using unit squares.", type: "phet" },
-  { id: "radians", name: "Radians", slug: "radians", subject: "Math", description: "Explore the relationship between degrees and radians on a circle.", type: "phet" },
   { id: "plinko-probability", name: "Plinko Probability", slug: "plinko-probability", subject: "Math", description: "Drop balls through a peg board and explore probability distributions.", type: "phet" },
-  { id: "factor-building", name: "Factor Building", slug: "factor-building", subject: "Math", description: "Build rectangles with factor pairs and explore number theory.", type: "phet" },
-  { id: "unit-circle", name: "Unit Circle", slug: "unit-circle", subject: "Math", description: "Explore the unit circle and trigonometric functions visually.", type: "phet" },
 ];

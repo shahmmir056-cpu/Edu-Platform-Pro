@@ -22,6 +22,11 @@ import TextPlayground from '@/pages/TextPlayground';
 import MathSolver from '@/pages/MathSolver';
 import VirtualLab from '@/pages/VirtualLab';
 import Logic from '@/pages/Logic';
+import StudyGames from '@/pages/StudyGames';
+import TestConductor from '@/pages/TestConductor';
+import SimulationsPage from '@/features/simulations/SimulationsPage';
+import DebateMentorPage from '@/features/debate-mentor/DebateMentorPage';
+import SimulationsV2Page from '@/features/simulations/SimulationsV2Page';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
 
@@ -52,6 +57,11 @@ function Router() {
             <Route path="/math-solver" component={MathSolver} />
             <Route path="/virtual-lab" component={VirtualLab} />
             <Route path="/logic" component={Logic} />
+            <Route path="/study-games" component={StudyGames} />
+            <Route path="/test-conductor" component={TestConductor} />
+            <Route path="/simulations" component={SimulationsPage} />
+            <Route path="/simulations-v2" component={SimulationsV2Page} />
+            <Route path="/debate-mentor" component={DebateMentorPage} />
             <Route path="/about" component={About} />
             <Route path="/contact" component={Contact} />
             <Route component={NotFound} />

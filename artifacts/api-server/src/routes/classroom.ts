@@ -10,7 +10,8 @@ router.get("/classrooms", (_req, res) => {
 router.post("/classrooms", (req, res) => {
   const { title, subject, teacherId, teacherName, scheduledAt } = req.body;
   if (!title || !subject || !teacherId || !teacherName) {
-    return res.status(400).json({ error: "title, subject, teacherId, teacherName are required" });
+    res.status(400).json({ error: "title, subject, teacherId, teacherName are required" });
+    return;
   }
   const room = createRoom({
     title,
@@ -31,7 +32,7 @@ router.post("/classrooms", (req, res) => {
 
 router.get("/classrooms/:id", (req, res) => {
   const room = getRoom(req.params.id);
-  if (!room) return res.status(404).json({ error: "Room not found" });
+  if (!room) { res.status(404).json({ error: "Room not found" }); return; }
   res.json({
     id: room.id,
     code: room.code,
@@ -46,8 +47,8 @@ router.get("/classrooms/:id", (req, res) => {
 
 router.get("/classrooms/code/:code", (req, res) => {
   const room = getRoomByCode(req.params.code.toUpperCase());
-  if (!room) return res.status(404).json({ error: "Room not found" });
-  if (!room.isActive) return res.status(410).json({ error: "Class has ended" });
+  if (!room) { res.status(404).json({ error: "Room not found" }); return; }
+  if (!room.isActive) { res.status(410).json({ error: "Class has ended" }); return; }
   res.json({
     id: room.id,
     code: room.code,

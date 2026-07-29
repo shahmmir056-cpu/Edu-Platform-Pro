@@ -97,11 +97,17 @@ export default function Feedback() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
             onSubmit={handleSubmit}
-            className="bg-card border border-card-border rounded-2xl p-8 md:p-10"
+            className="rounded-2xl p-8 md:p-10 backdrop-blur-xl"
+            style={{
+              background: "rgba(255,255,255,0.5)",
+              backdropFilter: "blur(20px) saturate(180%)",
+               border: "2px solid #2D2D2D",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7), 0 4px 16px rgba(0,0,0,0.04)",
+            }}
           >
             {/* Star rating */}
             <div className="mb-8">
-              <label className="block text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">
+              <label className="block text-sm font-bold uppercase tracking-wider text-[#6B6B6B] mb-3">
                 How would you rate your experience?
               </label>
               <div className="flex items-center gap-1">
@@ -120,13 +126,13 @@ export default function Feedback() {
                         "transition-colors duration-150",
                         star <= currentRating
                           ? "text-accent fill-accent"
-                          : "text-muted-foreground/30"
+                          : "text-[#9A9A9A]"
                       )}
                     />
                   </button>
                 ))}
                 {currentRating > 0 && (
-                  <span className="ml-3 text-sm font-medium text-muted-foreground">
+                  <span className="ml-3 text-sm font-medium text-[#6B6B6B]">
                     {currentRating === 1 && "Poor"}
                     {currentRating === 2 && "Fair"}
                     {currentRating === 3 && "Good"}
@@ -140,25 +146,35 @@ export default function Feedback() {
             {/* Name + Email */}
             <div className="grid sm:grid-cols-2 gap-5 mb-5">
               <div>
-                <label className="block text-sm font-bold uppercase tracking-wider text-muted-foreground mb-2">
+                <label className="block text-sm font-bold uppercase tracking-wider text-[#6B6B6B] mb-2">
                   Name
                 </label>
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-background border border-input rounded-xl p-3.5 outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
+                  className="w-full rounded-xl p-3.5 outline-none focus:ring-2 focus:ring-[#FF9F4C]/50 focus:border-transparent transition-all"
+                  style={{
+                    background: "rgba(255,255,255,0.5)",
+                    border: "1px solid rgba(0,0,0,0.08)",
+                    color: "#FF9F4C",
+                  }}
                   placeholder="Your name"
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold uppercase tracking-wider text-muted-foreground mb-2">
+                <label className="block text-sm font-bold uppercase tracking-wider text-[#6B6B6B] mb-2">
                   Email
                 </label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-background border border-input rounded-xl p-3.5 outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
+                  className="w-full rounded-xl p-3.5 outline-none focus:ring-2 focus:ring-[#FF9F4C]/50 focus:border-transparent transition-all"
+                  style={{
+                    background: "rgba(255,255,255,0.5)",
+                    border: "1px solid rgba(0,0,0,0.08)",
+                    color: "#FF9F4C",
+                  }}
                   placeholder="you@example.com"
                 />
               </div>
@@ -166,7 +182,7 @@ export default function Feedback() {
 
             {/* Category */}
             <div className="mb-5">
-              <label className="block text-sm font-bold uppercase tracking-wider text-muted-foreground mb-2">
+              <label className="block text-sm font-bold uppercase tracking-wider text-[#6B6B6B] mb-2">
                 Category
               </label>
               <div className="flex flex-wrap gap-2">
@@ -178,8 +194,8 @@ export default function Feedback() {
                     className={cn(
                       "px-4 py-2 rounded-xl text-sm font-medium border transition-all",
                       category === cat.value
-                        ? "border-primary bg-primary/5 text-primary"
-                        : "border-input bg-background text-muted-foreground hover:border-primary/50"
+                        ? "border-[#FF9F4C] bg-[#FF9F4C]/10 text-[#E8852E]"
+                        : "border-[rgba(0,0,0,0.08)] bg-white/50 text-[#6B6B6B] hover:border-[#FF9F4C]/50"
                     )}
                   >
                     {cat.label}
@@ -190,13 +206,18 @@ export default function Feedback() {
 
             {/* Message */}
             <div className="mb-6">
-              <label className="block text-sm font-bold uppercase tracking-wider text-muted-foreground mb-2">
+              <label className="block text-sm font-bold uppercase tracking-wider text-[#6B6B6B] mb-2">
                 Your Feedback
               </label>
               <textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                className="w-full bg-background border border-input rounded-xl p-4 min-h-[140px] outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all resize-none"
+                className="w-full rounded-xl p-4 min-h-[140px] outline-none focus:ring-2 focus:ring-[#FF9F4C]/50 focus:border-transparent transition-all resize-none"
+                style={{
+                  background: "rgba(255,255,255,0.5)",
+                  border: "1px solid rgba(0,0,0,0.08)",
+                  color: "#FF9F4C",
+                }}
                 placeholder="Tell us what you think, what's broken, or what you'd like to see..."
               />
             </div>
@@ -213,7 +234,7 @@ export default function Feedback() {
             <button
               type="submit"
               disabled={sending}
-              className="inline-flex items-center gap-2 px-7 py-3.5 bg-primary text-primary-foreground font-bold rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-all shadow-md"
+              className="inline-flex items-center gap-2 px-7 py-3.5 bg-gradient-to-r from-[#FF9F4C] to-[#E8852E] text-white font-bold rounded-xl hover:from-[#E8852E] hover:to-[#d97724] disabled:opacity-50 transition-all shadow-lg shadow-[#FF9F4C]/25"
             >
               {sending ? (
                 <>
@@ -231,20 +252,26 @@ export default function Feedback() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-card border border-card-border rounded-2xl p-10 text-center"
+            className="rounded-2xl p-6 sm:p-10 text-center backdrop-blur-xl"
+            style={{
+              background: "rgba(255,255,255,0.5)",
+              backdropFilter: "blur(20px) saturate(180%)",
+               border: "2px solid #2D2D2D",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7), 0 4px 16px rgba(0,0,0,0.04)",
+            }}
           >
             <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-5">
               <CheckCircle2 size={32} />
             </div>
-            <h3 className="font-serif text-2xl font-medium text-foreground mb-2">
+            <h3 className="font-serif text-xl sm:text-2xl font-medium text-[#FF9F4C] mb-2">
               Thank you, {name.split(" ")[0] || "there"}!
             </h3>
-            <p className="text-muted-foreground max-w-md mx-auto mb-8">
+            <p className="text-[#6B6B6B] max-w-md mx-auto mb-8">
               Your feedback has been saved. It helps us make Neural Sync better for everyone.
             </p>
             <button
               onClick={reset}
-              className="inline-flex items-center gap-2 px-6 py-3 border-2 border-input bg-background hover:bg-muted text-foreground font-bold rounded-xl transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 border-2 border-[rgba(0,0,0,0.08)] bg-white/50 hover:bg-white/70 text-[#FF9F4C] font-bold rounded-xl transition-colors backdrop-blur-xl"
             >
               Submit Another
             </button>

@@ -27,24 +27,24 @@ export default function NotFound() {
           404
         </motion.p>
 
-        <motion.h1 variants={fadeUp} className="text-2xl md:text-3xl font-serif text-foreground mb-4">
+        <motion.h1 variants={fadeUp} className="text-2xl md:text-3xl font-serif text-[#FF9F4C] mb-4">
           Page not found
         </motion.h1>
 
-        <motion.p variants={fadeUp} className="text-muted-foreground text-lg mb-10 leading-relaxed">
+        <motion.p variants={fadeUp} className="text-[#6B6B6B] text-base sm:text-lg mb-10 leading-relaxed">
           The page you're looking for doesn't exist or has been moved. Let's get you back on track.
         </motion.p>
 
         <motion.div variants={fadeUp} className="flex flex-wrap items-center justify-center gap-4">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-7 py-3.5 bg-primary text-primary-foreground rounded-xl font-bold hover:bg-primary/90 transition-all shadow-md"
+            className="inline-flex items-center gap-2 px-7 py-3.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-bold hover:from-blue-600 hover:to-blue-700 transition-all shadow-md"
           >
             <Home size={18} /> Back to Home
           </Link>
           <Link
             href="/math-solver"
-            className="inline-flex items-center gap-2 px-7 py-3.5 border-2 border-input bg-background hover:bg-muted text-foreground font-bold rounded-xl transition-colors"
+            className="inline-flex items-center gap-2 px-7 py-3.5 border-2 border-[rgba(0,0,0,0.08)] bg-white/50 hover:bg-white/70 text-[#FF9F4C] font-bold rounded-xl transition-colors backdrop-blur-xl"
           >
             Try Math Solver <ArrowRight size={16} />
           </Link>

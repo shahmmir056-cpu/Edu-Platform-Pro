@@ -17,7 +17,6 @@ export default function Presentation() {
 
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (!topic.trim()) return;
     generatePres.mutate({ data: { topic, numSlides } });
     setCurrentSlide(0);
   };
@@ -43,7 +42,7 @@ export default function Presentation() {
       />
 
       {!generatePres.isPending && !presentation && !generatePres.isError && (
-        <form onSubmit={handleSubmit} className="animate-fade-in-up glass-card rounded-2xl p-8 max-w-xl mx-auto mt-12 border-t-4 border-t-primary">
+        <form onSubmit={handleSubmit} className="animate-fade-in-up lg-card rounded-2xl p-8 max-w-xl mx-auto mt-12 border-t-4 border-t-primary backdrop-blur-xl" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7), 0 4px 16px rgba(0,0,0,0.04)" }}>
           <div className="space-y-6">
             <div>
               <label htmlFor="topic" className="block text-sm font-bold uppercase tracking-wider text-muted-foreground mb-2">
@@ -55,7 +54,7 @@ export default function Presentation() {
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 placeholder="e.g., The Future of Renewable Energy..."
-                className="w-full bg-background border border-input rounded-xl p-4 focus:ring-2 focus:ring-ring focus:border-transparent outline-none transition-all text-lg"
+                className="w-full bg-white/[0.5] border border-black/[0.08] rounded-xl p-4 focus:ring-2 focus:ring-blue-500/50 focus:border-transparent outline-none transition-all text-lg text-foreground placeholder:text-muted-foreground"
                 required
               />
             </div>
@@ -81,7 +80,7 @@ export default function Presentation() {
             <button
               type="submit"
               disabled={!topic.trim()}
-              className="w-full py-4 bg-primary text-primary-foreground font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-primary/90 disabled:opacity-50 transition-all shadow-md mt-4"
+              className="w-full py-4 lg-button text-white font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 transition-all shadow-lg mt-4"
             >
               <LayoutTemplate size={20} />
               Generate Deck
@@ -105,11 +104,27 @@ export default function Presentation() {
         <div className="flex-1 flex flex-col animate-fade-in-up pb-20">
           
           <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-2xl font-serif font-bold text-foreground">{presentation.title}</h2>
+            <h2 className="text-xl sm:text-2xl font-serif font-bold text-foreground">{presentation.title}</h2>
             <div className="flex items-center gap-2">
               <button onClick={() => {generatePres.reset(); setTopic("");}} className="text-sm font-bold text-muted-foreground hover:text-foreground">New</button>
               <span className="text-muted-foreground mx-2">|</span>
-              <button className="text-sm font-bold text-primary flex items-center gap-1"><Download size={14}/> Export</button>
+              <button 
+                onClick={() => {
+                  if (!presentation) return;
+                  let md = `# ${presentation.title}\n\n`;
+                  presentation.slides.forEach((s, i) => {
+                    md += `## Slide ${i + 1}: ${s.title}\n\n`;
+                    if (i !== 0) s.bullets.forEach((b: string) => { md += `- ${b}\n`; });
+                    md += `\n**Speaker Notes:** ${s.speakerNotes}\n\n---\n\n`;
+                  });
+                  const blob = new Blob([md], { type: "text/markdown" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url; a.download = `${presentation.title.toLowerCase().replace(/\s+/g, "-")}.md`;
+                  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                }}
+                className="text-sm font-bold text-primary flex items-center gap-1 hover:text-primary/80"><Download size={14}/> Export</button>
             </div>
           </div>
 
@@ -117,11 +132,11 @@ export default function Presentation() {
             
             {/* Visual Slide Area */}
             <div className="flex-1 flex flex-col relative group">
-              <div className="flex-1 bg-white border border-border shadow-lg rounded-xl overflow-hidden flex flex-col p-10 md:p-16 aspect-video">
+              <div className="flex-1 bg-[#FFFAF5] border border-black/[0.08] shadow-lg rounded-xl overflow-hidden flex flex-col p-10 md:p-16 aspect-video">
                 <div className="mb-auto">
-                  <h3 className={cn(
-                    "font-serif font-bold text-slate-900 leading-tight mb-8",
-                    currentSlide === 0 ? "text-5xl md:text-6xl text-center mt-12" : "text-4xl pb-6 border-b-2 border-primary/10"
+                  <h3                   className={cn(
+                    "font-serif font-bold text-foreground leading-tight mb-8",
+                    currentSlide === 0 ? "text-5xl md:text-6xl text-center mt-12" : "text-4xl pb-6 border-b-2 border-primary/20"
                   )}>
                     {presentation.slides[currentSlide].title}
                   </h3>
@@ -129,7 +144,7 @@ export default function Presentation() {
                   {currentSlide !== 0 && (
                     <ul className="space-y-6">
                       {presentation.slides[currentSlide].bullets.map((bullet, i) => (
-                        <li key={i} className="flex gap-4 text-xl text-slate-700 leading-relaxed">
+                        <li key={i} className="flex gap-4 text-xl text-foreground/70 leading-relaxed">
                           <span className="text-primary font-bold mt-1">•</span>
                           {bullet}
                         </li>
@@ -138,7 +153,7 @@ export default function Presentation() {
                   )}
                 </div>
                 
-                <div className="mt-auto text-sm text-slate-400 font-mono flex justify-between">
+                <div className="mt-auto text-sm text-muted-foreground font-mono flex justify-between">
                   <span>{presentation.title}</span>
                   <span>{currentSlide + 1}</span>
                 </div>
@@ -147,26 +162,26 @@ export default function Presentation() {
               {/* Navigation Overlay */}
               <button 
                 onClick={prevSlide} disabled={currentSlide === 0}
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/10 backdrop-blur text-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all disabled:hidden hover:bg-black/20 hover:text-black"
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/70 backdrop-blur text-foreground/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all disabled:hidden hover:bg-white hover:text-foreground"
               >
                 <ChevronLeft size={24} />
               </button>
               <button 
                 onClick={nextSlide} disabled={currentSlide === presentation.slides.length - 1}
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/10 backdrop-blur text-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all disabled:hidden hover:bg-black/20 hover:text-black"
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/70 backdrop-blur text-foreground/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all disabled:hidden hover:bg-white hover:text-foreground"
               >
                 <ChevronRight size={24} />
               </button>
             </div>
 
             {/* Speaker Notes Area */}
-            <div className="w-full lg:w-96 shrink-0 flex flex-col bg-card border border-card-border rounded-xl shadow-sm overflow-hidden h-[400px] lg:h-auto">
-              <div className="p-4 bg-secondary/50 border-b border-border flex items-center justify-between">
+            <div className="w-full lg:w-96 shrink-0 flex flex-col bg-white/[0.5] border border-black/[0.08] rounded-xl shadow-sm overflow-hidden h-[400px] lg:h-auto backdrop-blur-xl" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7), 0 4px 16px rgba(0,0,0,0.04)" }}>
+              <div className="p-4 bg-white/[0.3] border-b border-black/[0.06] flex items-center justify-between">
                 <span className="text-sm font-bold uppercase tracking-wider text-foreground">Speaker Notes</span>
-                <span className="text-xs font-mono text-muted-foreground px-2 py-1 bg-background rounded">Slide {currentSlide + 1}</span>
+                <span className="text-xs font-mono text-muted-foreground px-2 py-1 bg-white/[0.5] rounded">Slide {currentSlide + 1}</span>
               </div>
               <div className="p-6 overflow-y-auto flex-1">
-                <p className="text-foreground/80 leading-relaxed">
+                <p className="text-foreground/70 leading-relaxed">
                   {presentation.slides[currentSlide].speakerNotes}
                 </p>
               </div>
@@ -183,18 +198,18 @@ export default function Presentation() {
                 className={cn(
                   "shrink-0 w-40 aspect-video rounded-lg border-2 p-3 text-left overflow-hidden snap-start transition-all",
                   idx === currentSlide 
-                    ? "border-primary ring-4 ring-primary/20 bg-white" 
-                    : "border-input bg-card hover:border-primary/30 opacity-60 hover:opacity-100"
+                    ? "border-primary ring-4 ring-primary/20 bg-white/[0.5]" 
+                    : "border-black/[0.08] bg-white/[0.3] hover:border-primary/30 opacity-60 hover:opacity-100"
                 )}
               >
-                <div className="text-xs font-serif font-bold text-slate-900 truncate mb-1">
+                <div className="text-xs font-serif font-bold text-foreground truncate mb-1">
                   {slide.title}
                 </div>
                 {idx !== 0 && (
-                  <div className="w-1/2 h-1 bg-slate-200 rounded mb-1" />
+                  <div className="w-1/2 h-1 bg-black/[0.1] rounded mb-1" />
                 )}
                 {idx !== 0 && (
-                  <div className="w-3/4 h-1 bg-slate-200 rounded" />
+                  <div className="w-3/4 h-1 bg-black/[0.1] rounded" />
                 )}
               </button>
             ))}

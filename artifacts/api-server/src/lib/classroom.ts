@@ -227,7 +227,8 @@ export function leaveRoom(socketId: string): { room: Classroom; participant: Par
   const participant = room.participants.get(socketId);
   if (participant) {
     participant.leftAt = new Date();
-    room.attendance.find((a) => a.participantId === participant.id && !a.leftAt).leftAt = participant.leftAt;
+    const att = room.attendance.find((a) => a.participantId === participant.id && !a.leftAt);
+    if (att) att.leftAt = participant.leftAt;
     room.participants.delete(socketId);
   }
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Gamepad2,
@@ -10,18 +10,13 @@ import {
   ArrowRight,
   Clock,
   Target,
-  Sparkles,
   Star,
   Hash,
   BookOpen,
   Lightbulb,
   Lock,
-  Eye,
   Heart,
   Flame,
-  Crown,
-  Medal,
-  Volume2,
   CheckCircle2,
 } from "lucide-react";
 import { ToolHeader } from "@/components/ui/ToolHeader";
@@ -150,11 +145,11 @@ function GameHub({ onSelect }: { onSelect: (g: Game) => void }) {
   return (
     <motion.div initial="hidden" animate="show" exit={{ opacity: 0 }} variants={stagger}>
       <ToolHeader title="Study Games" description="Learn while you play — brain-training games built for students." icon={Gamepad2} />
-      <motion.div variants={stagger} className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mt-8">
+      <motion.div variants={stagger} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-8">
         {games.map((g) => (
           <motion.button key={g.id} variants={fadeUp} whileHover={{ y: -4, scale: 1.01 }} whileTap={{ scale: 0.98 }}
             onClick={() => onSelect(g.id)}
-            className={cn("group text-left bg-card border-2 border-card-border rounded-2xl p-7 transition-all duration-300 hover:shadow-xl", g.borderHover)}>
+            className={cn("group text-left bg-card border-2 border-card-border rounded-2xl p-4 sm:p-7 transition-all duration-300 hover:shadow-xl", g.borderHover)}>
             <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center mb-5 bg-gradient-to-br", g.gradient)}>
               <g.icon size={26} className="text-foreground/80" />
             </div>
@@ -398,17 +393,25 @@ function WordScrambleGame({ onBack }: { onBack: () => void }) {
   const [feedback, setFeedback] = useState<"correct" | "wrong" | null>(null);
   const [gameOver, setGameOver] = useState(false);
   const [showDef, setShowDef] = useState(false);
+  const scrambledWordRef = useRef<string>("");
 
   const wordSet = VOCAB_SETS[selectedSet];
 
-  const scramble = (word: string): string => {
+  const scrambleWord = useCallback((word: string): string => {
     const arr = word.split("");
     for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
-    return arr.join("") === word ? scramble(word) : arr.join("");
-  };
+    const result = arr.join("");
+    return result === word ? scrambleWord(word) : result;
+  }, []);
+
+  const scrambledWord = useMemo(() => {
+    if (!words[currentIdx]) return "";
+    return scrambleWord(words[currentIdx]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentIdx, words, started]);
 
   const startGame = () => {
     const shuffled = [...wordSet.words].sort(() => Math.random() - 0.5).map((w) => w.term);
@@ -494,7 +497,7 @@ function WordScrambleGame({ onBack }: { onBack: () => void }) {
           <div className="bg-card border-2 border-card-border rounded-2xl p-6 sm:p-10 shadow-lg">
             <p className="text-sm text-muted-foreground mb-4 uppercase tracking-wider font-bold">Unscramble this word</p>
             <div className="flex justify-center gap-1.5 mb-6 flex-wrap">
-              {scramble(words[currentIdx]).split("").map((letter: string, i: number) => (
+              {scrambledWord.split("").map((letter: string, i: number) => (
                 <motion.span key={i} initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.08 }}
                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary/10 text-primary font-mono font-bold text-lg sm:text-xl flex items-center justify-center">
@@ -552,13 +555,14 @@ function SpeedMathGame({ onBack }: { onBack: () => void }) {
   const [wrong, setWrong] = useState(0);
   const [feedback, setFeedback] = useState<"correct" | "wrong" | null>(null);
   const [gameOver, setGameOver] = useState(false);
+  const bestStreakRef = useRef(0);
 
   const topic = SPEED_MATH_TOPICS[selectedTopic];
 
   const nextQuestion = useCallback(() => { setCurrent(topic.gen()); setInput(""); setFeedback(null); }, [topic]);
 
   const startGame = () => {
-    setScore(0); setStreak(0); setTimer(60); setCorrect(0); setWrong(0); setGameOver(false); setStarted(true); nextQuestion();
+    setScore(0); setStreak(0); setTimer(60); setCorrect(0); setWrong(0); setGameOver(false); setStarted(true); bestStreakRef.current = 0; nextQuestion();
   };
 
   useEffect(() => {
@@ -571,7 +575,11 @@ function SpeedMathGame({ onBack }: { onBack: () => void }) {
     const answer = parseFloat(input);
     if (answer === current.a) {
       setScore((s) => s + 10 + streak * 2);
-      setStreak((s) => s + 1);
+      setStreak((s) => {
+        const newStreak = s + 1;
+        if (newStreak > bestStreakRef.current) bestStreakRef.current = newStreak;
+        return newStreak;
+      });
       setCorrect((c) => c + 1);
       setFeedback("correct");
     } else {
@@ -641,7 +649,7 @@ function SpeedMathGame({ onBack }: { onBack: () => void }) {
       {gameOver && (
         <VictoryScreen title="Time's Up!" score={`Score: ${score}`} subtitle={`${correct} correct, ${wrong} wrong`}
           onRestart={startGame} onBack={onBack}
-          extraStats={[{ label: "Correct", value: correct }, { label: "Wrong", value: wrong }, { label: "Accuracy", value: `${accuracy}%` }, { label: "Best Streak", value: streak }]} />
+          extraStats={[{ label: "Correct", value: correct }, { label: "Wrong", value: wrong }, { label: "Accuracy", value: `${accuracy}%` }, { label: "Best Streak", value: bestStreakRef.current }]} />
       )}
     </motion.div>
   );
@@ -709,18 +717,18 @@ function TriviaGame({ onBack }: { onBack: () => void }) {
 
       {started && !gameOver && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl mx-auto mt-8">
-          <div className="bg-card border-2 border-card-border rounded-2xl p-8 mb-6 shadow-lg">
+          <div className="bg-card border-2 border-card-border rounded-2xl p-4 sm:p-8 mb-6 shadow-lg">
             <div className="flex justify-between items-center mb-6">
               <span className="text-sm font-bold text-muted-foreground">Question {currentIdx + 1}</span>
-              <div className={cn("w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold",
+              <div className={cn("w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0",
                 timer > 10 ? "bg-primary/10 text-primary" : timer > 5 ? "bg-accent/10 text-accent-foreground" : "bg-red-100 text-red-700")}>
                 {timer}
               </div>
             </div>
             <p className="text-xl font-serif font-bold text-foreground mb-8">{questions[currentIdx].q}</p>
-            <div className="grid sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {questions[currentIdx].options.map((opt, i) => (
-                <motion.button key={i} whileHover={!showAnswer ? { scale: 1.02 } : {}} whileTap={!showAnswer ? { scale: 0.98 } : {}}
+                <motion.button key={i} whileHover={!showAnswer ? { scale: 1.02 } : {}} whileTap={!showAnswer ? { scale: 0.98 } :{}}
                   onClick={() => handleSelect(i)}
                   className={cn("p-4 rounded-xl border-2 text-left font-medium transition-all",
                     showAnswer && i === questions[currentIdx].correct ? "border-emerald-500 bg-emerald-50 text-emerald-700" :
@@ -815,10 +823,10 @@ function CodeBreakerGame({ onBack }: { onBack: () => void }) {
 
       {started && !gameOver && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl mx-auto mt-8">
-          <div className="bg-card border-2 border-card-border rounded-2xl p-8 mb-6 shadow-lg">
+          <div className="bg-card border-2 border-card-border rounded-2xl p-4 sm:p-8 mb-6 shadow-lg">
             <div className="flex justify-between items-center mb-6">
               <span className="text-sm font-bold text-muted-foreground uppercase tracking-wider">What comes next?</span>
-              <div className={cn("w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold",
+              <div className={cn("w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0",
                 timer > 8 ? "bg-primary/10 text-primary" : timer > 4 ? "bg-accent/10 text-accent-foreground" : "bg-red-100 text-red-700")}>
                 {timer}
               </div>

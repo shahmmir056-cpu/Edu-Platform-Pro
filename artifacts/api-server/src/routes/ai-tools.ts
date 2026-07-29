@@ -22,7 +22,6 @@ import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 
-/** Wraps a route handler so AiNotConfiguredError -> 503 and other errors -> 500, both as JSON. */
 function aiRoute(handler: (req: Request, res: Response) => Promise<void>) {
   return async (req: Request, res: Response) => {
     try {

@@ -16,7 +16,6 @@ export default function Essay() {
 
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (!topic.trim()) return;
     generateEssay.mutate({ data: { topic, essayType, wordCount, tone } });
   };
 
@@ -34,10 +33,10 @@ export default function Essay() {
       />
 
       {!generateEssay.isPending && !essay && !generateEssay.isError && (
-        <form onSubmit={handleSubmit} className="animate-fade-in-up glass-card rounded-2xl p-8 max-w-2xl mx-auto mt-12 border-t-4 border-t-primary">
+        <form onSubmit={handleSubmit} className="animate-fade-in-up lg-card rounded-2xl p-8 max-w-2xl mx-auto mt-12 border-t-4 border-t-primary">
           <div className="space-y-6">
             <div>
-              <label htmlFor="topic" className="block text-sm font-bold uppercase tracking-wider text-muted-foreground mb-2">
+              <label htmlFor="topic" className="block text-sm font-bold uppercase tracking-wider mb-2" style={{ color: "#6B6B6B" }}>
                 Essay Topic / Prompt
               </label>
               <textarea
@@ -45,20 +44,20 @@ export default function Essay() {
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 placeholder="e.g., The role of artificial intelligence in modern education..."
-                className="w-full bg-background border border-input rounded-xl p-4 min-h-[100px] focus:ring-2 focus:ring-ring focus:border-transparent outline-none transition-all resize-none"
+                className="lg-input w-full rounded-xl p-4 min-h-[100px] focus:ring-2 focus:ring-ring focus:border-transparent outline-none transition-all resize-none"
                 required
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-bold uppercase tracking-wider text-muted-foreground mb-2">
+                <label className="block text-sm font-bold uppercase tracking-wider mb-2" style={{ color: "#6B6B6B" }}>
                   Essay Type
                 </label>
                 <select
                   value={essayType}
                   onChange={(e) => setEssayType(e.target.value as EssayType)}
-                  className="w-full bg-background border border-input rounded-xl p-3.5 focus:ring-2 focus:ring-ring outline-none capitalize"
+                  className="lg-input w-full rounded-xl p-3.5 focus:ring-2 focus:ring-ring outline-none capitalize"
                 >
                   <option value="expository">Expository</option>
                   <option value="argumentative">Argumentative</option>
@@ -70,13 +69,13 @@ export default function Essay() {
               </div>
 
               <div>
-                <label className="block text-sm font-bold uppercase tracking-wider text-muted-foreground mb-2">
+                <label className="block text-sm font-bold uppercase tracking-wider mb-2" style={{ color: "#6B6B6B" }}>
                   Tone
                 </label>
                 <select
                   value={tone}
                   onChange={(e) => setTone(e.target.value)}
-                  className="w-full bg-background border border-input rounded-xl p-3.5 focus:ring-2 focus:ring-ring outline-none"
+                  className="lg-input w-full rounded-xl p-3.5 focus:ring-2 focus:ring-ring outline-none"
                 >
                   <option value="academic">Academic & Objective</option>
                   <option value="persuasive">Passionate & Persuasive</option>
@@ -88,15 +87,15 @@ export default function Essay() {
 
             <div>
               <div className="flex justify-between mb-2">
-                <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                <label className="text-sm font-bold uppercase tracking-wider" style={{ color: "#6B6B6B" }}>
                   Target Word Count
                 </label>
                 <span className="text-sm font-mono font-bold text-primary">{wordCount} words</span>
               </div>
               <input
                 type="range"
-                min="10"
-                max="1000"
+                min="100"
+                max="3000"
                 step="100"
                 value={wordCount}
                 onChange={(e) => setWordCount(Number(e.target.value))}
@@ -106,8 +105,8 @@ export default function Essay() {
 
             <button
               type="submit"
-              disabled={!topic.trim()}
-              className="w-full py-4 bg-primary text-primary-foreground font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-primary/90 disabled:opacity-50 transition-all shadow-md mt-8"
+              disabled={!topic.trim() || generateEssay.isPending}
+              className="lg-button w-full py-4 font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-primary/90 disabled:opacity-50 transition-all shadow-md mt-8"
             >
               <FileText size={20} />
               Draft Essay
@@ -140,34 +139,41 @@ export default function Essay() {
         <div className="animate-fade-in-up space-y-8 flex flex-col md:flex-row gap-8 items-start">
           
           {/* Outline Sidebar */}
-          <div className="w-full md:w-72 shrink-0 bg-card border border-card-border p-6 rounded-2xl sticky top-8">
-            <h3 className="font-serif text-lg font-bold text-primary border-b border-border pb-3 mb-4 flex items-center gap-2">
+          <div className="w-full md:w-72 shrink-0 lg-card p-6 rounded-2xl sticky top-8">
+            <h3 className="font-serif text-lg font-bold text-primary pb-3 mb-4 flex items-center gap-2" style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
               <Layers size={18} /> Outline
             </h3>
             <ol className="space-y-3 text-sm">
               {essay.outline.map((point, idx) => (
                 <li key={idx} className="flex gap-2">
-                  <span className="font-mono text-muted-foreground font-bold">{idx + 1}.</span>
-                  <span className="text-foreground/80 leading-snug">{point}</span>
+                  <span className="font-mono font-bold" style={{ color: "#6B6B6B" }}>{idx + 1}.</span>
+                  <span className="leading-snug" style={{ color: "#2D2D2D" }}>{point}</span>
                 </li>
               ))}
             </ol>
             
-            <div className="mt-8 pt-4 border-t border-border space-y-3">
+            <div className="mt-8 pt-4 space-y-3" style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>
               <div className="flex justify-between text-xs">
-                <span className="text-muted-foreground uppercase tracking-wider font-bold">Word Count</span>
-                <span className="font-mono text-foreground font-bold">{essay.wordCount}</span>
+                <span className="uppercase tracking-wider font-bold" style={{ color: "#6B6B6B" }}>Word Count</span>
+                <span className="font-mono font-bold" style={{ color: "#FF9F4C" }}>{essay.wordCount}</span>
               </div>
               <div className="flex justify-between text-xs">
-                <span className="text-muted-foreground uppercase tracking-wider font-bold">Type</span>
-                <span className="font-mono text-foreground font-bold capitalize">{essayType}</span>
+                <span className="uppercase tracking-wider font-bold" style={{ color: "#6B6B6B" }}>Type</span>
+                <span className="font-mono font-bold capitalize" style={{ color: "#FF9F4C" }}>{essayType}</span>
               </div>
             </div>
           </div>
 
           {/* Main Document */}
-          <div className="flex-1 bg-white shadow-lg border border-border p-10 md:p-16 rounded-xl max-w-[800px] min-h-[800px] font-serif text-lg leading-loose text-slate-800">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-10 text-center leading-tight">
+          <div className="flex-1 shadow-lg p-6 sm:p-10 md:p-16 rounded-xl w-full max-w-[800px] sm:min-h-[800px] font-serif text-base sm:text-lg leading-loose" 
+            style={{ 
+              background: "rgba(255,255,255,0.8)", 
+              backdropFilter: "blur(20px) saturate(180%)",
+               border: "2px solid #2D2D2D",
+              color: "#2D2D2D",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7), 0 4px 16px rgba(0,0,0,0.04)"
+            }}>
+            <h2 className="text-3xl md:text-4xl font-bold mb-10 text-center leading-tight" style={{ color: "#FF9F4C" }}>
               {essay.title}
             </h2>
             
@@ -183,21 +189,23 @@ export default function Essay() {
         <div className="flex justify-center gap-4 mt-12 pb-20">
           <button 
             onClick={reset}
-            className="px-6 py-3 border-2 border-input bg-background hover:bg-muted text-foreground font-bold rounded-xl transition-colors"
+            className="lg-button-outline px-6 py-3 font-bold rounded-xl transition-colors"
           >
             New Essay
           </button>
           <button 
             onClick={() => {
-              const element = document.createElement("a");
               const file = new Blob([`${essay.title}\n\n${essay.body}`], {type: 'text/plain'});
-              element.href = URL.createObjectURL(file);
+              const url = URL.createObjectURL(file);
+              const element = document.createElement("a");
+              element.href = url;
               element.download = `${essay.title.toLowerCase().replace(/\s+/g, '-')}.txt`;
               document.body.appendChild(element);
               element.click();
               document.body.removeChild(element);
+              URL.revokeObjectURL(url);
             }}
-            className="px-6 py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:bg-primary/90 transition-colors shadow-sm flex items-center gap-2"
+            className="lg-button px-6 py-3 font-bold rounded-xl transition-colors shadow-sm flex items-center gap-2"
           >
             <Download size={18} />
             Download TXT

@@ -1,0 +1,95 @@
+import type { Simulation } from "../engine/types";
+
+export const gelElectrophoresis: Simulation = {
+  id: "gel-electrophoresis",
+  title: "Gel Electrophoresis",
+  subtitle: "DNA Separation by Size",
+  category: "Biology",
+  description: "Load DNA samples into an agarose gel, apply voltage, and separate DNA fragments by size. Smaller fragments move faster through the gel matrix.",
+  difficulty: "Intermediate",
+  estimatedMinutes: 10,
+  icon: "🧬",
+  equipment: [
+    { id: "gel-box", type: "gel-box", label: "Electrophoresis Chamber", droppable: true, initialState: { isRunning: false, voltage: 0, time: 0 } },
+    { id: "pipette-sample1", type: "pipette", label: "Sample 1 (DNA Ladder)", draggable: true, initialState: { liquidLevel: 0.8, liquidColor: "#7B1FA2" } },
+    { id: "pipette-sample2", type: "pipette", label: "Sample 2 (Patient)", draggable: true, initialState: { liquidLevel: 0.8, liquidColor: "#1565C0" } },
+    { id: "pipette-sample3", type: "pipette", label: "Sample 3 (Control)", draggable: true, initialState: { liquidLevel: 0.8, liquidColor: "#2E7D32" } },
+    { id: "buffer-beaker", type: "beaker", label: "TAE Buffer", droppable: true, initialState: { fillLevel: 0.8, liquidColor: "#E3F2FD" } },
+    { id: "power-supply", type: "power-supply", label: "Power Supply", initialState: { voltage: 120, isOn: false } },
+  ],
+  initialLayout: [
+    { id: "gel-box", x: 200, y: 160, scale: 1.1 },
+    { id: "pipette-sample1", x: 60, y: 140, scale: 0.9 },
+    { id: "pipette-sample2", x: 60, y: 260, scale: 0.9 },
+    { id: "pipette-sample3", x: 60, y: 380, scale: 0.9 },
+    { id: "buffer-beaker", x: 480, y: 200, scale: 0.9 },
+    { id: "power-supply", x: 480, y: 370, scale: 0.9 },
+  ],
+  steps: [
+    {
+      id: "add-buffer",
+      instruction: "Fill the gel box with TAE buffer solution.",
+      hint: "Pour the buffer until the gel is submerged.",
+      trigger: { type: "collision", items: ["buffer-beaker", "gel-box"] },
+      result: { visual: "buffer-filled", message: "TAE buffer conducts electricity and maintains pH during electrophoresis." },
+    },
+    {
+      id: "load-sample1",
+      instruction: "Load Sample 1 (DNA Ladder) into the first well.",
+      hint: "Drag the purple pipette to the gel box.",
+      trigger: { type: "collision", items: ["pipette-sample1", "gel-box"] },
+      result: { visual: "well1-loaded", data: { "wells-loaded": 1 }, message: "DNA ladder loaded — this contains fragments of known sizes for comparison." },
+    },
+    {
+      id: "load-sample2",
+      instruction: "Load Sample 2 (Patient DNA) into the second well.",
+      trigger: { type: "collision", items: ["pipette-sample2", "gel-box"] },
+      result: { visual: "well2-loaded", data: { "wells-loaded": 2 }, message: "Patient sample loaded. We'll compare it to the ladder to estimate fragment sizes." },
+    },
+    {
+      id: "load-sample3",
+      instruction: "Load Sample 3 (Control) into the third well.",
+      trigger: { type: "collision", items: ["pipette-sample3", "gel-box"] },
+      result: { visual: "well3-loaded", data: { "wells-loaded": 3 }, message: "Control sample loaded. All three wells are now ready." },
+    },
+    {
+      id: "apply-voltage",
+      instruction: "Turn on the power supply to start electrophoresis (120V).",
+      hint: "Click the power supply to turn it on.",
+      trigger: { type: "click", target: "power-supply" },
+      result: {
+        visual: "gel-running",
+        data: { "gel-running": true, voltage: 120 },
+        message: "Electric field applied! DNA is negatively charged and migrates toward the positive electrode (+).",
+      },
+    },
+    {
+      id: "wait-run",
+      instruction: "Watch the DNA fragments separate through the gel matrix.",
+      trigger: { type: "timer", duration: 8 },
+      result: {
+        visual: "gel-complete",
+        data: {
+          "band-1-small": 0.9,
+          "band-1-medium": 0.5,
+          "band-1-large": 0.2,
+          "band-2-small": 0.85,
+          "band-2-large": 0.2,
+          "band-3-small": 0.9,
+          "band-3-medium": 0.5,
+          "band-3-large": 0.2,
+        },
+        message: "Electrophoresis complete! Smaller fragments migrated farther. Compare bands to the ladder.",
+      },
+    },
+    {
+      id: "analyze",
+      instruction: "Analyze the results. Compare band patterns across lanes.",
+      trigger: { type: "manual" },
+      result: {
+        data: { isComplete: true },
+        message: "Patient (lane 2) is missing the medium band — possible deletion mutation. Control (lane 3) matches the ladder pattern.",
+      },
+    },
+  ],
+};

@@ -1,139 +1,149 @@
-import OpenAI from "openai";
+import https from "node:https";
 import { logger } from "./logger";
 
-/**
- * Thrown when no AI provider key is configured. Routes catch this and return
- * a clear 503 instead of a generic 500 so the frontend can show a helpful message.
- */
 export class AiNotConfiguredError extends Error {
   constructor(message?: string) {
-    super(
-      message ??
-        "No AI provider is configured. Set GROQ_API_KEY or GLM_API_KEY to enable AI generation.",
-    );
+    super(message ?? "No AI provider configured. Set GROQ_API_KEY to enable AI generation.");
     this.name = "AiNotConfiguredError";
   }
 }
 
-type TextProvider = {
-  name: string;
-  apiKey: string | undefined;
-  baseURL: string;
-  model: string;
-};
+const GROQ_HOST = "api.groq.com";
+const GROQ_PATH = "/openai/v1/chat/completions";
+const GROQ_MODEL = "llama-3.3-70b-versatile";
+const MAX_RETRIES = 3;
 
-function textProviders(): TextProvider[] {
-  return [
-    {
-      name: "groq",
-      apiKey: process.env.GROQ_API_KEY,
-      baseURL: "https://api.groq.com/openai/v1",
-      model: "llama-3.3-70b-versatile",
-    },
-    {
-      name: "glm",
-      apiKey: process.env.GLM_API_KEY,
-      baseURL: "https://open.bigmodel.cn/api/paas/v4",
-      model: "glm-4.6",
-    },
-  ];
-}
-
-const clientCache = new Map<string, OpenAI>();
-
-function clientFor(provider: TextProvider): OpenAI {
-  const cached = clientCache.get(provider.name);
-  if (cached) return cached;
-  const created = new OpenAI({
-    apiKey: provider.apiKey,
-    baseURL: provider.baseURL,
-    fetch: globalThis.fetch,
+function httpsPost(
+  hostname: string,
+  path: string,
+  headers: Record<string, string>,
+  body: string,
+): Promise<{ status: number; data: any; headers: Record<string, string | string[] | undefined> }> {
+  return new Promise((resolve, reject) => {
+    const req = https.request(
+      {
+        hostname,
+        path,
+        method: "POST",
+        headers: {
+          ...headers,
+          "Content-Length": Buffer.byteLength(body),
+        },
+      },
+      (res) => {
+        const chunks: Buffer[] = [];
+        res.on("data", (chunk: Buffer) => chunks.push(chunk));
+        res.on("end", () => {
+          const raw = Buffer.concat(chunks).toString("utf-8");
+          let data: any;
+          try {
+            data = JSON.parse(raw);
+          } catch {
+            data = { error: raw };
+          }
+          resolve({ status: res.statusCode ?? 500, data, headers: res.headers });
+        });
+        res.on("error", reject);
+      },
+    );
+    req.on("error", reject);
+    req.setTimeout(120_000, () => {
+      req.destroy(new Error("Groq request timed out"));
+    });
+    req.write(body);
+    req.end();
   });
-  clientCache.set(provider.name, created);
-  return created;
 }
 
-/**
- * Calls the model with a system + user prompt and parses the response as JSON.
- * Tries each configured text provider in order (Groq, then GLM), retrying once
- * per provider on JSON parse failure, and falling through to the next provider
- * if a provider errors out (e.g. rate limit, outage).
- */
+function getRetryAfterMs(headers: Record<string, string | string[] | undefined>, data: any): number {
+  const retryAfter = headers["retry-after"];
+  if (retryAfter) {
+    const seconds = Number(retryAfter);
+    if (!Number.isNaN(seconds) && seconds > 0) return seconds * 1000;
+  }
+  const msg = data?.error?.message || "";
+  const match = msg.match(/try again in ([\d.]+)s/);
+  if (match) return Math.ceil(Number(match[1]) * 1000);
+  return 30_000;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+type ChatMessage = { role: string; content: string };
+
 export async function generateJson<T>(params: {
   system: string;
   user: string;
   maxTokens?: number;
 }): Promise<T> {
-  const configured = textProviders().filter((p) => p.apiKey);
-  if (configured.length === 0) {
-    throw new AiNotConfiguredError();
-  }
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) throw new AiNotConfiguredError();
 
-  const { system, user, maxTokens = 8192 } = params;
+  const { system, user, maxTokens = 4000 } = params;
+  const messages: ChatMessage[] = [
+    { role: "system", content: system },
+    { role: "user", content: user },
+  ];
+
   let lastErr: unknown;
 
-  for (const provider of configured) {
-    const openai = clientFor(provider);
-    const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
-      { role: "system", content: system },
-      { role: "user", content: user },
-    ];
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    const body = JSON.stringify({
+      model: GROQ_MODEL,
+      max_tokens: maxTokens,
+      messages,
+      response_format: { type: "json_object" },
+    });
 
-    const maxAttempts = 3;
-    let providerFailed = false;
+    try {
+      const { status, data, headers } = await httpsPost(GROQ_HOST, GROQ_PATH, {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      }, body);
 
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      if (status === 429) {
+        const waitMs = getRetryAfterMs(headers, data);
+        logger.warn({ attempt, waitMs }, "Rate limited by Groq, waiting");
+        lastErr = new Error(data?.error?.message || "Rate limited");
+        if (attempt < MAX_RETRIES - 1) {
+          await sleep(waitMs);
+          continue;
+        }
+        break;
+      }
+
+      if (status !== 200) {
+        const errMsg = data?.error?.message || JSON.stringify(data);
+        throw new Error(`Groq API error ${status}: ${errMsg}`);
+      }
+
+      const content: string = data.choices?.[0]?.message?.content ?? "";
+
       try {
-        const completion = await openai.chat.completions.create({
-          model: provider.model,
-          max_tokens: maxTokens,
-          messages,
-          response_format: { type: "json_object" },
-        });
-
-        const content = completion.choices[0]?.message?.content ?? "";
-        try {
-          return JSON.parse(content) as T;
-        } catch (err) {
-          logger.warn(
-            { attempt, provider: provider.name, err },
-            "Failed to parse AI JSON response, retrying",
-          );
-          messages.push({ role: "assistant", content });
-          messages.push({
-            role: "user",
-            content:
-              "That was not valid JSON. Reply with ONLY a single valid JSON object, no markdown fences, no commentary. " +
-              "Every string value -- including any multi-line text -- must be a properly quoted JSON string with newlines encoded as \\n escape sequences, never literal line breaks.",
-          });
-        }
-      } catch (err) {
-        // The provider's own JSON-mode validation rejected the generation (e.g. Groq's
-        // json_validate_failed for malformed strings). Retry with a corrective nudge
-        // rather than immediately abandoning this provider.
-        lastErr = err;
-        logger.warn(
-          { attempt, provider: provider.name, err },
-          "Provider rejected JSON generation, retrying",
-        );
-        if (attempt === maxAttempts - 1) {
-          providerFailed = true;
-          break;
-        }
+        return JSON.parse(content) as T;
+      } catch {
+        logger.warn({ attempt }, "Non-JSON response, asking model to retry");
+        messages.push({ role: "assistant", content });
         messages.push({
           role: "user",
           content:
-            "Your previous reply failed JSON validation. Reply again with ONLY a single valid JSON object: " +
-            "every string value must be properly quoted with newlines encoded as \\n escape sequences, no literal line breaks inside strings, no markdown fences, no commentary.",
+            "Your reply was not valid JSON. Reply with ONLY a single valid JSON object. " +
+            "No markdown fences, no commentary. Every string value must use \\n for newlines.",
+        });
+      }
+    } catch (err) {
+      lastErr = err;
+      logger.warn({ attempt, err }, "Groq request failed");
+      if (attempt < MAX_RETRIES - 1) {
+        messages.push({
+          role: "user",
+          content: "Your previous reply failed validation. Reply with ONLY a single valid JSON object.",
         });
       }
     }
-
-    if (!providerFailed) {
-      lastErr = new Error(`${provider.name} did not return valid JSON after retries`);
-    }
-    logger.warn({ provider: provider.name, err: lastErr }, "Text provider failed, trying next provider");
   }
 
-  throw lastErr instanceof Error ? lastErr : new Error("All text providers failed");
+  throw lastErr instanceof Error ? lastErr : new Error("Groq API failed after retries");
 }

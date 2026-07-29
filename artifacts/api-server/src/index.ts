@@ -17,14 +17,18 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
+process.on("uncaughtException", (err) => {
+  logger.error({ err }, "Uncaught exception");
+});
+process.on("unhandledRejection", (reason) => {
+  logger.error({ err: reason }, "Unhandled rejection");
+});
+
 const httpServer = createServer(app);
 setupSocketServer(httpServer);
 
-httpServer.listen(port, (err) => {
-  if (err) {
-    logger.error({ err }, "Error listening on port");
-    process.exit(1);
-  }
+httpServer.listen(port, () => {
+  logger.info({ port }, "API server started");
 
   logger.info({ port }, "Server listening with WebSocket support");
 });
