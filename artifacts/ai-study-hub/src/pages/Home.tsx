@@ -142,8 +142,8 @@ function CinematicParticles({ mousePos }: { mousePos: { x: number; y: number } }
       size: number; color: string; glow: boolean;
       pulse: number; pulseSpeed: number;
     }[] = [];
-    const COUNT = 140;
-    const CONN_DIST = 160;
+    const COUNT = 200;
+    const CONN_DIST = 180;
 
     function resize() {
       w = canvas!.width = window.innerWidth;
@@ -152,14 +152,18 @@ function CinematicParticles({ mousePos }: { mousePos: { x: number; y: number } }
     resize();
     window.addEventListener("resize", resize);
 
+    const orangeShades = ["#FF9F4C", "#FFB366", "#E8852E", "#FF8C2E"];
     for (let i = 0; i < COUNT; i++) {
-      const glow = i % 6 === 0;
-      const c = i % 4 === 0 ? "#FF9F4C" : i % 4 === 1 ? "#FFB366" : i % 4 === 2 ? "#E8852E" : "rgba(45,45,45,0.35)";
+      const isBlack = i % 3 === 2;
+      const isGlow = !isBlack && i % 5 === 0;
+      const c = isBlack
+        ? `rgba(45,45,45,${0.2 + Math.random() * 0.35})`
+        : orangeShades[Math.floor(Math.random() * orangeShades.length)];
       particles.push({
         x: Math.random() * w, y: Math.random() * h, z: Math.random() * 400,
-        vx: (Math.random() - 0.5) * 0.25, vy: (Math.random() - 0.5) * 0.25, vz: (Math.random() - 0.5) * 0.12,
-        size: glow ? 2 + Math.random() * 2.5 : 0.8 + Math.random() * 1.5,
-        color: c, glow,
+        vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3, vz: (Math.random() - 0.5) * 0.12,
+        size: isGlow ? 2.5 + Math.random() * 3 : isBlack ? 1.5 + Math.random() * 2.5 : 1 + Math.random() * 2,
+        color: c, glow: isGlow,
         pulse: Math.random() * Math.PI * 2, pulseSpeed: 0.015 + Math.random() * 0.04,
       });
     }
