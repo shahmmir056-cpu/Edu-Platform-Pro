@@ -107,6 +107,8 @@ export function useHandGesture() {
   const waveDirHistoryRef = useRef<{ dir: number; time: number }[]>([]);
   const lastWaveTimeRef = useRef<number>(0);
   const streamRef = useRef<MediaStream | null>(null);
+  const frameCountRef = useRef<number>(0);
+  const lastFpsTimeRef = useRef<number>(0);
 
   const [state, setState] = useState<GestureState>({
     enabled: false,
@@ -186,6 +188,13 @@ export function useHandGesture() {
   const processFrame = useCallback((now: number) => {
     if (!handLandmarkerRef.current || !videoRef.current) return;
     const results = handLandmarkerRef.current.detectForVideo(videoRef.current, now);
+
+    frameCountRef.current++;
+    if (now - lastFpsTimeRef.current >= 1000) {
+      setState(s => ({ ...s, fps: frameCountRef.current }));
+      frameCountRef.current = 0;
+      lastFpsTimeRef.current = now;
+    }
 
     if (results.landmarks && results.landmarks.length > 0) {
       const lm = results.landmarks[0];
