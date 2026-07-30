@@ -10,13 +10,12 @@ function proxyAudio(text: string, voice?: string): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const urlObj = new URL("/tts", KOKORO_TTS_URL);
     const body = JSON.stringify({ text, voice: voice || undefined });
-    const isHttps = urlObj.protocol === "https:";
-    const mod = isHttps ? https : http;
+    const transport = urlObj.protocol === "https:" ? https : http;
 
-    const req = mod.request(
+    const req = transport.request(
       {
         hostname: urlObj.hostname,
-        port: urlObj.port || (isHttps ? 443 : 80),
+        port: urlObj.port || (urlObj.protocol === "https:" ? 443 : 80),
         path: urlObj.pathname,
         method: "POST",
         headers: {
@@ -32,15 +31,26 @@ function proxyAudio(text: string, voice?: string): Promise<Buffer> {
           const buf = Buffer.concat(chunks);
           if (res.statusCode !== 200) {
             const errMsg = buf.toString("utf-8").slice(0, 200);
-            reject(new Error(`Kokoro TTS error ${res.statusCode}: ${errMsg}`));
-          } else {
-            resolve(buf);
+            return reject(new Error(`Kokoro TTS error ${res.statusCode}: ${errMsg}`));
           }
+          resolve(buf);
         });
         res.on("error", reject);
       },
     );
-    req.on("error", reject);
+
+    req.on("timeout", () => {
+      req.destroy(new Error("Kokoro TTS request timed out"));
+    });
+
+    req.on("error", (err: NodeJS.ErrnoException) => {
+      if (err.code === "ECONNREFUSED" || err.code === "ECONNRESET" || err.message.includes("timed out")) {
+        reject(new Error("TTS_SERVICE_UNAVAILABLE"));
+      } else {
+        reject(err);
+      }
+    });
+
     req.write(body);
     req.end();
   });
@@ -50,18 +60,24 @@ router.post("/tts", async (req, res) => {
   try {
     const { text, voice } = req.body;
     if (!text || typeof text !== "string" || text.trim().length === 0) {
-      return res.status(400).json({ error: "Text is required" });
+      res.status(400).json({ error: "Text is required" });
+      return;
     }
     if (text.length > 5000) {
-      return res.status(400).json({ error: "Text exceeds 5000 character limit" });
+      res.status(400).json({ error: "Text exceeds 5000 character limit" });
+      return;
     }
+
     const audio = await proxyAudio(text.trim(), voice);
+
     res.set("Content-Type", "audio/wav");
     res.set("Content-Length", audio.length.toString());
-    res.send(audio);
+    res.status(200);
+    res.end(audio);
   } catch (err: any) {
-    if (err.message?.includes("connect")) {
-      return res.status(503).json({ error: "TTS service unavailable" });
+    if (err.message === "TTS_SERVICE_UNAVAILABLE") {
+      res.status(503).json({ error: "TTS service unavailable" });
+      return;
     }
     console.error("TTS error:", err.message);
     res.status(500).json({ error: "TTS generation failed" });
@@ -71,8 +87,8 @@ router.post("/tts", async (req, res) => {
 router.get("/tts/health", async (_req, res) => {
   try {
     const urlObj = new URL("/health", KOKORO_TTS_URL);
-    const mod = urlObj.protocol === "https:" ? https : http;
-    const proxyReq = mod.get(urlObj, (proxyRes) => {
+    const transport = urlObj.protocol === "https:" ? https : http;
+    const proxyReq = transport.get(urlObj, (proxyRes) => {
       let data = "";
       proxyRes.on("data", (c: string) => (data += c));
       proxyRes.on("end", () => {
@@ -84,7 +100,10 @@ router.get("/tts/health", async (_req, res) => {
       });
     });
     proxyReq.on("error", () => res.json({ status: "unreachable" }));
-    proxyReq.setTimeout(5000);
+    proxyReq.setTimeout(5000, () => {
+      proxyReq.destroy();
+      res.json({ status: "unreachable" });
+    });
   } catch {
     res.json({ status: "unreachable" });
   }

@@ -13,12 +13,12 @@ export function useVoice({ onTranscript, autoRestart = false }: UseVoiceOptions 
   const [transcript, setTranscript] = useState("");
   const [isSupported, setIsSupported] = useState(false);
   const recognitionRef = useRef<any>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const currentSourceRef = useRef<string | null>(null);
   const autoRestartRef = useRef(autoRestart);
   const skipNextAutoRef = useRef(false);
   const onTranscriptRef = useRef(onTranscript);
-  const speakResolveRef = useRef<(() => void) | null>(null);
+  const speakGenRef = useRef(0);
+  const currentAbortRef = useRef<AbortController | null>(null);
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     autoRestartRef.current = autoRestart;
@@ -27,6 +27,19 @@ export function useVoice({ onTranscript, autoRestart = false }: UseVoiceOptions 
   useEffect(() => {
     onTranscriptRef.current = onTranscript;
   }, [onTranscript]);
+
+  function cancelCurrentSpeak() {
+    if (currentAbortRef.current) {
+      currentAbortRef.current.abort();
+      currentAbortRef.current = null;
+    }
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current.src = "";
+      currentAudioRef.current = null;
+    }
+    setIsSpeaking(false);
+  }
 
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -65,7 +78,6 @@ export function useVoice({ onTranscript, autoRestart = false }: UseVoiceOptions 
         if (autoRestartRef.current && !skipNextAutoRef.current) {
           setTimeout(() => {
             try {
-              cancelAudio();
               recognition.start();
               setIsListening(true);
               setTranscript("");
@@ -82,33 +94,15 @@ export function useVoice({ onTranscript, autoRestart = false }: UseVoiceOptions 
       if (recognitionRef.current) {
         try { recognitionRef.current.abort(); } catch {}
       }
-      cancelAudio();
+      cancelCurrentSpeak();
     };
   }, []);
-
-  function cancelAudio() {
-    if (currentSourceRef.current) {
-      URL.revokeObjectURL(currentSourceRef.current);
-      currentSourceRef.current = null;
-    }
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.src = "";
-      audioRef.current = null;
-    }
-    if (speakResolveRef.current) {
-      speakResolveRef.current();
-      speakResolveRef.current = null;
-    }
-    setIsSpeaking(false);
-  }
 
   const startListening = useCallback(() => {
     if (!recognitionRef.current) return;
     skipNextAutoRef.current = false;
     try {
-      cancelAudio();
-      setIsSpeaking(false);
+      cancelCurrentSpeak();
       recognitionRef.current.start();
       setIsListening(true);
       setTranscript("");
@@ -123,86 +117,94 @@ export function useVoice({ onTranscript, autoRestart = false }: UseVoiceOptions 
   }, []);
 
   const speak = useCallback(async (text: string, voice?: string) => {
-    return new Promise<void>((resolve) => {
-      cancelAudio();
-      skipNextAutoRef.current = true;
-      if (recognitionRef.current) {
-        try { recognitionRef.current.stop(); } catch {}
-        setIsListening(false);
-      }
-      if (!text.trim()) { resolve(); return; }
+    const trimmed = text?.trim() ?? "";
+    if (!trimmed) return;
 
-      speakResolveRef.current = resolve;
-      setIsSpeaking(true);
+    cancelCurrentSpeak();
+    skipNextAutoRef.current = true;
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch {}
+      setIsListening(false);
+    }
 
-      const controller = new AbortController();
+    const gen = ++speakGenRef.current;
+    setIsSpeaking(true);
 
-      fetch(TTS_ENDPOINT, {
+    const controller = new AbortController();
+    currentAbortRef.current = controller;
+
+    try {
+      const res = await fetch(TTS_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: text.trim(), voice }),
+        body: JSON.stringify({ text: trimmed, voice }),
         signal: controller.signal,
-      })
-        .then(async (res) => {
-          if (!res.ok) {
-            const err = await res.json().catch(() => ({ error: "TTS failed" }));
-            throw new Error(err.error || `HTTP ${res.status}`);
-          }
-          const blob = await res.blob();
-          const url = URL.createObjectURL(blob);
-          currentSourceRef.current = url;
+      });
 
-          const audio = new Audio(url);
-          audioRef.current = audio;
+      if (gen !== speakGenRef.current) return;
 
-          audio.onended = () => {
-            setIsSpeaking(false);
-            if (currentSourceRef.current) {
-              URL.revokeObjectURL(currentSourceRef.current);
-              currentSourceRef.current = null;
-            }
-            audioRef.current = null;
-            speakResolveRef.current = null;
-            skipNextAutoRef.current = false;
-            if (autoRestartRef.current) {
-              setTimeout(() => {
-                try {
-                  recognitionRef.current?.start();
-                  setIsListening(true);
-                  setTranscript("");
-                } catch {}
-              }, 400);
-            }
-            resolve();
-          };
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({ error: "TTS failed" }));
+        throw new Error(errBody.error || `HTTP ${res.status}`);
+      }
 
-          audio.onerror = () => {
-            setIsSpeaking(false);
-            if (currentSourceRef.current) {
-              URL.revokeObjectURL(currentSourceRef.current);
-              currentSourceRef.current = null;
-            }
-            audioRef.current = null;
-            speakResolveRef.current = null;
-            skipNextAutoRef.current = false;
-            resolve();
-          };
+      const blob = await res.blob();
 
-          await audio.play();
-        })
-        .catch((err) => {
-          if (err.name === "AbortError") return;
-          console.warn("Kokoro TTS error:", err.message);
-          setIsSpeaking(false);
-          speakResolveRef.current = null;
-          skipNextAutoRef.current = false;
+      if (gen !== speakGenRef.current) return;
+
+      // Fetch done; no longer need the abort controller for cancellation.
+      if (currentAbortRef.current === controller) {
+        currentAbortRef.current = null;
+      }
+
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      currentAudioRef.current = audio;
+
+      await new Promise<void>((resolve) => {
+        audio.onended = () => {
+          finish();
+          resolve();
+        };
+        audio.onerror = () => {
+          finish();
+          resolve();
+        };
+
+        audio.play().catch((playErr) => {
+          finish();
+          console.warn("Audio playback error:", playErr.message);
           resolve();
         });
-    });
+
+        function finish() {
+          if (currentAudioRef.current === audio) {
+            currentAudioRef.current = null;
+          }
+          URL.revokeObjectURL(url);
+          setIsSpeaking(false);
+          skipNextAutoRef.current = false;
+          if (autoRestartRef.current) {
+            setTimeout(() => {
+              try {
+                recognitionRef.current?.start();
+                setIsListening(true);
+                setTranscript("");
+              } catch {}
+            }, 400);
+          }
+        }
+      });
+    } catch (err: any) {
+      if (err.name === "AbortError") return;
+      console.warn("Kokoro TTS error:", err.message);
+      setIsSpeaking(false);
+      skipNextAutoRef.current = false;
+    }
   }, []);
 
   const stopSpeaking = useCallback(() => {
-    cancelAudio();
+    cancelCurrentSpeak();
     skipNextAutoRef.current = false;
   }, []);
 
