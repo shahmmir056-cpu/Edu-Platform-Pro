@@ -24,6 +24,8 @@ jobs:
       - run: pnpm install
       - run: pnpm run build
         working-directory: artifacts/ai-study-hub
+        env:
+          BASE_PATH: /Edu-Platform-Pro
       - uses: actions/upload-pages-artifact@v3
         with:
           path: artifacts/ai-study-hub/dist/public
