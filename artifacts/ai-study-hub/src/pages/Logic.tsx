@@ -1532,6 +1532,18 @@ export default function Logic() {
     setSaved(false);
   }, []);
 
+  const duplicateNode = useCallback(() => {
+    if (!selected) return;
+    const node = circuit.nodes.find((n) => n.id === selected);
+    if (!node) return;
+    const newId = uid();
+    setCircuit((c) => ({
+      ...c,
+      nodes: [...c.nodes, { ...node, id: newId, x: node.x + 30, y: node.y + 30 }],
+    }));
+    setSelected(newId);
+  }, [selected, circuit.nodes]);
+
   const clearAll = useCallback(() => {
     setCircuit({ nodes: [], wires: [] });
     setSelected(null);
@@ -1599,18 +1611,27 @@ export default function Logic() {
         if (tag !== "INPUT" && tag !== "TEXTAREA") deleteNode(selected);
       }
       if (e.key === "Escape") { setPlacing(null); setWireFrom(null); setSelected(null); }
-      if (e.key === "a" && !e.ctrlKey && !e.metaKey) {
-        const tag = (document.activeElement as HTMLElement)?.tagName;
-        if (tag !== "INPUT" && tag !== "TEXTAREA") autoArrange();
-      }
+      if ((e.ctrlKey || e.metaKey) && e.key === "a") { e.preventDefault(); autoArrange(); }
+      if ((e.ctrlKey || e.metaKey) && e.key === "s") { e.preventDefault(); exportCircuit(); }
+      if ((e.ctrlKey || e.metaKey) && e.key === "d") { e.preventDefault(); duplicateNode(); }
       if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) { e.preventDefault(); undo(); }
       if ((e.ctrlKey || e.metaKey) && e.key === "z" && e.shiftKey) { e.preventDefault(); redo(); }
       if ((e.ctrlKey || e.metaKey) && e.key === "y") { e.preventDefault(); redo(); }
       if (e.key === "?" && !e.ctrlKey && !e.metaKey) { setShowShortcuts((s) => !s); }
+      if (selected && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+        const tag = (document.activeElement as HTMLElement)?.tagName;
+        if (tag !== "INPUT" && tag !== "TEXTAREA") {
+          e.preventDefault();
+          const step = e.shiftKey ? 1 : 10;
+          const dx = e.key === "ArrowLeft" ? -step : e.key === "ArrowRight" ? step : 0;
+          const dy = e.key === "ArrowUp" ? -step : e.key === "ArrowDown" ? step : 0;
+          moveNode(selected, circuit.nodes.find((n) => n.id === selected)!.x + dx, circuit.nodes.find((n) => n.id === selected)!.y + dy);
+        }
+      }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [selected, deleteNode, autoArrange, undo, redo]);
+  }, [selected, deleteNode, autoArrange, undo, redo, exportCircuit, duplicateNode, moveNode, circuit.nodes]);
 
   return (
     <div className="flex-1 min-h-0 flex flex-col overflow-hidden" style={{ background: "#FFF8F0" }}>
@@ -4258,7 +4279,11 @@ export default function Logic() {
               {[
                 ["Delete Selected", "Delete / Backspace"],
                 ["Cancel Operation", "Esc"],
-                ["Auto Arrange", "A"],
+                ["Auto Arrange", "Ctrl+Shift+A"],
+                ["Save Circuit", "Ctrl+S"],
+                ["Duplicate Node", "Ctrl+D"],
+                ["Nudge Node", "Arrow Keys"],
+                ["Nudge (fine)", "Shift+Arrow"],
                 ["Undo", "Ctrl+Z"],
                 ["Redo", "Ctrl+Shift+Z / Ctrl+Y"],
                 ["Zoom In", "Scroll Up"],
@@ -4329,7 +4354,9 @@ export default function Logic() {
               </h4>
               <div className="grid grid-cols-2 gap-1.5 text-[10px]" style={{ color: "#6B6B6B" }}>
                 {[
-                  ["Delete Selected", "Delete"], ["Cancel", "Esc"], ["Auto Arrange", "A"],
+                  ["Delete Selected", "Delete"], ["Cancel", "Esc"],
+                  ["Auto Arrange", "Ctrl+Shift+A"], ["Save Circuit", "Ctrl+S"],
+                  ["Duplicate Node", "Ctrl+D"], ["Nudge", "Arrows"],
                   ["Zoom In", "Scroll Up"], ["Zoom Out", "Scroll Down"], ["Pan", "Alt+Drag"],
                 ].map(([k, v]) => (
                     <div key={k} className="flex justify-between items-center py-1 px-1 rounded-md hover:bg-black/3">
