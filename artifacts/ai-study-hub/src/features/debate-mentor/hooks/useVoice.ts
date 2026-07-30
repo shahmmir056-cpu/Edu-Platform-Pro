@@ -21,6 +21,7 @@ export function useVoice({ onTranscript, autoRestart = false, ttsEndpoint }: Use
   const speakGenRef = useRef(0);
   const currentAbortRef = useRef<AbortController | null>(null);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const synthRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   useEffect(() => {
     autoRestartRef.current = autoRestart;
@@ -40,7 +41,37 @@ export function useVoice({ onTranscript, autoRestart = false, ttsEndpoint }: Use
       currentAudioRef.current.src = "";
       currentAudioRef.current = null;
     }
+    if (synthRef.current) {
+      window.speechSynthesis?.cancel();
+      synthRef.current = null;
+    }
     setIsSpeaking(false);
+  }
+
+  function fallbackSpeak(text: string, gen: number) {
+    if (!window.speechSynthesis) {
+      setIsSpeaking(false);
+      skipNextAutoRef.current = false;
+      return;
+    }
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.1;
+    utterance.pitch = 1.0;
+    synthRef.current = utterance;
+    utterance.onend = () => { finishFallback(); };
+    utterance.onerror = () => { finishFallback(); };
+    window.speechSynthesis.speak(utterance);
+    function finishFallback() {
+      if (gen !== speakGenRef.current) return;
+      if (synthRef.current === utterance) synthRef.current = null;
+      setIsSpeaking(false);
+      skipNextAutoRef.current = false;
+      if (autoRestartRef.current && recognitionRef.current) {
+        setTimeout(() => {
+          try { recognitionRef.current?.start(); setIsListening(true); setTranscript(""); } catch {}
+        }, 400);
+      }
+    }
   }
 
   useEffect(() => {
@@ -199,9 +230,8 @@ export function useVoice({ onTranscript, autoRestart = false, ttsEndpoint }: Use
       });
     } catch (err: any) {
       if (err.name === "AbortError") return;
-      console.warn("Kokoro TTS error:", err.message);
-      setIsSpeaking(false);
-      skipNextAutoRef.current = false;
+      console.warn("Kokoro TTS error, falling back to browser speech:", err.message);
+      fallbackSpeak(trimmed, gen);
     }
   }, []);
 
