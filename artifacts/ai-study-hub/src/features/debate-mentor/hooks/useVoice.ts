@@ -5,17 +5,20 @@ interface UseVoiceOptions {
   autoRestart?: boolean;
 }
 
+const TTS_ENDPOINT = "/api/tts";
+
 export function useVoice({ onTranscript, autoRestart = false }: UseVoiceOptions = {}) {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [isSupported, setIsSupported] = useState(false);
   const recognitionRef = useRef<any>(null);
-  const synthRef = useRef<SpeechSynthesis | null>(null);
-  const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const currentSourceRef = useRef<string | null>(null);
   const autoRestartRef = useRef(autoRestart);
   const skipNextAutoRef = useRef(false);
   const onTranscriptRef = useRef(onTranscript);
+  const speakResolveRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     autoRestartRef.current = autoRestart;
@@ -62,7 +65,7 @@ export function useVoice({ onTranscript, autoRestart = false }: UseVoiceOptions 
         if (autoRestartRef.current && !skipNextAutoRef.current) {
           setTimeout(() => {
             try {
-              synthRef.current?.cancel();
+              cancelAudio();
               recognition.start();
               setIsListening(true);
               setTranscript("");
@@ -74,32 +77,37 @@ export function useVoice({ onTranscript, autoRestart = false }: UseVoiceOptions 
       recognitionRef.current = recognition;
     }
 
-    synthRef.current = window.speechSynthesis || null;
-
-    if (synthRef.current) {
-      const loadVoices = () => {
-        voicesRef.current = synthRef.current?.getVoices() || [];
-      };
-      loadVoices();
-      synthRef.current.addEventListener("voiceschanged", loadVoices);
-    }
-
     return () => {
       skipNextAutoRef.current = true;
       if (recognitionRef.current) {
         try { recognitionRef.current.abort(); } catch {}
       }
-      if (synthRef.current) {
-        synthRef.current.cancel();
-      }
+      cancelAudio();
     };
   }, []);
+
+  function cancelAudio() {
+    if (currentSourceRef.current) {
+      URL.revokeObjectURL(currentSourceRef.current);
+      currentSourceRef.current = null;
+    }
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = "";
+      audioRef.current = null;
+    }
+    if (speakResolveRef.current) {
+      speakResolveRef.current();
+      speakResolveRef.current = null;
+    }
+    setIsSpeaking(false);
+  }
 
   const startListening = useCallback(() => {
     if (!recognitionRef.current) return;
     skipNextAutoRef.current = false;
     try {
-      synthRef.current?.cancel();
+      cancelAudio();
       setIsSpeaking(false);
       recognitionRef.current.start();
       setIsListening(true);
@@ -114,77 +122,92 @@ export function useVoice({ onTranscript, autoRestart = false }: UseVoiceOptions 
     setIsListening(false);
   }, []);
 
-  const speakRateRef = useRef(1.0);
-
-  const getPreferredVoice = useCallback(() => {
-    const voices = voicesRef.current.length > 0
-      ? voicesRef.current
-      : (synthRef.current?.getVoices() || []);
-    return voices.find((v) => v.name.includes("Google") && v.lang.startsWith("en"))
-      || voices.find((v) => v.lang.startsWith("en") && v.localService === false)
-      || voices.find((v) => v.lang.startsWith("en"))
-      || voices[0]
-      || null;
-  }, []);
-
-  const speak = useCallback((text: string, rate?: number) => {
+  const speak = useCallback(async (text: string, voice?: string) => {
     return new Promise<void>((resolve) => {
-      if (!synthRef.current) { resolve(); return; }
-
+      cancelAudio();
       skipNextAutoRef.current = true;
       if (recognitionRef.current) {
         try { recognitionRef.current.stop(); } catch {}
         setIsListening(false);
       }
+      if (!text.trim()) { resolve(); return; }
 
-      const doSpeak = () => {
-        if (!synthRef.current) { resolve(); return; }
-        synthRef.current.cancel();
+      speakResolveRef.current = resolve;
+      setIsSpeaking(true);
 
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = rate ?? speakRateRef.current;
-        utterance.pitch = 1.0;
-        utterance.lang = "en-US";
+      const controller = new AbortController();
 
-        const voice = getPreferredVoice();
-        if (voice) utterance.voice = voice;
-
-        utterance.onstart = () => setIsSpeaking(true);
-        utterance.onend = () => {
-          setIsSpeaking(false);
-          skipNextAutoRef.current = false;
-          if (autoRestartRef.current) {
-            setTimeout(() => {
-              try {
-                recognitionRef.current?.start();
-                setIsListening(true);
-                setTranscript("");
-              } catch {}
-            }, 400);
+      fetch(TTS_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: text.trim(), voice }),
+        signal: controller.signal,
+      })
+        .then(async (res) => {
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({ error: "TTS failed" }));
+            throw new Error(err.error || `HTTP ${res.status}`);
           }
-          resolve();
-        };
-        utterance.onerror = (e) => {
-          console.warn("Speech synthesis error:", e.error);
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
+          currentSourceRef.current = url;
+
+          const audio = new Audio(url);
+          audioRef.current = audio;
+
+          audio.onended = () => {
+            setIsSpeaking(false);
+            if (currentSourceRef.current) {
+              URL.revokeObjectURL(currentSourceRef.current);
+              currentSourceRef.current = null;
+            }
+            audioRef.current = null;
+            speakResolveRef.current = null;
+            skipNextAutoRef.current = false;
+            if (autoRestartRef.current) {
+              setTimeout(() => {
+                try {
+                  recognitionRef.current?.start();
+                  setIsListening(true);
+                  setTranscript("");
+                } catch {}
+              }, 400);
+            }
+            resolve();
+          };
+
+          audio.onerror = () => {
+            setIsSpeaking(false);
+            if (currentSourceRef.current) {
+              URL.revokeObjectURL(currentSourceRef.current);
+              currentSourceRef.current = null;
+            }
+            audioRef.current = null;
+            speakResolveRef.current = null;
+            skipNextAutoRef.current = false;
+            resolve();
+          };
+
+          await audio.play();
+        })
+        .catch((err) => {
+          if (err.name === "AbortError") return;
+          console.warn("Kokoro TTS error:", err.message);
           setIsSpeaking(false);
+          speakResolveRef.current = null;
           skipNextAutoRef.current = false;
           resolve();
-        };
-        synthRef.current.speak(utterance);
-      };
-
-      setTimeout(doSpeak, 80);
+        });
     });
-  }, [getPreferredVoice]);
+  }, []);
 
   const stopSpeaking = useCallback(() => {
-    synthRef.current?.cancel();
-    setIsSpeaking(false);
+    cancelAudio();
     skipNextAutoRef.current = false;
   }, []);
 
-  const setSpeakRate = useCallback((rate: number) => {
-    speakRateRef.current = rate;
+  const setSpeakRate = useCallback((_rate: number) => {
+    // Kokoro speed can be configured via env; no runtime rate control for now
   }, []);
 
   const startAutoConversation = useCallback(() => {

@@ -5,6 +5,7 @@ import classroomRouter from "./classroom";
 import feedbackRouter from "./feedback";
 import pastPapersRouter from "./past-papers";
 import debateMentorRouter from "./debate-mentor";
+import ttsRouter from "./tts";
 
 const router: IRouter = Router();
 
@@ -14,5 +15,6 @@ router.use(classroomRouter);
 router.use(feedbackRouter);
 router.use(pastPapersRouter);
 router.use(debateMentorRouter);
+router.use(ttsRouter);
 
 export default router;
