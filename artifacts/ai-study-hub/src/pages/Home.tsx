@@ -5,6 +5,7 @@ import {
   BookOpen, PenTool, HelpCircle, Layers, ClipboardList,
   ArrowRight, Sigma, FlaskConical, Infinity as InfinityIcon,
   Gamepad2, ClipboardCheck, Zap, Brain, Eye, Lightbulb, Cpu, Rocket, Image as ImageIcon,
+  ChevronLeft, ChevronRight,
 } from "lucide-react";
 import MobileHome from "./MobileHome";
 
@@ -154,6 +155,8 @@ export default function Home() {
   const smoothScroll = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
   const visionImgParallax = useTransform(smoothScroll, [0.15, 0.45], [0, -60]);
   const visionImgScale = useTransform(smoothScroll, [0.15, 0.45], [1, 1.08]);
+  const [carouselIdx, setCarouselIdx] = useState(0);
+  const maxIdx = Math.max(0, SHOWCASE_TOOLS.length - 3);
 
   return (
     <>
@@ -507,43 +510,83 @@ export default function Home() {
           <p style={{ color: "#6B6B6B" }} className="text-base sm:text-lg">Pick a tool below — everything runs instantly, right in your browser.</p>
         </motion.div>
 
-        <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" style={{ perspective: 1200 }}>
-          {SHOWCASE_TOOLS.map((tool, idx) => (
-            <motion.div key={tool.path}
-              initial={{ opacity: 0, y: 60, rotateX: 15, scale: 0.95 }}
-              whileInView={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }}
-              viewport={{ once: true, amount: 0.1 }}
-              transition={{ duration: 0.7, delay: idx * 0.05, ease: [0.16, 1, 0.3, 1] }}
-              style={{ transformPerspective: 800, transformOrigin: "center bottom" }}>
-              <InteractiveCard intensity={3}
-                className="lg-card group relative flex flex-col h-full p-6 rounded-2xl transition-all duration-500 overflow-hidden text-center"
-                style={{ background: "rgba(255,255,255,0.5)", border: "2px solid #2D2D2D", boxShadow: "inset 0 0 0 1px rgba(255,159,76,0.12), inset 0 0 20px rgba(255,159,76,0.04), inset 0 1px 0 rgba(255,255,255,0.6)" }}>
-                <Link href={tool.path} className="absolute inset-0 z-10" />
-                <ShimmerOverlay color="rgba(255,255,255,0.05)" />
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
-                  style={{ background: `radial-gradient(circle at 30% 20%, ${tool.iconColor}04 0%, transparent 60%)` }} />
-                <div className="flex justify-center mb-5 relative z-20">
-                  <motion.div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                    style={{ background: `${tool.iconColor}08`, border: `1px solid ${tool.iconColor}15` }}
-                    whileHover={{ scale: 1.15, rotate: [0, -8, 8, 0] }} transition={{ duration: 0.4 }}>
-                    <tool.icon size={24} style={{ color: tool.iconColor }} />
+        <div className="relative" style={{ perspective: 1200 }}>
+          {/* Left arrow */}
+          <button onClick={() => setCarouselIdx((p) => Math.max(p - 1, 0))}
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-30 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
+            style={{ background: "rgba(255,255,255,0.8)", border: "1.5px solid #2D2D2D", boxShadow: "0 4px 16px rgba(0,0,0,0.06)", backdropFilter: "blur(8px)", color: "#2D2D2D" }}>
+            <ChevronLeft size={18} />
+          </button>
+
+          {/* Carousel track */}
+          <div className="overflow-hidden">
+            <motion.div className="flex gap-5"
+              drag="x"
+              dragConstraints={{ left: -maxIdx * 360, right: 0 }}
+              dragElastic={0.1}
+              onDragEnd={(_, info) => {
+                const threshold = 60;
+                if (info.offset.x < -threshold) setCarouselIdx((p) => Math.min(p + 1, maxIdx));
+                if (info.offset.x > threshold) setCarouselIdx((p) => Math.max(p - 1, 0));
+              }}
+              animate={{ x: -carouselIdx * 360 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.8 }}>
+              {SHOWCASE_TOOLS.map((tool, idx) => {
+                const isFocused = idx >= carouselIdx && idx < carouselIdx + 3;
+                return (
+                  <motion.div key={tool.path} layout
+                    animate={{ scale: isFocused ? 1 : 0.92, opacity: isFocused ? 1 : 0.35 }}
+                    transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                    className="min-w-[340px]">
+                    <InteractiveCard intensity={3}
+                      className="lg-card group relative flex flex-col h-full p-6 rounded-2xl transition-all duration-500 overflow-hidden text-center"
+                      style={{ background: "rgba(255,255,255,0.5)", border: "2px solid #2D2D2D", boxShadow: "inset 0 0 0 1px rgba(255,159,76,0.12), inset 0 0 20px rgba(255,159,76,0.04), inset 0 1px 0 rgba(255,255,255,0.6)" }}>
+                      <Link href={tool.path} className="absolute inset-0 z-10" />
+                      <ShimmerOverlay color="rgba(255,255,255,0.05)" />
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
+                        style={{ background: `radial-gradient(circle at 30% 20%, ${tool.iconColor}04 0%, transparent 60%)` }} />
+                      <div className="flex justify-center mb-5 relative z-20">
+                        <motion.div className="w-12 h-12 rounded-xl flex items-center justify-center"
+                          style={{ background: `${tool.iconColor}08`, border: `1px solid ${tool.iconColor}15` }}
+                          whileHover={{ scale: 1.15, rotate: [0, -8, 8, 0] }} transition={{ duration: 0.4 }}>
+                          <tool.icon size={24} style={{ color: tool.iconColor }} />
+                        </motion.div>
+                      </div>
+                      <span className="inline-flex self-center text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full mb-3 relative z-20"
+                        style={{ background: `${C.orange}08`, color: C.primary, border: `1px solid ${C.orange}15` }}>{tool.tag}</span>
+                      <h3 className="text-base sm:text-lg font-serif font-medium mb-2 relative z-20" style={{ color: C.darkSlate }}>{tool.name}</h3>
+                      <p className="text-sm leading-relaxed flex-1 relative z-20" style={{ color: "#6B6B6B" }}>{tool.desc}</p>
+                      <motion.div className="mt-5 flex items-center justify-center text-sm font-bold relative z-20"
+                        style={{ color: tool.iconColor }}
+                        initial={{ opacity: 0, x: -8 }}
+                        whileHover={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.4 }}>
+                        Launch Tool <ArrowRight size={14} className="ml-1" />
+                      </motion.div>
+                    </InteractiveCard>
                   </motion.div>
-                </div>
-                <span className="inline-flex self-center text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full mb-3 relative z-20"
-                  style={{ background: `${C.orange}08`, color: C.primary, border: `1px solid ${C.orange}15` }}>{tool.tag}</span>
-                <h3 className="text-base sm:text-lg font-serif font-medium mb-2 relative z-20" style={{ color: C.darkSlate }}>{tool.name}</h3>
-                <p className="text-sm leading-relaxed flex-1 relative z-20" style={{ color: "#6B6B6B" }}>{tool.desc}</p>
-                <motion.div className="mt-5 flex items-center justify-center text-sm font-bold relative z-20"
-                  style={{ color: tool.iconColor }}
-                  initial={{ opacity: 0, x: -8 }}
-                  whileHover={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.4 }}>
-                  Launch Tool <ArrowRight size={14} className="ml-1" />
-                </motion.div>
-              </InteractiveCard>
+                );
+              })}
             </motion.div>
-          ))}
-        </motion.div>
+          </div>
+
+          {/* Right arrow */}
+          <button onClick={() => setCarouselIdx((p) => Math.min(p + 1, maxIdx))}
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-30 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
+            style={{ background: "rgba(255,255,255,0.8)", border: "1.5px solid #2D2D2D", boxShadow: "0 4px 16px rgba(0,0,0,0.06)", backdropFilter: "blur(8px)", color: "#2D2D2D" }}>
+            <ChevronRight size={18} />
+          </button>
+
+          {/* Dots */}
+          <div className="flex justify-center gap-1.5 mt-8">
+            {Array.from({ length: maxIdx + 1 }).map((_, i) => (
+              <motion.button key={i} onClick={() => setCarouselIdx(i)}
+                className="rounded-full transition-all duration-300"
+                animate={{ width: i === carouselIdx ? 24 : 6, height: 6, background: i === carouselIdx ? C.orange : "rgba(0,0,0,0.08)" }}
+                whileTap={{ scale: 0.8 }} />
+            ))}
+          </div>
+        </div>
       </section>
 
       {/* ═══ CTA ═══ */}
