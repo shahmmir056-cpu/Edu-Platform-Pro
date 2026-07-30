@@ -170,6 +170,18 @@ export default function Home() {
             background: "linear-gradient(135deg, rgba(245,237,228,0.7) 0%, rgba(245,237,228,0.3) 50%, rgba(255,159,76,0.05) 100%)"
           }} />
 
+          {/* Decorative dots — left */}
+          <div className="absolute top-12 left-8 z-[1] w-[60px] h-[120px] opacity-30 pointer-events-none"
+            style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
+          <div className="absolute top-16 left-[88px] z-[1] w-[40px] h-[80px] opacity-20 pointer-events-none"
+            style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "16px 16px" }} />
+
+          {/* Decorative dots — right */}
+          <div className="absolute top-16 right-8 z-[1] w-[60px] h-[120px] opacity-30 pointer-events-none"
+            style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
+          <div className="absolute top-8 right-[88px] z-[1] w-[40px] h-[80px] opacity-20 pointer-events-none"
+            style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "16px 16px" }} />
+
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 flex-1 flex items-center">
           <div className="w-full max-w-3xl mx-auto pt-24 pb-16 text-center">
             {/* ═══ Editorial Content ═══ */}
