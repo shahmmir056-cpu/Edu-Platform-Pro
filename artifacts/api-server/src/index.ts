@@ -1,7 +1,6 @@
 import { createServer } from "http";
 import app from "./app";
 import { logger } from "./lib/logger";
-import { setupSocketServer } from "./lib/socket";
 
 const rawPort = process.env["PORT"];
 
@@ -25,10 +24,7 @@ process.on("unhandledRejection", (reason) => {
 });
 
 const httpServer = createServer(app);
-setupSocketServer(httpServer);
 
 httpServer.listen(port, () => {
   logger.info({ port }, "API server started");
-
-  logger.info({ port }, "Server listening with WebSocket support");
 });

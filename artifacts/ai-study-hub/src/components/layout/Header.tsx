@@ -45,14 +45,12 @@ const TOOLS = [
   { name: "Study Games", path: "/study-games", icon: Gamepad2 },
   { name: "Test Conductor", path: "/test-conductor", icon: ClipboardCheck },
   { name: "Presentation", path: "/presentation", icon: MonitorPlay },
-  { name: "Virtual Classroom", path: "/virtual-classroom", icon: MonitorPlay },
 ];
 
 const NAV_LINKS = [
   { name: "Home", path: "/", icon: Home },
   { name: "Math Solver", path: "/math-solver", icon: BookOpen },
   { name: "Virtual Lab", path: "/virtual-lab", icon: FlaskConical },
-  { name: "Virtual Classroom", path: "/virtual-classroom", icon: MonitorPlay },
   { name: "AI Debate", path: "/debate-mentor", icon: Brain },
   { name: "Logic", path: "/logic", icon: Cpu },
   { name: "Our Vision", path: "/about", icon: Info },
@@ -293,16 +291,6 @@ export function Header() {
                   </div>
                 </div>
               </nav>
-              <div className="space-y-2 p-3 sm:p-4" style={{ borderTop: "1px solid rgba(255,159,76,0.08)" }}>
-                <Link
-                  href="/virtual-classroom"
-                  onClick={() => setMobileOpen(false)}
-                  className="water-nav-cta flex items-center justify-center gap-2 w-full px-5 py-3 rounded-2xl text-sm font-semibold"
-                >
-                  <MonitorPlay size={16} />
-                  Virtual Classroom
-                </Link>
-              </div>
             </div>
           </SheetContent>
         </Sheet>
