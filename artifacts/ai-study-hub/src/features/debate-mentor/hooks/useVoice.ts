@@ -48,6 +48,30 @@ export function useVoice({ onTranscript, autoRestart = false, ttsEndpoint }: Use
     setIsSpeaking(false);
   }
 
+  let bestVoiceRef: SpeechSynthesisVoice | null = null;
+  let voiceLoadAttempted = false;
+
+  function getBestVoice(): SpeechSynthesisVoice | null {
+    if (bestVoiceRef) return bestVoiceRef;
+    const voices = window.speechSynthesis?.getVoices() ?? [];
+    if (voices.length === 0) return null;
+    const preferred = [
+      "Google UK English Female", "Google UK English Male", "Google US English",
+      "Microsoft Zira", "Microsoft David", "Microsoft Linda",
+      "Samantha", "Karen", "Moira", "Tessa", "Fiona", "Kate",
+    ];
+    for (const name of preferred) {
+      const found = voices.find((v) => v.name.includes(name) && v.localService === false);
+      if (found) { bestVoiceRef = found; return found; }
+    }
+    for (const name of preferred) {
+      const found = voices.find((v) => v.name.includes(name));
+      if (found) { bestVoiceRef = found; return found; }
+    }
+    bestVoiceRef = voices[0];
+    return bestVoiceRef;
+  }
+
   function fallbackSpeak(text: string, gen: number) {
     if (!window.speechSynthesis) {
       setIsSpeaking(false);
@@ -55,8 +79,11 @@ export function useVoice({ onTranscript, autoRestart = false, ttsEndpoint }: Use
       return;
     }
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1.1;
+    utterance.rate = 0.9;
     utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+    const best = getBestVoice();
+    if (best) utterance.voice = best;
     synthRef.current = utterance;
     utterance.onend = () => { finishFallback(); };
     utterance.onerror = () => { finishFallback(); };
@@ -129,6 +156,18 @@ export function useVoice({ onTranscript, autoRestart = false, ttsEndpoint }: Use
       }
       cancelCurrentSpeak();
     };
+  }, []);
+
+  // Preload speech voices on mount (Chrome loads them async)
+  useEffect(() => {
+    if (!window.speechSynthesis) return;
+    if (!voiceLoadAttempted) {
+      voiceLoadAttempted = true;
+      window.speechSynthesis.getVoices();
+    }
+    const onVoices = () => { bestVoiceRef = null; getBestVoice(); };
+    window.speechSynthesis.addEventListener("voiceschanged", onVoices);
+    return () => window.speechSynthesis.removeEventListener("voiceschanged", onVoices);
   }, []);
 
   const startListening = useCallback(() => {
