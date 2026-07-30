@@ -171,7 +171,7 @@ export default function Home() {
           }} />
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 flex-1 flex items-center">
-          <div className="w-full max-w-3xl mx-auto pt-24 pb-16">
+          <div className="w-full max-w-3xl mx-auto pt-24 pb-16 text-center">
             {/* ═══ Editorial Content ═══ */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -233,7 +233,7 @@ export default function Home() {
               </h2>
 
               {/* Description */}
-              <motion.p className="text-base lg:text-lg leading-relaxed max-w-lg mb-10" style={{ color: "#6B6B6B" }}
+              <motion.p className="text-base lg:text-lg leading-relaxed max-w-lg mx-auto mb-10" style={{ color: "#6B6B6B" }}
                 initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 1.9 }}>
                 Neural Sync is an AI-powered smart education platform that helps students learn through{" "}
                 <span style={{ color: "#FF9F4C", fontWeight: 600 }}>AI tutors, virtual labs, smart notes, exam preparation,</span>{" "}
@@ -241,7 +241,7 @@ export default function Home() {
               </motion.p>
 
               {/* CTA Buttons */}
-              <motion.div className="flex flex-wrap items-center gap-4"
+              <motion.div className="flex flex-wrap items-center justify-center gap-4"
                 initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 2.2 }}>
                 <Link href="/quiz"
                   className="group relative inline-flex items-center gap-3 px-9 py-4 rounded-xl text-sm font-bold overflow-hidden transition-all duration-500 hover:-translate-y-1"
@@ -274,7 +274,7 @@ export default function Home() {
               </motion.div>
 
               {/* Stats row */}
-              <motion.div className="flex flex-wrap items-center gap-10 mt-12 pt-8"
+              <motion.div className="flex flex-wrap items-center justify-center gap-10 mt-12 pt-8"
                 style={{ borderTop: "1px solid rgba(45,45,45,0.05)" }}
                 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 2.6 }}>
                 {[
