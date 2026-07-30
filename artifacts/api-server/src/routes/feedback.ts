@@ -46,8 +46,8 @@ router.post("/feedback", async (req: Request, res: Response) => {
   try {
     const { name, email, rating, category, message, page } = req.body as Partial<FeedbackEntry>;
 
-    if (!name || !email || !rating || !message) {
-      res.status(400).json({ error: "Name, email, rating, and message are required." });
+    if (!name || !email || !message) {
+      res.status(400).json({ error: "Name, email, and message are required." });
       return;
     }
 
@@ -56,12 +56,19 @@ router.post("/feedback", async (req: Request, res: Response) => {
       return;
     }
 
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email))) {
+      res.status(400).json({ error: "Invalid email format." });
+      return;
+    }
+
+    const VALID_CATEGORIES = ["bug", "feature", "ux", "ai-quality", "general"];
+    const cleanCat = String(category || "general").trim().toLowerCase();
     const entry: FeedbackEntry = {
       id: crypto.randomUUID(),
       name: String(name).trim(),
       email: String(email).trim(),
       rating,
-      category: String(category || "general").trim(),
+      category: VALID_CATEGORIES.includes(cleanCat) ? cleanCat : "general",
       message: String(message).trim(),
       page: page ? String(page).trim() : undefined,
       createdAt: new Date().toISOString(),

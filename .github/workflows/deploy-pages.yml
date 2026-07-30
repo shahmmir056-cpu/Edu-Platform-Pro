@@ -26,6 +26,7 @@ jobs:
         working-directory: artifacts/ai-study-hub
         env:
           BASE_PATH: /Edu-Platform-Pro
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: artifacts/ai-study-hub/dist/public
