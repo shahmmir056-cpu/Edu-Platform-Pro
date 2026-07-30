@@ -165,19 +165,14 @@ export default function Home() {
       {/* ═══ HERO ═══ */}
       <section className="relative flex flex-col items-center justify-center overflow-hidden"
         style={{ minHeight: "100dvh", background: "#F5EDE4" }}>
-        {/* Background image */}
-        <div className="absolute inset-0 z-0">
-          <img src="/images/hero-bg.jpg" alt=""
-            className="w-full h-full object-cover object-center"
-          />
-          <div className="absolute inset-0" style={{
+          {/* Background overlay */}
+          <div className="absolute inset-0 z-0" style={{
             background: "linear-gradient(135deg, rgba(245,237,228,0.7) 0%, rgba(245,237,228,0.3) 50%, rgba(255,159,76,0.05) 100%)"
           }} />
-        </div>
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 flex-1 flex items-center">
-          <div className="w-full grid lg:grid-cols-2 gap-12 lg:gap-20 items-center pt-24 pb-16">
-            {/* ═══ LEFT: Editorial Content ═══ */}
+          <div className="w-full max-w-3xl mx-auto pt-24 pb-16">
+            {/* ═══ Editorial Content ═══ */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -296,31 +291,7 @@ export default function Home() {
               </motion.div>
             </motion.div>
 
-            {/* ═══ RIGHT: Hero Image ═══ */}
-            <motion.div className="relative h-[320px] sm:h-[420px] lg:h-[580px] rounded-2xl overflow-hidden"
-              initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1.2, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              style={{ boxShadow: "0 8px 40px rgba(255,159,76,0.15)" }}>
-              <img
-                src="/images/hero-new.jpg"
-                alt="Neural Sync AI Learning Platform"
-                className="w-full h-full object-cover"
-                style={{ objectPosition: "center" }}
-              />
-              {/* Overlay gradient for depth */}
-              <div className="absolute inset-0" style={{
-                background: "linear-gradient(135deg, rgba(255,159,76,0.15) 0%, rgba(255,212,168,0.05) 50%, transparent 100%)",
-              }} />
-              {/* Floating badge */}
-              <motion.div className="absolute top-4 right-4 lg:top-6 lg:right-6 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider"
-                style={{ background: "rgba(255,255,255,0.6)", backdropFilter: "blur(12px)", color: "#FF9F4C", border: "1px solid rgba(255,159,76,0.15)" }}
-                initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2 }}>
-                AI Powered
-              </motion.div>
-              {/* Bottom gradient fade */}
-              <div className="absolute bottom-0 left-0 right-0 h-1/3"
-                style={{ background: "linear-gradient(to top, rgba(245,237,228,0.4), transparent)" }} />
-            </motion.div>
+
           </div>
         </div>
 
