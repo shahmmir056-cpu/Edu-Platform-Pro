@@ -1386,12 +1386,12 @@ export default function Logic() {
   const [selected, setSelected] = useState<string | null>(null);
   const [placing, setPlacing] = useState<GateType | null>(null);
   const [wireFrom, setWireFrom] = useState<{ nodeId: string; portId: string; side: "left" | "right" } | null>(null);
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
+  const [mouse, setMouse] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [dragging, setDragging] = useState<{ nodeId: string; ox: number; oy: number } | null>(null);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-  const [panning, setPanning] = useState(false);
-  const panRef = useRef({ sx: 0, sy: 0, px: 0, py: 0 });
+  const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState<number>(1);
+  const [panning, setPanning] = useState<boolean>(false);
+  const panRef = useRef<{ sx: number; sy: number; px: number; py: number }>({ sx: 0, sy: 0, px: 0, py: 0 });
   const [settings, setSettings] = useState<Settings>({ showGrid: true, theme: "dark" });
   const [showTruthTable, setShowTruthTable] = useState(true);
   const [showKMap, setShowKMap] = useState(false);
@@ -1411,7 +1411,7 @@ export default function Logic() {
   const [showMobilePalette, setShowMobilePalette] = useState(false);
   const [history, setHistory] = useState<Circuit[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
-  const skipHistory = useRef(false);
+  const skipHistory = useRef<boolean>(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
 
   const theme = useMemo(() => getTheme(settings.theme), [settings.theme]);

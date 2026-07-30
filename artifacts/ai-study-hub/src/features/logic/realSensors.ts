@@ -1,6 +1,9 @@
 // Real Sensor Integration — Web Serial + WebSocket
 // Allows connecting physical Arduino/ESP32 sensors to the logic simulator
 
+interface SerialReader { read(): Promise<{ value: Uint8Array; done: boolean }>; cancel(): Promise<void>; }
+interface SerialPortHandle { open(opts: { baudRate: number }): Promise<void>; close(): Promise<void>; readable: { getReader(): SerialReader }; }
+interface SerialNavigator { serial: { requestPort(): Promise<SerialPortHandle> }; }
 export type SensorConnectionType = "none" | "serial" | "websocket";
 export type SensorChannel = "temp" | "humidity" | "pressure" | "light" | "ultrasonic" | "ir" | "motion" | "gas" | "force" | "accelerometer" | "gyro" | "current" | "color" | "strain" | "proximity" | "magnetic" | "gps" | "rfid" | "fingerprint" | "microphone";
 
@@ -74,8 +77,8 @@ class RealSensorStore {
   // Callbacks for UI updates
   private listeners: Set<() => void> = new Set();
   // Serial port
-  private serialPort: any = null;
-  private serialReader: any = null;
+  private serialPort: SerialPortHandle | null = null;
+  private serialReader: SerialReader | null = null;
   private serialReading = false;
   // WebSocket
   private ws: WebSocket | null = null;
@@ -174,7 +177,7 @@ class RealSensorStore {
     }
 
     try {
-      this.serialPort = await (navigator as any).serial.requestPort();
+      this.serialPort = await (navigator as unknown as SerialNavigator).serial.requestPort();
       await this.serialPort.open({ baudRate: 115200 });
 
       this.connectionType = "serial";
@@ -184,7 +187,7 @@ class RealSensorStore {
 
       // Start reading loop
       this.readSerialLoop();
-    } catch (err: any) {
+    } catch (err: unknown) {
       this.connected = false;
       this.connectionType = "none";
       this.notify();
@@ -216,7 +219,7 @@ class RealSensorStore {
           }
         }
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Serial read error:", err);
     } finally {
       this.connected = false;
@@ -253,11 +256,11 @@ class RealSensorStore {
         this.notify();
       };
 
-      this.ws.onmessage = (event) => {
-        this.parseDataLine(event.data);
+      this.ws.onmessage = (event: MessageEvent) => {
+        this.parseDataLine(event.data as string);
       };
 
-      this.ws.onerror = (err) => {
+      this.ws.onerror = (err: Event) => {
         console.error("WebSocket error:", err);
       };
 
@@ -266,7 +269,7 @@ class RealSensorStore {
         this.connectionType = "none";
         this.notify();
       };
-    } catch (err: any) {
+    } catch (err: unknown) {
       this.connected = false;
       this.connectionType = "none";
       this.notify();

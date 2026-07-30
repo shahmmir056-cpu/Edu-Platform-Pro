@@ -1,4 +1,4 @@
-import type { Circuit, CircuitNode, GateType } from "./types";
+import type { Circuit, CircuitNode, GateType, TruthTableResult } from "./types";
 import { realSensors } from "./realSensors";
 
 function evalNode(node: CircuitNode): boolean[] {
@@ -7,8 +7,8 @@ function evalNode(node: CircuitNode): boolean[] {
   const setBits = (prefix: string, n: number, val: number) => Array.from({length:n},(_,b)=>!!(val&(1<<b)));
   // Sensor helpers
   const seedH = (() => { let h=0; for(const c of node.id) h=((h<<5)-h+c.charCodeAt(0))|0; return h; })();
-  const getTick = () => { if(!(node as any).state) (node as any).state=0; return ((node as any).state as number); };
-  const advanceTick = () => { (node as any).state = getTick()+1; return (node as any).state; };
+  const getTick = () => { if(!node.state) node.state=0; return (node.state as number); };
+  const advanceTick = () => { node.state = getTick()+1; return node.state; };
   // Check for real sensor data — returns outputs if node has assigned real channel, null otherwise
   const realData = () => realSensors.getNodeOutputs(node.id);
 
@@ -361,7 +361,7 @@ function evalNode(node: CircuitNode): boolean[] {
       let v = getTick() || ((seedH>>>0)%36)+10;
       v += (seedH & 1) ? 1 : -1;
       if (v > 45) v = 45; if (v < 10) v = 10;
-      advanceTick(); (node as any).state = v;
+      advanceTick(); node.state = v;
       const b = Math.round(v * 2.55); // scale to 8-bit
       return Array.from({length:8},(_,j)=>!!(b&(1<<j)));
     }
@@ -369,7 +369,7 @@ function evalNode(node: CircuitNode): boolean[] {
       let v = getTick() || ((seedH>>>0)%60)+20;
       v += (seedH & 2) ? 1 : -1;
       if (v > 95) v = 95; if (v < 15) v = 15;
-      advanceTick(); (node as any).state = v;
+      advanceTick(); node.state = v;
       const b = Math.round(v * 2.55);
       return Array.from({length:8},(_,j)=>!!(b&(1<<j)));
     }
@@ -377,7 +377,7 @@ function evalNode(node: CircuitNode): boolean[] {
       let v = getTick() || 1013;
       v += (seedH & 4) ? 2 : -2;
       if (v > 1100) v = 1100; if (v < 300) v = 300;
-      advanceTick(); (node as any).state = v;
+      advanceTick(); node.state = v;
       const b = Math.round((v - 300) * 0.3125); // map 300-1100 → 0-250
       return Array.from({length:8},(_,j)=>!!(b&(1<<j)));
     }
@@ -392,7 +392,7 @@ function evalNode(node: CircuitNode): boolean[] {
       let v = getTick() || ((seedH>>>0)%200)+2;
       v += (seedH & 8) ? 3 : -3;
       if (v > 400) v = 400; if (v < 2) v = 2;
-      advanceTick(); (node as any).state = v;
+      advanceTick(); node.state = v;
       const b = Math.min(255, v & 0xff);
       return Array.from({length:8},(_,j)=>!!(b&(1<<j)));
     }
@@ -400,14 +400,14 @@ function evalNode(node: CircuitNode): boolean[] {
       let v = getTick() || ((seedH>>>0)%180)+20;
       v += (seedH & 1) ? 5 : -5;
       if (v > 220) v = 220; if (v < 5) v = 5;
-      advanceTick(); (node as any).state = v;
+      advanceTick(); node.state = v;
       return Array.from({length:8},(_,j)=>!!(v&(1<<j)));
     }
     case "gas-sensor": { // MQ-135: air quality 0-255, slow drift
       let v = getTick() || ((seedH>>>0)%128)+50;
       v += (seedH & 2) ? 3 : -2;
       if (v > 255) v = 255; if (v < 10) v = 10;
-      advanceTick(); (node as any).state = v;
+      advanceTick(); node.state = v;
       return Array.from({length:8},(_,j)=>!!(v&(1<<j)));
     }
     case "microphone-sensor": { // MEMS mic: audio amplitude 0-255, oscillating
@@ -421,7 +421,7 @@ function evalNode(node: CircuitNode): boolean[] {
       let v = getTick() || ((seedH>>>0)%12)+4;
       v += (seedH & 1) ? 1 : -1;
       if (v > 15) v = 15; if (v < 0) v = 0;
-      advanceTick(); (node as any).state = v;
+      advanceTick(); node.state = v;
       return [!!(v&1),!!(v&2),!!(v&4),!!(v&8)];
     }
 
@@ -467,7 +467,7 @@ function evalNode(node: CircuitNode): boolean[] {
       let v = getTick() || ((seedH>>>0)%15)+1;
       v += (seedH & 1) ? 1 : -1;
       if (v > 15) v = 15; if (v < 0) v = 0;
-      advanceTick(); (node as any).state = v;
+      advanceTick(); node.state = v;
       return Array.from({length:4},(_,j)=>!!(v&(1<<j))).concat([v>8]);
     }
     case "color-sensor": { // TCS3200: RGB frequency selection
@@ -577,8 +577,8 @@ function evalNode(node: CircuitNode): boolean[] {
       const d = Array.from({length:8},(_,j)=>i(`d${j}`));
       const hi = d.slice(0,4).reduce((v,b,i)=>v|(b?(1<<i):0),0);
       const lo = d.slice(4,8).reduce((v,b,i)=>v|(b?(1<<i):0),0);
-      const mac = (hi * lo + ((node as any).state||0)) & 0xff;
-      (node as any).state = mac;
+      const mac = (hi * lo + ((node.state as number) || 0)) & 0xff;
+      node.state = mac;
       return Array.from({length:8},(_,j)=>!!(mac&(1<<j)));
     }
     case "npu-block": { // NPU: binary neural network — 2-layer perceptron
@@ -597,8 +597,8 @@ function evalNode(node: CircuitNode): boolean[] {
     // ====== Memory Blocks — enhanced with timing and state ======
     case "ram-block": { // SRAM: address latch + read/write
       const addr = (i("a0")?1:0)|(i("a1")?2:0)|(i("a2")?4:0)|(i("a3")?8:0);
-      if (!(node as any).state) (node as any).state = { mem: Array.from({length:16},()=>[false,false,false,false]), latch: 0 };
-      const st = (node as any).state as { mem: boolean[][], latch: number };
+      if (!node.state) node.state = { mem: Array.from({length:16},()=>[false,false,false,false]), latch: 0 };
+      const st = node.state as { mem: boolean[][], latch: number };
       st.latch = addr & 0xf;
       if (i("clk") && i("wr")) {
         st.mem[addr & 0xf] = [i("d0"),i("d1"),i("d2"),i("d3")];
@@ -614,8 +614,8 @@ function evalNode(node: CircuitNode): boolean[] {
     }
     case "eeprom-block": { // EEPROM: wear-leveling, endurance tracking
       const addr = (i("a0")?1:0)|(i("a1")?2:0)|(i("a2")?4:0)|(i("a3")?8:0);
-      if (!(node as any).state) (node as any).state = { mem: Array.from({length:16},()=>[false,false,false,false]), writes: 0 };
-      const st = (node as any).state as { mem: boolean[][], writes: number };
+      if (!node.state) node.state = { mem: Array.from({length:16},()=>[false,false,false,false]), writes: 0 };
+      const st = node.state as { mem: boolean[][], writes: number };
       if ((i("clk") || i("en")) && i("wr")) {
         st.mem[addr & 0xf] = [i("d0"),i("d1"),i("d2"),i("d3")];
         st.writes++;
@@ -624,8 +624,8 @@ function evalNode(node: CircuitNode): boolean[] {
     }
     case "sram-block": { // SRAM: async read, sync write
       const addr = (i("a0")?1:0)|(i("a1")?2:0)|(i("a2")?4:0)|(i("a3")?8:0);
-      if (!(node as any).state) (node as any).state = Array.from({length:16},()=>[false,false,false,false]);
-      const mem = (node as any).state as boolean[][];
+      if (!node.state) node.state = Array.from({length:16},()=>[false,false,false,false]);
+      const mem = node.state as boolean[][];
       if (i("wr") && (i("clk") || i("en"))) {
         mem[addr & 0xf] = [i("d0"),i("d1"),i("d2"),i("d3")];
       }
@@ -633,8 +633,8 @@ function evalNode(node: CircuitNode): boolean[] {
     }
     case "flash-block": { // Flash: multi-level cell, page erase
       const addr = (i("a0")?1:0)|(i("a1")?2:0)|(i("a2")?4:0)|(i("a3")?8:0);
-      if (!(node as any).state) (node as any).state = { mem: Array.from({length:16},()=>[false,false,false,false]), page: -1 };
-      const st = (node as any).state as { mem: boolean[][], page: number };
+      if (!node.state) node.state = { mem: Array.from({length:16},()=>[false,false,false,false]), page: -1 };
+      const st = node.state as { mem: boolean[][], page: number };
       if (i("clk") && i("wr")) {
         st.mem[addr & 0xf] = [i("d0"),i("d1"),i("d2"),i("d3")];
         st.page = addr & 0xf;
@@ -643,8 +643,8 @@ function evalNode(node: CircuitNode): boolean[] {
     }
     case "cache-block": { // Cache: valid+tag matching
       const addr = (i("a0")?1:0)|(i("a1")?2:0)|(i("a2")?4:0)|(i("a3")?8:0);
-      if (!(node as any).state) (node as any).state = { mem: Array.from({length:16},()=>[false,false,false,false]), tag: -1 };
-      const st = (node as any).state as { mem: boolean[][], tag: number };
+      if (!node.state) node.state = { mem: Array.from({length:16},()=>[false,false,false,false]), tag: -1 };
+      const st = node.state as { mem: boolean[][], tag: number };
       if (i("clk") && i("wr")) {
         st.mem[addr & 0xf] = [i("d0"),i("d1"),i("d2"),i("d3")];
         st.tag = addr & 0xf;
@@ -655,8 +655,8 @@ function evalNode(node: CircuitNode): boolean[] {
 
     // ====== Communication Blocks — protocol-accurate handshaking ======
     case "uart-block": { // UART: start bit + 8 data + stop bit, shift register
-      if (!(node as any).state) (node as any).state = { shiftReg: 0, bits: 0, active: false };
-      const st = (node as any).state as { shiftReg: number, bits: number, active: boolean };
+      if (!node.state) node.state = { shiftReg: 0, bits: 0, active: false };
+      const st = node.state as { shiftReg: number, bits: number, active: boolean };
       if (i("clk") && i("start") && !st.active) {
         // Load data into shift register with start(0) and stop(1) framing
         let frame = 0;
@@ -676,13 +676,13 @@ function evalNode(node: CircuitNode): boolean[] {
     }
     case "spi-block": { // SPI: MOSI on falling edge, SCLK phase
       if (i("clk") && !i("ss")) {
-        if (!(node as any).state) (node as any).state = 0;
-        const bit = ((node as any).state as number) % 8;
+        if (!node.state) node.state = 0;
+        const bit = (node.state as number) % 8;
         const data = Array.from({length:4},(_,j)=>i(`d${j}`)?1:0).reduce((v,b)=>(v<<1)|b,0);
-        (node as any).state = bit + 1;
+        node.state = bit + 1;
         return [!!(data & (1 << (3 - bit))), !!i("clk"), true]; // mosi, sclk, busy
       }
-      if (i("ss")) (node as any).state = 0;
+      if (i("ss")) node.state = 0;
       return [false, false, false];
     }
     case "i2c-block": { // I2C: start condition, address+ACK, data
@@ -719,9 +719,9 @@ function evalNode(node: CircuitNode): boolean[] {
     }
     case "wifi-block": { // WiFi 802.11: preamble + header + payload
       if (i("clk") && i("en")) {
-        if (!(node as any).state) (node as any).state = 0;
-        const phase = ((node as any).state as number) % 4;
-        (node as any).state = phase + 1;
+        if (!node.state) node.state = 0;
+        const phase = (node.state as number) % 4;
+        node.state = phase + 1;
         const data = Array.from({length:4},(_,j)=>i(`d${j}`));
         // Preamble → header → payload → ACK cycle
         return [data[0], data[1], phase < 3]; // tx, rx, connected
@@ -730,9 +730,9 @@ function evalNode(node: CircuitNode): boolean[] {
     }
     case "bluetooth-block": { // BLE: advertising → connected → data
       if (i("clk") && i("en")) {
-        if (!(node as any).state) (node as any).state = 0;
-        const phase = ((node as any).state as number) % 3;
-        (node as any).state = phase + 1;
+        if (!node.state) node.state = 0;
+        const phase = (node.state as number) % 3;
+        node.state = phase + 1;
         const data = Array.from({length:4},(_,j)=>i(`d${j}`));
         return [data[0], data[1], phase >= 1]; // tx, rx, connected (after advertising)
       }
@@ -740,9 +740,9 @@ function evalNode(node: CircuitNode): boolean[] {
     }
     case "zigbee-block": { // Zigbee: CSMA-CA channel access
       if (i("clk") && i("en")) {
-        if (!(node as any).state) (node as any).state = 0;
-        const backoff = ((node as any).state as number) % 5;
-        (node as any).state = backoff + 1;
+        if (!node.state) node.state = 0;
+        const backoff = (node.state as number) % 5;
+        node.state = backoff + 1;
         const data = Array.from({length:4},(_,j)=>i(`d${j}`));
         return [data[0], data[1], backoff < 4]; // tx, rx, connected (channel clear)
       }
@@ -750,9 +750,9 @@ function evalNode(node: CircuitNode): boolean[] {
     }
     case "lora-block": { // LoRa: chirp spreading, long range, slow
       if (i("clk") && i("en")) {
-        if (!(node as any).state) (node as any).state = 0;
-        const sf = ((node as any).state as number) % 8; // spreading factor cycles
-        (node as any).state = sf + 1;
+        if (!node.state) node.state = 0;
+        const sf = (node.state as number) % 8; // spreading factor cycles
+        node.state = sf + 1;
         const data = Array.from({length:4},(_,j)=>i(`d${j}`));
         return [data[0], data[1], sf < 6]; // tx, rx, connected (SF dependent)
       }
@@ -760,9 +760,9 @@ function evalNode(node: CircuitNode): boolean[] {
     }
     case "gsm-module": { // GSM: AT command → network attach → data
       if (i("clk") && i("en")) {
-        if (!(node as any).state) (node as any).state = 0;
-        const phase = ((node as any).state as number) % 4;
-        (node as any).state = phase + 1;
+        if (!node.state) node.state = 0;
+        const phase = (node.state as number) % 4;
+        node.state = phase + 1;
         const data = Array.from({length:4},(_,j)=>i(`d${j}`));
         return [data[0], data[1], phase >= 2]; // tx, rx, connected (after register)
       }
@@ -770,9 +770,9 @@ function evalNode(node: CircuitNode): boolean[] {
     }
     case "mqtt-block": { // MQTT: CONNECT → SUBSCRIBE → PUBLISH cycle
       if (i("clk") && i("en")) {
-        if (!(node as any).state) (node as any).state = 0;
-        const phase = ((node as any).state as number) % 3;
-        (node as any).state = phase + 1;
+        if (!node.state) node.state = 0;
+        const phase = (node.state as number) % 3;
+        node.state = phase + 1;
         const topic = (i("topic0")?1:0) | (i("topic1")?2:0);
         return [i("d0"), i("d1"), phase >= 1]; // tx, rx, connected
       }
@@ -781,10 +781,10 @@ function evalNode(node: CircuitNode): boolean[] {
 
     // ====== Power — voltage/current models ======
     case "battery": { // Battery: voltage decays with usage over time
-      if (!(node as any).state) (node as any).state = 100; // 100% charge
-      const charge = (node as any).state as number;
+      if (!node.state) node.state = 100; // 100% charge
+      const charge = node.state as number;
       // Slow self-discharge
-      (node as any).state = Math.max(0, charge - 1);
+      node.state = Math.max(0, charge - 1);
       return [charge > 10, charge > 0]; // vcc, gnd (vcc drops to false at <10%)
     }
     case "adapter": // AC/DC adapter: constant regulated output
@@ -794,31 +794,31 @@ function evalNode(node: CircuitNode): boolean[] {
       return [vin, true]; // vout=vin if above dropout, gnd always true
     }
     case "fuse": { // Fuse: breaks (opens) when overcurrent simulated by state
-      if (!(node as any).state) (node as any).state = { blown: false, current: 0 };
-      const st = (node as any).state as { blown: boolean, current: number };
+      if (!node.state) node.state = { blown: false, current: 0 };
+      const st = node.state as { blown: boolean, current: number };
       if (i("in")) st.current++; else st.current = Math.max(0, st.current - 1);
       if (st.current > 20) st.blown = true; // blows after sustained current
       return [!st.blown && i("in")]; // out
     }
     case "power-switch": { // Switch with state toggle
-      if (!(node as any).state) (node as any).state = false;
-      if (i("en")) (node as any).state = i("in");
-      return [(node as any).state as boolean]; // out follows switch state
+      if (!node.state) node.state = false;
+      if (i("en")) node.state = i("in");
+      return [node.state as boolean]; // out follows switch state
     }
     case "buck-converter": { // Buck: step-down with duty cycle
       if (i("clk")) {
-        if (!(node as any).state) (node as any).state = 0;
-        const duty = ((node as any).state as number + 1) % 8;
-        (node as any).state = duty;
+        if (!node.state) node.state = 0;
+        const duty = (node.state as number + 1) % 8;
+        node.state = duty;
         return [i("vin") && (duty < 5)]; // 62.5% duty cycle → ~62% of Vin
       }
       return [false];
     }
     case "boost-converter": { // Boost: step-up — invert duty cycle
       if (i("clk")) {
-        if (!(node as any).state) (node as any).state = 0;
-        const duty = ((node as any).state as number + 1) % 8;
-        (node as any).state = duty;
+        if (!node.state) node.state = 0;
+        const duty = (node.state as number + 1) % 8;
+        node.state = duty;
         return [i("vin") || (duty < 3)]; // boost: pass or pump
       }
       return [i("vin")];
@@ -834,21 +834,21 @@ function evalNode(node: CircuitNode): boolean[] {
       return [i("a")]; // ideal resistor: pass-through (no boolean voltage drop model)
     }
     case "capacitor": { // RC charge/discharge using state
-      if (!(node as any).state) (node as any).state = false;
-      const prev = (node as any).state as boolean;
-      if (i("a")) (node as any).state = true;  // charge
-      else if (!i("a") && prev) { /* discharge takes time — keep high once */ (node as any).state = false; }
-      return [(node as any).state as boolean];
+      if (!node.state) node.state = false;
+      const prev = node.state as boolean;
+      if (i("a")) node.state = true;  // charge
+      else if (!i("a") && prev) { /* discharge takes time — keep high once */ node.state = false; }
+      return [node.state as boolean];
     }
     case "inductor": { // Current can't change instantly — latching behavior
-      if (!(node as any).state) (node as any).state = false;
-      if (i("a")) (node as any).state = true;
+      if (!node.state) node.state = false;
+      if (i("a")) node.state = true;
       // Latch: stays high for one extra tick after input goes low
-      if (!i("a") && (node as any).state) {
-        (node as any).state = false;
+      if (!i("a") && node.state) {
+        node.state = false;
         return [true]; // flyback pulse
       }
-      return [(node as any).state as boolean];
+      return [node.state as boolean];
     }
     case "diode": // Diode: forward bias only (anode to cathode)
       return [i("a") ? true : false]; // ideal diode: conducts forward only
@@ -859,11 +859,11 @@ function evalNode(node: CircuitNode): boolean[] {
       return [i("b") && i("c")]; // e = base × collector (active region)
     }
     case "transistor-mosfet": { // N-MOSFET: gate threshold with body diode
-      if (!(node as any).state) (node as any).state = false;
+      if (!node.state) node.state = false;
       const gateOn = i("g"); // Vgs > Vth
-      if (gateOn) (node as any).state = i("d");
-      else (node as any).state = false; // cutoff
-      return [(node as any).state as boolean]; // source = gate-controlled drain
+      if (gateOn) node.state = i("d");
+      else node.state = false; // cutoff
+      return [node.state as boolean]; // source = gate-controlled drain
     }
     case "op-amp": { // Op-amp: differential amplifier with saturation
       const vp = i("inp"), vn = i("inn"), vcc = i("vcc"), vss = i("vss");
@@ -874,9 +874,9 @@ function evalNode(node: CircuitNode): boolean[] {
       return [outp, outn];
     }
     case "crystal-osc": { // Quartz crystal oscillator: self-sustaining
-      if (!(node as any).state) (node as any).state = false;
-      (node as any).state = !(node as any).state;
-      return [(node as any).state];
+      if (!(node.state as boolean)) node.state = false;
+      node.state = !(node.state as boolean);
+      return [node.state as boolean];
     }
     case "transformer": { // Transformer: isolated winding coupling
       return [i("a"), i("b")]; // pass-through with isolation
@@ -990,8 +990,8 @@ function evalNode(node: CircuitNode): boolean[] {
       return [w1, w2, w3]; // 3 wheel outputs
     }
     case "chassis-frame": { // Encoder counter from wheel inputs
-      if (!(node as any).state) (node as any).state = [0,0,0,0];
-      const encs = (node as any).state as number[];
+      if (!node.state) node.state = [0,0,0,0];
+      const encs = node.state as number[];
       const wheels = [i("fl"), i("fr"), i("rl"), i("rr")];
       return wheels.map((w,j) => {
         if (w) encs[j] = (encs[j] + 1) % 16;
@@ -1000,7 +1000,7 @@ function evalNode(node: CircuitNode): boolean[] {
     }
     case "industrial-6axis": { // 6-axis robot: forward kinematics
       const clk = i("clk"), en = i("en"), rst = i("rst");
-      if (rst) { (node as any).state = 0; return Array(7).fill(false); }
+      if (rst) { node.state = 0; return Array(7).fill(false); }
       if (!clk || !en) return Array(7).fill(false);
       const joints = (i("j0")?1:0)|(i("j1")?2:0)|(i("j2")?4:0)|(i("j3")?8:0)|(i("j4")?16:0)|(i("j5")?32:0);
       // Simplified FK: compute approximate XYZ from joint bits
@@ -1036,30 +1036,30 @@ function evalNode(node: CircuitNode): boolean[] {
     }
     case "gripper": { // 2-finger parallel gripper
       if (!i("en")) return [false, false];
-      const pos = i("open") ? 100 : i("close") ? 0 : ((node as any).state || 50);
-      (node as any).state = pos;
+      const pos = i("open") ? 100 : i("close") ? 0 : ((node.state as number) || 50);
+      node.state = pos;
       return [pos > 50, pos < 10]; // pos (open), gripping
     }
     case "gripper-3f": { // 3-finger adaptive gripper
       if (!i("en")) return [false, false, false];
       const force = i("force") ? 80 : 40;
-      const pos = Math.min(force, ((node as any).state || 0) + (i("f0")||i("f1")||i("f2") ? 10 : -5));
-      (node as any).state = pos;
+      const pos = Math.min(force, ((node.state as number) || 0) + (i("f0")||i("f1")||i("f2") ? 10 : -5));
+      node.state = pos;
       return [pos > 50, pos > 80, pos >= force]; // pos, gripping, done
     }
     case "encoder": { // Quadrature rotary encoder
-      if (i("rst")) { (node as any).state = 0; return [false, false, false]; }
-      const cnt = ((node as any).state || 0) as number;
+      if (i("rst")) { node.state = 0; return [false, false, false]; }
+      const cnt = (node.state as number) || 0;
       const dir = i("ch_a") !== i("ch_b");
       const newCnt = dir ? cnt + 1 : cnt - 1;
-      (node as any).state = newCnt;
+      node.state = newCnt;
       return [!!(newCnt & 1), dir, !!(cnt & 3)]; // count pulse, direction, speed
     }
     case "lidar": { // LIDAR distance scanner
       if (!i("en")) return [false, false, false, false];
       const scan = i("scan");
-      const dist = scan ? (((node as any).state || 0) + 1) % 8 : ((node as any).state || 0);
-      (node as any).state = dist;
+      const dist = scan ? (((node.state as number) || 0) + 1) % 8 : ((node.state as number) || 0);
+      node.state = dist;
       return [!!(dist & 1), !!(dist & 2), scan, scan]; // dist, angle, valid, done
     }
     case "imu": { // 6-axis IMU (accel + gyro)
@@ -1106,7 +1106,7 @@ function evalNode(node: CircuitNode): boolean[] {
     }
     case "kinematic-solver": { // Inverse kinematics solver
       const clk = i("clk"), en = i("en"), rst = i("rst");
-      if (rst) { (node as any).state = 0; return Array(7).fill(false); }
+      if (rst) { node.state = 0; return Array(7).fill(false); }
       if (!clk || !en) return Array(7).fill(false);
       const tx = (i("tx")?1:0)|(i("ty")?2:0)|(i("tz")?4:0);
       const j0 = !!(tx & 1), j1 = !!(tx & 2), j2 = !!(tx & 4);
@@ -1115,8 +1115,8 @@ function evalNode(node: CircuitNode): boolean[] {
     case "path-planner": { // A* path planner
       const clk = i("clk"), en = i("en");
       if (!clk || !en) return [false, false, false, false];
-      const step = ((node as any).state || 0) as number;
-      (node as any).state = (step + 1) % 8;
+      const step = (node.state || 0) as number;
+      node.state = (step + 1) % 8;
       return [!!(step & 1), !!(step & 2), !!(step & 4), step >= 7]; // px, py, step, done
     }
     case "collision-detector": { // Proximity-based collision avoidance
@@ -1176,9 +1176,9 @@ function evalNode(node: CircuitNode): boolean[] {
     }
     case "stepper-nema": { // NEMA stepper motor
       if (i("en")) return [false, false];
-      const cnt = ((node as any).state || 0) as number;
-      if (i("step")) (node as any).state = cnt + (i("dir") ? 1 : -1);
-      return [!!((node as any).state & 1), i("step")]; // position, moving
+      const cnt = (node.state as number) || 0;
+      if (i("step")) node.state = cnt + (i("dir") ? 1 : -1);
+      return [!!((node.state as number) & 1), i("step")]; // position, moving
     }
     case "harmonic-drive": { // Harmonic drive reducer (1:100 ratio)
       if (!i("en")) return [false, false];
@@ -1256,14 +1256,14 @@ export function simulate(circuit: Circuit): Circuit {
   return { nodes, wires: [...circuit.wires] };
 }
 
-export function generateTruthTable(circuit: Circuit) {
+export function generateTruthTable(circuit: Circuit): TruthTableResult {
   const inputs = circuit.nodes.filter((n) => ["toggle","const-0","const-1","button","dip-switch","keypad","analog-in","push-button","voltage-src-4","data-bus-in","addr-input","step-input","status-in","control-in","strobe-in","ready-in","ack-in","busy-in","interrupt-in","dma-in","hold-in","bus-req-in","test-mode","enable-all","global-reset","random","pulse-gen","edge-det","edge-det-f"].includes(n.type));
   const outputs = circuit.nodes.filter((n) => ["bulb","hex-display","led","d-latch","d-flipflop","t-flipflop","sr-latch","jk-flipflop","7-segment","buzzer","bar-graph","tri-led","stepper-motor","servo-motor","traffic-light","digit-display","dot-matrix","scope-output","indicator-panel","seven-seg-4","ascii-display","signal-analyzer","voltmeter","ammeter","clock-display","thermometer-out","tachometer","power-meter","data-latch-disp","status-led","lcd-display"].includes(n.type));
 
-  if (inputs.length === 0 || outputs.length === 0) return { headers: [], rows: [] };
+  if (inputs.length === 0 || outputs.length === 0) return { headers: [], rows: [], inputNodes: [], outputNodes: [], currentInputs: {}, currentOutputs: {}, activeRowIndex: -1 };
 
   const n = inputs.length;
-  if (n > 12) return { headers: [], rows: [] };
+  if (n > 12) return { headers: [], rows: [], inputNodes: [], outputNodes: [], currentInputs: {}, currentOutputs: {}, activeRowIndex: -1 };
   const rows: { inputs: Record<string, boolean>; outputs: Record<string, boolean> }[] = [];
 
   for (let i = 0; i < Math.pow(2, n); i++) {

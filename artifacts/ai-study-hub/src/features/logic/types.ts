@@ -224,7 +224,7 @@ export interface CircuitNode {
   y: number;
   inputs: Record<string, boolean>;
   outputs: Record<string, boolean>;
-  state?: boolean;
+  state?: unknown;
 }
 
 export interface Wire {
@@ -256,6 +256,21 @@ export interface AppTheme {
   text: string;
   textMuted: string;
   accent: string;
+}
+
+export interface TruthTableRow {
+  inputs: Record<string, boolean>;
+  outputs: Record<string, boolean>;
+}
+
+export interface TruthTableResult {
+  headers: string[];
+  rows: TruthTableRow[];
+  inputNodes: CircuitNode[];
+  outputNodes: CircuitNode[];
+  currentInputs: Record<string, boolean>;
+  currentOutputs: Record<string, boolean>;
+  activeRowIndex: number;
 }
 
 export interface Settings {
