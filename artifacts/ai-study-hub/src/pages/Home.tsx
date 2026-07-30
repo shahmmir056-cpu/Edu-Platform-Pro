@@ -302,7 +302,7 @@ export default function Home() {
               transition={{ duration: 1.2, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
               style={{ boxShadow: "0 8px 40px rgba(255,159,76,0.15)" }}>
               <img
-                src="/images/hero-orange-gradient.jpg"
+                src="/images/hero-new.jpg"
                 alt="Neural Sync AI Learning Platform"
                 className="w-full h-full object-cover"
                 style={{ objectPosition: "center" }}
