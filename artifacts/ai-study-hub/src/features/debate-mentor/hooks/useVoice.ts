@@ -3,11 +3,13 @@ import { useState, useCallback, useRef, useEffect } from "react";
 interface UseVoiceOptions {
   onTranscript?: (text: string) => void;
   autoRestart?: boolean;
+  ttsEndpoint?: string;
 }
 
-const TTS_ENDPOINT = "/api/tts";
+const DEFAULT_TTS_ENDPOINT = "/api/tts";
 
-export function useVoice({ onTranscript, autoRestart = false }: UseVoiceOptions = {}) {
+export function useVoice({ onTranscript, autoRestart = false, ttsEndpoint }: UseVoiceOptions = {}) {
+  const ttsUrl = ttsEndpoint || DEFAULT_TTS_ENDPOINT;
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [transcript, setTranscript] = useState("");
@@ -134,7 +136,7 @@ export function useVoice({ onTranscript, autoRestart = false }: UseVoiceOptions 
     currentAbortRef.current = controller;
 
     try {
-      const res = await fetch(TTS_ENDPOINT, {
+      const res = await fetch(ttsUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: trimmed, voice }),

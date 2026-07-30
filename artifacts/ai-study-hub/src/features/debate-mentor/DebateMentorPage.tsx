@@ -6,7 +6,7 @@ import { VoiceWaveform } from "./components/VoiceWaveform";
 import { ChatInterface } from "./components/ChatInterface";
 import { ParticleBackground } from "./components/ParticleBackground";
 import { useVoice } from "./hooks/useVoice";
-import { sendDebateMessage, generateScore } from "./lib/api";
+import { sendDebateMessage, generateScore, API_TTS } from "./lib/api";
 import type { ChatMessage, DebateMode, DebateScore, InterviewStyle } from "./types";
 
 const MODES: { id: DebateMode; label: string; icon: typeof MessageSquare; desc: string; roleDesc: string; features: string[] }[] = [
@@ -60,6 +60,7 @@ export default function DebateMentorPage() {
       }
     },
     autoRestart: sessionStarted,
+    ttsEndpoint: API_TTS,
   });
 
   const speakRef = useRef(voice.speak);
