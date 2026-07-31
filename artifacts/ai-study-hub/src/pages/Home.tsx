@@ -254,46 +254,49 @@ export default function Home() {
       {/* ═══ HERO ═══ */}
       <section className="relative flex flex-col items-center justify-center overflow-hidden"
         style={{ minHeight: "100dvh", background: "#F5EDE4" }}>
-          {/* Background overlay */}
-          <div className="absolute inset-0 z-0" style={{
-            background: "linear-gradient(135deg, rgba(245,237,228,0.7) 0%, rgba(245,237,228,0.3) 50%, rgba(255,159,76,0.05) 100%)"
-          }} />
+        {/* Ambient glow behind headline */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none z-0"
+          style={{ background: "radial-gradient(circle, rgba(255,159,76,0.08) 0%, rgba(255,212,168,0.04) 40%, transparent 70%)" }} />
 
-          {/* Decorative dots — top-left cluster */}
-          <div className="absolute top-12 left-8 z-[1] w-[60px] h-[120px] opacity-30 pointer-events-none"
-            style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
-          <div className="absolute top-16 left-[88px] z-[1] w-[40px] h-[80px] opacity-20 pointer-events-none"
-            style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "16px 16px" }} />
-          <div className="absolute top-32 left-6 z-[1] w-[30px] h-[60px] opacity-15 pointer-events-none"
-            style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "10px 10px" }} />
+        {/* Subtle grid pattern */}
+        <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.03]"
+          style={{ backgroundImage: "linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
 
-          {/* Decorative dots — top-right cluster */}
-          <div className="absolute top-16 right-8 z-[1] w-[60px] h-[120px] opacity-30 pointer-events-none"
-            style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
-          <div className="absolute top-8 right-[88px] z-[1] w-[40px] h-[80px] opacity-20 pointer-events-none"
-            style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "16px 16px" }} />
-          <div className="absolute top-24 right-6 z-[1] w-[50px] h-[50px] opacity-15 pointer-events-none"
-            style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "10px 10px" }} />
+        {/* Decorative dots — top-left cluster */}
+        <div className="absolute top-12 left-8 z-[1] w-[60px] h-[120px] opacity-30 pointer-events-none"
+          style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
+        <div className="absolute top-16 left-[88px] z-[1] w-[40px] h-[80px] opacity-20 pointer-events-none"
+          style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "16px 16px" }} />
+        <div className="absolute top-32 left-6 z-[1] w-[30px] h-[60px] opacity-15 pointer-events-none"
+          style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "10px 10px" }} />
 
-          {/* Decorative dots — middle-left */}
-          <div className="absolute top-1/2 left-10 z-[1] w-[70px] h-[90px] opacity-[0.08] pointer-events-none"
-            style={{ backgroundImage: "radial-gradient(circle, #000 1.5px, transparent 1.5px)", backgroundSize: "20px 20px" }} />
+        {/* Decorative dots — top-right cluster */}
+        <div className="absolute top-16 right-8 z-[1] w-[60px] h-[120px] opacity-30 pointer-events-none"
+          style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
+        <div className="absolute top-8 right-[88px] z-[1] w-[40px] h-[80px] opacity-20 pointer-events-none"
+          style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "16px 16px" }} />
+        <div className="absolute top-24 right-6 z-[1] w-[50px] h-[50px] opacity-15 pointer-events-none"
+          style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "10px 10px" }} />
 
-          {/* Decorative dots — middle-right */}
-          <div className="absolute top-[45%] right-12 z-[1] w-[80px] h-[100px] opacity-[0.08] pointer-events-none"
-            style={{ backgroundImage: "radial-gradient(circle, #000 1.5px, transparent 1.5px)", backgroundSize: "22px 22px" }} />
+        {/* Decorative dots — middle-left */}
+        <div className="absolute top-1/2 left-10 z-[1] w-[70px] h-[90px] opacity-[0.08] pointer-events-none"
+          style={{ backgroundImage: "radial-gradient(circle, #000 1.5px, transparent 1.5px)", backgroundSize: "20px 20px" }} />
 
-          {/* Decorative dots — bottom-left */}
-          <div className="absolute bottom-20 left-12 z-[1] w-[50px] h-[80px] opacity-20 pointer-events-none"
-            style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "14px 14px" }} />
-          <div className="absolute bottom-32 left-[100px] z-[1] w-[35px] h-[50px] opacity-15 pointer-events-none"
-            style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "11px 11px" }} />
+        {/* Decorative dots — middle-right */}
+        <div className="absolute top-[45%] right-12 z-[1] w-[80px] h-[100px] opacity-[0.08] pointer-events-none"
+          style={{ backgroundImage: "radial-gradient(circle, #000 1.5px, transparent 1.5px)", backgroundSize: "22px 22px" }} />
 
-          {/* Decorative dots — bottom-right */}
-          <div className="absolute bottom-24 right-10 z-[1] w-[55px] h-[90px] opacity-20 pointer-events-none"
-            style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "14px 14px" }} />
-          <div className="absolute bottom-36 right-[110px] z-[1] w-[40px] h-[60px] opacity-15 pointer-events-none"
-            style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
+        {/* Decorative dots — bottom-left */}
+        <div className="absolute bottom-20 left-12 z-[1] w-[50px] h-[80px] opacity-20 pointer-events-none"
+          style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "14px 14px" }} />
+        <div className="absolute bottom-32 left-[100px] z-[1] w-[35px] h-[50px] opacity-15 pointer-events-none"
+          style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "11px 11px" }} />
+
+        {/* Decorative dots — bottom-right */}
+        <div className="absolute bottom-24 right-10 z-[1] w-[55px] h-[90px] opacity-20 pointer-events-none"
+          style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "14px 14px" }} />
+        <div className="absolute bottom-36 right-[110px] z-[1] w-[40px] h-[60px] opacity-15 pointer-events-none"
+          style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 flex-1 flex items-center">
           <div className="w-full max-w-3xl mx-auto pt-24 pb-16 text-center">
@@ -425,13 +428,14 @@ export default function Home() {
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 3.2, duration: 0.8 }}>
           {[Brain, Zap, FlaskConical, Sigma, Rocket].map((Icon, i) => (
             <motion.div key={i}
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,159,76,0.12)", boxShadow: "0 0 12px rgba(255,159,76,0.06)" }}
-              initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 3.4 + i * 0.12, duration: 0.5 }}>
-              <Icon size={13} style={{ color: "rgba(255,159,76,0.35)" }} />
+              className="w-9 h-9 rounded-xl flex items-center justify-center"
+              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,159,76,0.15)", boxShadow: "0 0 16px rgba(255,159,76,0.08), inset 0 1px 0 rgba(255,255,255,0.1)" }}
+              initial={{ opacity: 0, scale: 0.5, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ delay: 3.4 + i * 0.12, duration: 0.5 }}
+              whileHover={{ scale: 1.15, boxShadow: "0 0 24px rgba(255,159,76,0.15)" }}>
+              <Icon size={14} style={{ color: "rgba(255,159,76,0.5)" }} />
             </motion.div>
           ))}
-          <motion.div className="w-1 h-8 rounded-full" style={{ background: "rgba(255,159,76,0.15)" }} />
+          <motion.div className="w-1 h-10 rounded-full" style={{ background: "linear-gradient(to bottom, rgba(255,159,76,0.2), rgba(255,159,76,0.05))" }} />
         </motion.div>
       </section>
 
