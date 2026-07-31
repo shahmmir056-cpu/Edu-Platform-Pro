@@ -438,7 +438,7 @@ export default function Home() {
                 {[
                   { value: "10+", label: "AI Tools" },
                   { value: "50+", label: "Virtual Labs" },
-                  { value: "0$", label: "Always Free" },
+                  { value: "0", label: "Always Free" },
                 ].map((s, i) => (
                   <motion.div key={s.label} className="flex items-center gap-3 group"
                     initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 2.7 + i * 0.12 }}>

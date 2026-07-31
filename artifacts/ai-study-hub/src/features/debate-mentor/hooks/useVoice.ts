@@ -56,9 +56,11 @@ export function useVoice({ onTranscript, autoRestart = false, ttsEndpoint }: Use
     const voices = window.speechSynthesis?.getVoices() ?? [];
     if (voices.length === 0) return null;
     const preferred = [
-      "Google UK English Female", "Google UK English Male", "Google US English",
-      "Microsoft Zira", "Microsoft David", "Microsoft Linda",
+      "Google US English", "Google Canada English", "Google UK English",
+      "Google Australia English", "Google India English", "Google South Africa English",
+      "Microsoft Zira", "Microsoft David", "Microsoft Linda", "Microsoft Hema",
       "Samantha", "Karen", "Moira", "Tessa", "Fiona", "Kate",
+      "Google UK English Female", "Google UK English Male",
     ];
     for (const name of preferred) {
       const found = voices.find((v) => v.name.includes(name) && v.localService === false);
