@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef } from "react";
-import { useLocation } from "wouter";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FlaskConical,
@@ -10,7 +9,6 @@ import {
   Rocket,
 } from "lucide-react";
 import { ToolHeader } from "@/components/ui/ToolHeader";
-import { Footer } from "@/components/layout/Footer";
 import { CUSTOM_SIMULATIONS } from "./simulations";
 import { SIMULATIONS as PHET_SIMS } from "@/lib/simulations";
 import SimView from "./SimView";
@@ -35,31 +33,6 @@ export default function SimulationsPage() {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [activeSim, setActiveSim] = useState<Simulation | null>(null);
   const [activePhetSlug, setActivePhetSlug] = useState<string | null>(null);
-  const [simFooterH, setSimFooterH] = useState(0);
-  const simFooterRef = useRef<HTMLDivElement | null>(null);
-
-  // Measure the sim-viewer footer so the PhET sim's bottom strip is tucked behind it
-  useEffect(() => {
-    const el = simFooterRef.current;
-    if (!el) {
-      setSimFooterH(0);
-      return;
-    }
-    const update = () => setSimFooterH(el.offsetHeight);
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    update();
-    return () => ro.disconnect();
-  }, [activePhetSlug]);
-
-  // Close the sim viewer if the user navigates via a footer link
-  const [location] = useLocation();
-  useEffect(() => {
-    setActivePhetSlug(null);
-    setActiveSim(null);
-    setViewMode("grid");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location]);
 
   const openCustomSim = (sim: Simulation) => {
     setActiveSim(sim);
@@ -317,27 +290,27 @@ export default function SimulationsPage() {
                   </button>
                 </div>
               </div>
-              <div className="flex-1 relative overflow-hidden min-h-[35dvh] lg:min-h-0">
+              <div className="flex-1 relative overflow-hidden">
                 <iframe
                   src={`https://phet.colorado.edu/sims/html/${activePhetSlug}/latest/${activePhetSlug}_en.html?hideHeader=true&showResetButton=false&showInfoButton=false`}
                   title={PHET_SIMS.find((s) => s.slug === activePhetSlug)?.name}
-                  className="absolute top-0 left-0 w-full border-0 bg-white"
-                  style={{ height: `calc(100% + ${simFooterH}px)` }}
+                  className="absolute inset-0 w-full h-full border-0 bg-white"
                   allow="fullscreen; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-modals"
                   referrerPolicy="no-referrer"
                 />
               </div>
-              <div
-                ref={simFooterRef}
-                className="shrink-0 overflow-y-auto max-h-[calc(100dvh-35dvh-4rem)] lg:max-h-none border-t-2 border-[#2D2D2D]"
-              >
-                <Footer />
-              </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {activePhetSlug && (
+        <div
+          className="fixed bottom-0 left-0 right-0 z-[9999]"
+          style={{ height: 56, background: "#2D2D2D" }}
+        />
+      )}
     </div>
   );
 }
