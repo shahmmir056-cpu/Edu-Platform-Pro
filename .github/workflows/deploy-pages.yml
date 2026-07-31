@@ -27,6 +27,9 @@ jobs:
         env:
           BASE_PATH: /Edu-Platform-Pro
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
+      - name: Enable SPA routing (404.html fallback)
+        run: cp dist/public/index.html dist/public/404.html
+        working-directory: artifacts/ai-study-hub
       - uses: actions/upload-pages-artifact@v3
         with:
           path: artifacts/ai-study-hub/dist/public
