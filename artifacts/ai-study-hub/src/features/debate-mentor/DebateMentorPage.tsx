@@ -1,23 +1,19 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, BookOpen, GraduationCap, Briefcase, RotateCcw, Trophy, Sparkles, Mic, MicOff, X, ChevronDown, Cpu, Brain, Database, TrendingUp, BarChart3, Users, Activity, AlertTriangle } from "lucide-react";
+import { MessageSquare, BookOpen, GraduationCap, Briefcase, RotateCcw, Trophy, Sparkles, Mic, MicOff, X, ChevronDown } from "lucide-react";
 import { NeuralAvatar } from "./components/NeuralAvatar";
 import { VoiceWaveform } from "./components/VoiceWaveform";
 import { ChatInterface } from "./components/ChatInterface";
 import { ParticleBackground } from "./components/ParticleBackground";
-import { EnhancedDebateEngine } from "./components/EnhancedDebateEngine";
-import { KnowledgeIntegration } from "./components/KnowledgeIntegration";
-import { MultiAgentSystem } from "./components/MultiAgentSystem";
-import { AdvancedAnalytics } from "./components/AdvancedAnalytics";
 import { useVoice } from "./hooks/useVoice";
 import { sendDebateMessage, generateScore, API_TTS } from "./lib/api";
 import type { ChatMessage, DebateMode, DebateScore, InterviewStyle } from "./types";
 
 const MODES: { id: DebateMode; label: string; icon: typeof MessageSquare; desc: string; roleDesc: string; features: string[] }[] = [
-  { id: "debate", label: "Debate", icon: MessageSquare, desc: "AI argues the opposite side", roleDesc: "I am your Debate Opponent. I will challenge every argument you make, point out fallacies, and push your reasoning to its limits. State your position and let's begin.", features: ["Opposing arguments", "Fallacy detection", "Score & feedback", "Multi-agent analysis"] },
-  { id: "teacher", label: "Teacher", icon: BookOpen, desc: "Step-by-step interactive learning", roleDesc: "I am your AI Teacher. I will explain concepts step-by-step, use real-world analogies, and check your understanding with mini quizzes. What topic would you like to explore?", features: ["Step-by-step", "Mini quizzes", "Adaptive depth", "Concept explorer"] },
-  { id: "viva", label: "Viva", icon: GraduationCap, desc: "University oral exam simulation", roleDesc: "I am your Viva Examiner. I will ask questions one at a time, evaluate your answers on accuracy and depth, and guide you toward the correct understanding. Be prepared.", features: ["One Q at a time", "Hint system", "Performance report", "Real-time analytics"] },
-  { id: "interview", label: "Interview", icon: Briefcase, desc: "HR, technical, or behavioral prep", roleDesc: "I am your Interview Coach. I will simulate a real interview — asking follow-ups, probing weak spots, and giving you detailed feedback. Let's make you interview-ready.", features: ["HR / Technical / Behavioral", "Follow-up probes", "Detailed feedback", "Skill gap analysis"] },
+  { id: "debate", label: "Debate", icon: MessageSquare, desc: "AI argues the opposite side", roleDesc: "I am your Debate Opponent. I will challenge every argument you make, point out fallacies, and push your reasoning to its limits. State your position and let's begin.", features: ["Opposing arguments", "Fallacy detection", "Score & feedback"] },
+  { id: "teacher", label: "Teacher", icon: BookOpen, desc: "Step-by-step interactive learning", roleDesc: "I am your AI Teacher. I will explain concepts step-by-step, use real-world analogies, and check your understanding with mini quizzes. What topic would you like to explore?", features: ["Step-by-step", "Mini quizzes", "Adaptive depth"] },
+  { id: "viva", label: "Viva", icon: GraduationCap, desc: "University oral exam simulation", roleDesc: "I am your Viva Examiner. I will ask questions one at a time, evaluate your answers on accuracy and depth, and guide you toward the correct understanding. Be prepared.", features: ["One Q at a time", "Hint system", "Performance report"] },
+  { id: "interview", label: "Interview", icon: Briefcase, desc: "HR, technical, or behavioral prep", roleDesc: "I am your Interview Coach. I will simulate a real interview — asking follow-ups, probing weak spots, and giving you detailed feedback. Let's make you interview-ready.", features: ["HR / Technical / Behavioral", "Follow-up probes", "Detailed feedback"] },
 ];
 
 const INTERVIEW_STYLES: { id: InterviewStyle; label: string }[] = [
