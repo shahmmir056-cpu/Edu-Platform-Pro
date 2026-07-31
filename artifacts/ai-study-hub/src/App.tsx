@@ -1,7 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { AnimatePresence } from 'framer-motion';
 import { lazy, Suspense } from 'react';
 import { Route, Switch, Router as WouterRouter, useLocation } from 'wouter';
 
@@ -44,10 +43,9 @@ function Router() {
   const [location] = useLocation();
   return (
     <AppLayout>
-      <AnimatePresence mode="wait" initial={false}>
-        <PageTransition key={location}>
-          <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
-            <Switch>
+      <PageTransition key={location}>
+        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+          <Switch>
               <Route path="/" component={Home} />
               <Route path="/research" component={Research} />
               <Route path="/essay" component={Essay} />
@@ -70,7 +68,6 @@ function Router() {
             </Switch>
           </Suspense>
         </PageTransition>
-      </AnimatePresence>
     </AppLayout>
   );
 }
