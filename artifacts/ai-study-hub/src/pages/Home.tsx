@@ -624,30 +624,28 @@ export default function Home() {
                     transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                     className="min-w-[340px]">
                     <InteractiveCard intensity={3}
-                      className="lg-card group relative flex flex-col h-full p-6 rounded-2xl transition-all duration-500 overflow-hidden text-center"
+                      className="lg-card group relative flex flex-col h-full rounded-2xl transition-all duration-500 overflow-hidden text-center"
                       style={{ background: "rgba(255,255,255,0.5)", border: "2px solid #2D2D2D", boxShadow: "inset 0 0 20px rgba(255,159,76,0.04), inset 0 1px 0 rgba(255,255,255,0.6)" }}>
-                      <Link href={tool.path} className="absolute inset-0 z-10" />
-                      <ShimmerOverlay color="rgba(255,255,255,0.05)" />
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
-                        style={{ background: `radial-gradient(circle at 30% 20%, ${tool.iconColor}04 0%, transparent 60%)` }} />
-                      <div className="flex justify-center mb-5 relative z-20">
-                        <motion.div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                          style={{ background: `${tool.iconColor}08`, border: `1px solid ${tool.iconColor}15` }}
-                          whileHover={{ scale: 1.15, rotate: [0, -8, 8, 0] }} transition={{ duration: 0.4 }}>
-                          <tool.icon size={24} style={{ color: tool.iconColor }} />
-                        </motion.div>
-                      </div>
-                      <span className="inline-flex self-center text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full mb-3 relative z-20"
-                        style={{ background: `${C.orange}08`, color: C.primary, border: `1px solid ${C.orange}15` }}>{tool.tag}</span>
-                      <h3 className="text-base sm:text-lg font-serif font-medium mb-2 relative z-20" style={{ color: C.darkSlate }}>{tool.name}</h3>
-                      <p className="text-sm leading-relaxed flex-1 relative z-20" style={{ color: "#6B6B6B" }}>{tool.desc}</p>
-                      <motion.div className="mt-5 flex items-center justify-center text-sm font-bold relative z-20"
-                        style={{ color: tool.iconColor }}
-                        initial={{ opacity: 0, x: -8 }}
-                        whileHover={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.4 }}>
-                        Launch Tool <ArrowRight size={14} className="ml-1" />
-                      </motion.div>
+                      <Link href={tool.path} className="flex flex-col flex-1 h-full p-6 relative z-10">
+                        <ShimmerOverlay color="rgba(255,255,255,0.05)" />
+                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
+                          style={{ background: `radial-gradient(circle at 30% 20%, ${tool.iconColor}04 0%, transparent 60%)` }} />
+                        <div className="flex justify-center mb-5">
+                          <motion.div className="w-12 h-12 rounded-xl flex items-center justify-center"
+                            style={{ background: `${tool.iconColor}08`, border: `1px solid ${tool.iconColor}15` }}
+                            whileHover={{ scale: 1.15, rotate: [0, -8, 8, 0] }} transition={{ duration: 0.4 }}>
+                            <tool.icon size={24} style={{ color: tool.iconColor }} />
+                          </motion.div>
+                        </div>
+                        <span className="inline-flex self-center text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full mb-3"
+                          style={{ background: `${C.orange}08`, color: C.primary, border: `1px solid ${C.orange}15` }}>{tool.tag}</span>
+                        <h3 className="text-base sm:text-lg font-serif font-medium mb-2" style={{ color: C.darkSlate }}>{tool.name}</h3>
+                        <p className="text-sm leading-relaxed flex-1" style={{ color: "#6B6B6B" }}>{tool.desc}</p>
+                        <div className="mt-5 flex items-center justify-center text-sm font-bold"
+                          style={{ color: tool.iconColor }}>
+                          Launch Tool <ArrowRight size={14} className="ml-1" />
+                        </div>
+                      </Link>
                     </InteractiveCard>
                   </motion.div>
                 );
