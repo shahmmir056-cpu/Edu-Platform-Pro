@@ -449,19 +449,18 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Scroll indicator */}
-        <motion.div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-3"
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 3, duration: 0.8 }}>
-          <motion.span className="text-[9px] font-semibold uppercase tracking-[0.25em]" style={{ color: "#9A9A9A" }}
-            animate={{ opacity: [0.2, 0.7, 0.2] }} transition={{ duration: 2.5, repeat: Infinity }}>
-            Scroll
-          </motion.span>
-          <motion.div className="flex flex-col items-center gap-[3px]" animate={{ y: [0, 5, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
-            <motion.div className="w-[14px] h-[1.5px] rounded-full" style={{ background: "#FF9F4C" }}
-              animate={{ opacity: [0.3, 1, 0.3], width: ["10px", "14px", "10px"] }} transition={{ duration: 2, repeat: Infinity }} />
-            <motion.div className="w-[10px] h-[1.5px] rounded-full" style={{ background: "#FF9F4C" }}
-              animate={{ opacity: [0.15, 0.5, 0.15], width: ["7px", "10px", "7px"] }} transition={{ duration: 2, repeat: Infinity, delay: 0.35 }} />
-          </motion.div>
+        {/* futuristic icons row */}
+        <motion.div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-8"
+          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 3.2, duration: 0.8 }}>
+          {[Brain, Zap, FlaskConical, Sigma, Rocket].map((Icon, i) => (
+            <motion.div key={i}
+              className="w-8 h-8 rounded-lg flex items-center justify-center"
+              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,159,76,0.12)", boxShadow: "0 0 12px rgba(255,159,76,0.06)" }}
+              initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 3.4 + i * 0.12, duration: 0.5 }}>
+              <Icon size={13} style={{ color: "rgba(255,159,76,0.35)" }} />
+            </motion.div>
+          ))}
+          <motion.div className="w-1 h-8 rounded-full" style={{ background: "rgba(255,159,76,0.15)" }} />
         </motion.div>
       </section>
 
