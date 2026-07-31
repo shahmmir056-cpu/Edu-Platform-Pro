@@ -539,6 +539,13 @@ export default function VirtualLab() {
         )}
       </AnimatePresence>
 
+      {activeSim && (
+        <div
+          className="fixed bottom-0 left-0 right-0 z-[9999]"
+          style={{ height: 56, background: "#2D2D2D" }}
+        />
+      )}
+
       {/* ═══ Interactive Sim Lightbox ═══ */}
       <AnimatePresence>
         {activeV2Sim && (
