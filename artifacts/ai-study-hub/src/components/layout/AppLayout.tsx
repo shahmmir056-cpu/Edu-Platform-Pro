@@ -9,9 +9,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const isLogicPage = location === "/logic";
   const isLabPage = location.startsWith("/virtual-lab");
+  const isDebatePage = location.startsWith("/debate-mentor");
+  const isAppPage = isLogicPage || isDebatePage;
 
   return (
-    <div className={cn("flex w-full flex-col", isLogicPage ? "h-dvh overflow-hidden" : "min-h-[100dvh]")}>
+    <div className={cn("flex w-full flex-col", isAppPage ? "h-dvh overflow-hidden" : "min-h-[100dvh]")}>
       {/* Liquid Glass animated background */}
       <div className="lg-bg" />
 
@@ -21,20 +23,20 @@ export function AppLayout({ children }: { children: ReactNode }) {
       >
         Skip to content
       </a>
-      {!isLogicPage && <Header />}
+      {!isAppPage && <Header />}
       <main
         id="main-content"
         className={cn(
           "flex-1 min-w-0 max-w-full overflow-x-hidden relative z-10",
-          !isLogicPage && !isLabPage && "pt-20 pb-20 lg:pb-0",
-          isLogicPage && "overflow-hidden",
+          !isAppPage && !isLabPage && "pt-20 pb-20 lg:pb-0",
+          isAppPage && "overflow-hidden",
           isLabPage && "pt-20"
         )}
       >
         {children}
       </main>
-      {!isLogicPage && !isLabPage && <Footer />}
-      {!isLogicPage && !isLabPage && <BottomNav />}
+      {!isAppPage && !isLabPage && <Footer />}
+      {!isAppPage && !isLabPage && <BottomNav />}
     </div>
   );
 }

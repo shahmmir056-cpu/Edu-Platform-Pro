@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
+import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, BookOpen, GraduationCap, Briefcase, RotateCcw, Trophy, Sparkles, Mic, MicOff, X, ChevronDown } from "lucide-react";
+import { MessageSquare, BookOpen, GraduationCap, Briefcase, RotateCcw, Trophy, Sparkles, Mic, MicOff, X, ChevronDown, Home } from "lucide-react";
 import { NeuralAvatar } from "./components/NeuralAvatar";
 import { VoiceWaveform } from "./components/VoiceWaveform";
 import { ChatInterface } from "./components/ChatInterface";
@@ -170,7 +171,7 @@ export default function DebateMentorPage() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ background: "#FFF8F0" }}>
+    <div className="relative h-dvh flex flex-col overflow-hidden" style={{ background: "#FFF8F0" }}>
       <ParticleBackground />
       <div className="fixed inset-0 pointer-events-none z-0">
         <motion.div animate={{ scale: [1, 1.2, 1], opacity: [0.04, 0.08, 0.04] }} transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
@@ -179,9 +180,13 @@ export default function DebateMentorPage() {
           className="absolute rounded-full" style={{ width: 400, height: 400, bottom: "5%", left: "-8%", background: "rgba(255,212,168,0.05)", filter: "blur(100px)" }} />
       </div>
 
-      <div className="relative z-10 min-h-screen flex flex-col">
+      <div className="relative z-10 flex-1 min-h-0 flex flex-col">
         {/* ═══ Top Bar ═══ */}
-        <header className="lg-strong px-4 sm:px-6 py-3 flex items-center gap-3 sticky top-0 z-50" style={{ borderRadius: 0, borderTop: "none", borderLeft: "none", borderRight: "none", flexWrap: "wrap" }}>
+        <header className="lg-strong px-4 sm:px-6 py-3 flex items-center gap-3 shrink-0 z-50" style={{ borderRadius: 0, borderTop: "none", borderLeft: "none", borderRight: "none", flexWrap: "wrap" }}>
+          <Link href="/" aria-label="Back to home"
+            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all hover:scale-105 lg-card">
+            <Home size={16} style={{ color: "#E8852E" }} />
+          </Link>
           <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(255,159,76,0.12)", border: "2px solid #2D2D2D" }}>
             <span className="text-base">🤖</span>
           </div>
@@ -253,9 +258,9 @@ export default function DebateMentorPage() {
         </header>
 
         {/* ═══ Main Content ═══ */}
-        <div className="flex-1 flex flex-col lg:flex-row min-h-0">
-          {/* Left panel */}
-          <div className="lg:w-72 xl:w-80 p-4 lg:p-5 flex flex-col items-center lg:sticky lg:top-[52px] lg:h-[calc(100vh-52px)]"
+        <div className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden">
+          {/* Left panel — fixed in place, scrolls internally if its content grows */}
+          <div className="w-full lg:w-72 xl:w-80 shrink-0 overflow-y-auto max-h-[45vh] lg:max-h-none p-4 lg:p-5 flex flex-col items-center min-h-0"
             style={{ borderRight: "1.5px solid rgba(45,45,45,0.08)", borderBottom: "1.5px solid rgba(45,45,45,0.08)", background: "rgba(255,248,240,0.5)", backdropFilter: "blur(12px)" }}>
 
             {/* Avatar */}
@@ -327,8 +332,8 @@ export default function DebateMentorPage() {
             )}
           </div>
 
-          {/* Chat / Score area */}
-          <div className="flex-1 flex flex-col min-h-0 relative">
+          {/* Chat / Score area — fills remaining space, only this panel scrolls */}
+          <div className="flex-1 flex flex-col min-h-0 relative overflow-hidden">
             <AnimatePresence mode="wait">
               {showScore && score ? (
                 <motion.div key="score" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 40 }}

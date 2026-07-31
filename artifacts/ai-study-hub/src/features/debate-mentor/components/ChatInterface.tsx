@@ -34,13 +34,13 @@ export function ChatInterface({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTo({
-        top: scrollRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }
-  }, [messages, isAiTyping]);
+    const el = scrollRef.current;
+    if (!el) return;
+    const raf = requestAnimationFrame(() => {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [messages, isAiTyping, transcript]);
 
   const handleSend = () => {
     const text = (input || transcript).trim();
@@ -50,11 +50,11 @@ export function ChatInterface({
   };
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Messages */}
+    <div className="flex flex-col h-full min-h-0">
+      {/* Messages — the only independently scrollable region */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto px-5 py-5 space-y-4"
+        className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 py-5 space-y-4"
         style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(255,159,76,0.12) transparent" }}
       >
         {messages.length === 0 && (
@@ -176,8 +176,8 @@ export function ChatInterface({
         )}
       </div>
 
-      {/* Input bar */}
-      <div className="px-5 pb-5 pt-3">
+      {/* Input bar — pinned at the bottom, never scrolls */}
+      <div className="px-5 pb-5 pt-3 shrink-0">
         <div
           className="lg-strong flex items-center gap-3 px-4 py-2.5 flex-wrap"
           style={{ borderRadius: "1.25rem" }}
