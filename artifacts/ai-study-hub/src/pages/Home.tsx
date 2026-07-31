@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { motion, useMotionValue, useTransform, useScroll, useSpring } from "framer-motion";
 import {
   BookOpen, PenTool, HelpCircle, Layers, ClipboardList,
-  ArrowRight, Sigma, FlaskConical, Infinity as InfinityIcon,
+  ArrowRight, Sigma, FlaskConical,
   Gamepad2, ClipboardCheck, Zap, Brain, Eye, Lightbulb, Cpu, Rocket, Image as ImageIcon,
   ChevronLeft, ChevronRight, Star, Quote, MessageSquareHeart,
 } from "lucide-react";
@@ -29,13 +29,6 @@ const SHOWCASE_TOOLS = [
   { name: "Study Games", path: "/study-games", icon: Gamepad2, desc: "Gamified learning with vocabulary matching, flashcard challenges, and timed quizzes.", iconColor: C.indigo, tag: "Fun" },
   { name: "Test Conductor", path: "/test-conductor", icon: ClipboardCheck, desc: "Practice exams with MCQ, true/false, fill-in-the-blank, and essay questions.", iconColor: C.cyan, tag: "New" },
   { name: "AI Debate Mentor", path: "/debate-mentor", icon: Brain, desc: "Speak with an AI that challenges your thinking, debates ideas, and builds critical thinking.", iconColor: C.indigo, tag: "New" },
-];
-
-const FEATURE_STRIP = [
-  { icon: Brain, title: "AI Study Tools", desc: "Six writing & research tools that draft, explain, and quiz you instantly.", accent: C.orange },
-  { icon: Sigma, title: "Step-by-Step Solver", desc: "Every math answer comes with the reasoning shown, not just the result.", accent: C.sky },
-  { icon: FlaskConical, title: "Virtual Science Labs", desc: "Real PhET simulations you can touch, drag, and experiment with.", accent: C.cyan },
-  { icon: InfinityIcon, title: "Free, Forever", desc: "No account, no paywall, no limits. Just open a tool and start learning.", accent: C.blueLight },
 ];
 
 interface FeedbackEntry {
@@ -470,35 +463,6 @@ export default function Home() {
               animate={{ opacity: [0.15, 0.5, 0.15], width: ["7px", "10px", "7px"] }} transition={{ duration: 2, repeat: Infinity, delay: 0.35 }} />
           </motion.div>
         </motion.div>
-      </section>
-
-      {/* ═══ PREMIUM FEATURE STRIP ═══ */}
-      <section className="relative px-6 -mt-16 md:-mt-20 z-20">
-        <div className="max-w-7xl mx-auto">
-          <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
-            variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }}>
-            {FEATURE_STRIP.map((f) => (
-              <motion.div key={f.title} variants={fadeUp}>
-                <InteractiveCard intensity={4}
-                  className="group relative rounded-2xl p-7 transition-all duration-700 h-full overflow-hidden text-center"
-                  style={{ background: "rgba(255,255,255,0.45)", backdropFilter: "blur(24px)", border: "1px solid rgba(45,45,45,0.05)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.5), 0 8px 32px rgba(0,0,0,0.02)" }}>
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
-                    style={{ background: `radial-gradient(circle at 50% 0%, ${f.accent}06 0%, transparent 70%)` }} />
-                  <div className="flex justify-center mb-5">
-                    <div className="w-[52px] h-[52px] rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:rotate-[-6deg]"
-                      style={{ background: `${f.accent}08`, border: `1px solid ${f.accent}12` }}>
-                      <f.icon size={24} style={{ color: f.accent }} />
-                    </div>
-                  </div>
-                  <h3 className="font-serif text-lg font-medium mb-2.5" style={{ color: "#2D2D2D" }}>{f.title}</h3>
-                  <p className="text-sm leading-relaxed" style={{ color: "#6B6B6B" }}>{f.desc}</p>
-                  <motion.div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                    style={{ background: `linear-gradient(90deg, transparent, ${f.accent}, transparent)` }} />
-                </InteractiveCard>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
       </section>
 
       {/* ═══ IMMERSIVE VISION ═══ */}
