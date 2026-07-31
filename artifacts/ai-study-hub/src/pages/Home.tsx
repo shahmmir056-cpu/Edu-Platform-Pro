@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { motion, useMotionValue, useTransform, useScroll, useSpring } from "framer-motion";
 import {
   BookOpen, PenTool, HelpCircle, Layers, ClipboardList,
-  ArrowRight, Sigma, FlaskConical, Shield, Check,
+  ArrowRight, Sigma, FlaskConical, Shield, Check, Sparkles,
   Gamepad2, ClipboardCheck, Zap, Brain, Eye, Lightbulb, Cpu, Rocket, Image as ImageIcon,
   ChevronLeft, ChevronRight, Star, Quote, MessageSquareHeart,
 } from "lucide-react";
