@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { motion, useMotionValue, useTransform, useScroll, useSpring } from "framer-motion";
 import {
   BookOpen, PenTool, HelpCircle, Layers, ClipboardList,
-  ArrowRight, Sigma, FlaskConical,
+  ArrowRight, Sigma, FlaskConical, Shield, Check,
   Gamepad2, ClipboardCheck, Zap, Brain, Eye, Lightbulb, Cpu, Rocket, Image as ImageIcon,
   ChevronLeft, ChevronRight, Star, Quote, MessageSquareHeart,
 } from "lucide-react";
@@ -155,35 +155,6 @@ function FeedbackSection() {
 
 const fadeUp = { hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0, transition: { duration: 1.0, ease: [0.16, 1, 0.3, 1] } } };
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.12 } } };
-
-/* ─── Animated Counter ─── */
-function AnimatedCounter({ value, accent }: { value: string; accent: string }) {
-  const [display, setDisplay] = useState("0");
-  const ref = useRef<HTMLParagraphElement>(null);
-  const [inView, setInView] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.5 });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-  const num = parseInt(value) || 0;
-  useEffect(() => {
-    if (!inView) return;
-    if (num === 0) { setDisplay("0"); return; }
-    const steps = 50;
-    const t = setInterval(() => {
-      setDisplay((prev) => {
-        const next = parseInt(prev) + 1;
-        if (next >= steps) { clearInterval(t); return String(num); }
-        return String(Math.floor((num / steps) * next));
-      });
-    }, 20);
-    return () => clearInterval(t);
-  }, [inView, num]);
-  return <span ref={ref} className={`text-4xl md:text-5xl font-serif font-bold mb-2`} style={{ color: accent }}>{display}</span>;
-}
 
 /* ─── Interactive Card with enhanced 3D tilt ─── */
 function InteractiveCard({ children, className, style, intensity = 4 }: { children: React.ReactNode; className?: string; style?: React.CSSProperties; intensity?: number }) {
@@ -427,19 +398,19 @@ export default function Home() {
                 </Link>
               </motion.div>
 
-              {/* Stats row */}
-              <motion.div className="flex flex-wrap items-center justify-center gap-10 mt-12 pt-8"
-                style={{ borderTop: "1px solid rgba(45,45,45,0.05)" }}
-                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 2.6 }}>
+              {/* Trust row */}
+              <motion.div className="flex flex-wrap items-center justify-center gap-6 mt-10 pt-6"
+                style={{ borderTop: "1px solid rgba(45,45,45,0.06)" }}
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 2.8 }}>
                 {[
-                  { value: "10+", label: "AI Tools" },
-                  { value: "50+", label: "Virtual Labs" },
-                  { value: "0$", label: "Always Free" },
-                ].map((s, i) => (
-                  <motion.div key={s.label} className="flex items-center gap-3 group"
-                    initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 2.7 + i * 0.12 }}>
-                    <span className="text-xl font-bold font-serif group-hover:scale-110 transition-transform duration-300" style={{ color: "#FF9F4C" }}>{s.value}</span>
-                    <span className="text-xs tracking-wide" style={{ color: "#9A9A9A" }}>{s.label}</span>
+                  { icon: Shield, text: "100% Free", color: C.orange },
+                  { icon: Sparkles, text: "AI-Powered", color: C.sky },
+                  { icon: Check, text: "No Sign-up", color: C.cyan },
+                ].map((item, i) => (
+                  <motion.div key={item.text} className="flex items-center gap-2"
+                    initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 3.0 + i * 0.12 }}>
+                    <item.icon size={12} style={{ color: item.color }} />
+                    <span className="text-[10px] font-medium tracking-wide uppercase" style={{ color: "#9A9A9A" }}>{item.text}</span>
                   </motion.div>
                 ))}
               </motion.div>
@@ -571,27 +542,42 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══ STATS ═══ */}
-      <section className="relative px-4 sm:px-6 py-20 overflow-hidden"
-        style={{ background: "linear-gradient(180deg, #FFF8F0 0%, rgba(255,159,76,0.02) 50%, #FFF8F0 100%)" }}>
-        <motion.div className="relative z-10 max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 md:gap-12 text-center"
-          variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.3 }}>
-          {[{ value: "10", label: "AI-Powered Tools", accent: C.orange },
-            { value: "50+", label: "Virtual Lab Simulations", accent: C.sky },
-            { value: "0", label: "Sign-ups Required", accent: C.cyan },
-            { value: "24/7", label: "Always Available", accent: C.blueLight },
-          ].map((s) => (
-            <motion.div key={s.label} variants={fadeUp}>
-              <motion.div className="rounded-2xl px-6 py-6 group"
-                whileHover={{ y: -4, scale: 1.02 }} transition={{ duration: 0.3 }}
-                style={{ background: "rgba(255,255,255,0.5)", border: "2px solid #2D2D2D", boxShadow: "inset 0 0 20px rgba(255,159,76,0.03), inset 0 1px 0 rgba(255,255,255,0.6)", backdropFilter: "blur(16px)" }}>
-                <AnimatedCounter value={s.value} accent={s.accent} />
-                <motion.p className="text-sm uppercase tracking-wide font-medium" style={{ color: "#9A9A9A" }}
-                  whileHover={{ color: s.accent }} transition={{ duration: 0.3 }}>{s.label}</motion.p>
+      {/* ═══ FEATURES ═══ */}
+      <section className="relative px-4 sm:px-6 py-20 overflow-hidden">
+        <div className="max-w-6xl mx-auto">
+          <motion.div className="text-center mb-14"
+            initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}>
+            <motion.p className="text-sm font-bold uppercase tracking-widest mb-3" style={{ color: C.orange }}>Why Neural Sync</motion.p>
+            <h2 className="text-2xl md:text-4xl font-serif mb-4" style={{ color: "#1A1A1A" }}>Built for the way you learn</h2>
+            <p className="text-sm max-w-md mx-auto" style={{ color: "#6B6B6B" }}>AI tools that adapt to you — no accounts, no paywalls, just open and start.</p>
+          </motion.div>
+          <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+            variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }}>
+            {[
+              { icon: Brain, title: "AI That Explains", desc: "Get step-by-step reasoning, not just answers. The AI checks your understanding in real time.", accent: C.orange, glow: "rgba(255,159,76,0.06)" },
+              { icon: FlaskConical, title: "Hands-on Labs", desc: "49 PhET simulations across biology, chemistry, and physics — drag, click, explore.", accent: C.sky, glow: "rgba(255,179,102,0.06)" },
+              { icon: Shield, title: "Always Free", desc: "No account required. No paywalls. No limits. Just open a tool and start learning.", accent: C.cyan, glow: "rgba(152,212,255,0.06)" },
+              { icon: Rocket, title: "Instant Results", desc: "Math solver, essay writer, quizzes — everything builds on your browser in seconds.", accent: C.blueLight, glow: "rgba(255,202,128,0.06)" },
+            ].map((f) => (
+              <motion.div key={f.title} variants={fadeUp}>
+                <div className="rounded-2xl p-6 h-full relative overflow-hidden group transition-all duration-500 hover:shadow-lg"
+                  style={{ background: "rgba(255,255,255,0.5)", border: "1.5px solid rgba(45,45,45,0.08)", backdropFilter: "blur(12px)" }}>
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                    style={{ background: `radial-gradient(circle at 50% 0%, ${f.glow}, transparent 70%)` }} />
+                  <div className="relative z-10">
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-[-6deg]"
+                      style={{ background: `${f.accent}10`, border: `1px solid ${f.accent}20` }}>
+                      <f.icon size={22} style={{ color: f.accent }} />
+                    </div>
+                    <h3 className="font-serif text-base font-medium mb-2.5" style={{ color: "#1A1A1A" }}>{f.title}</h3>
+                    <p className="text-xs leading-relaxed" style={{ color: "#6B6B6B" }}>{f.desc}</p>
+                  </div>
+                </div>
               </motion.div>
-            </motion.div>
-          ))}
-        </motion.div>
+            ))}
+          </motion.div>
+        </div>
       </section>
 
       {/* ═══ TOOLS GRID ═══ */}
