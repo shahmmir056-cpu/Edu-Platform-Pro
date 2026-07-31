@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import MobileHome from "./MobileHome";
 
+const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
 const C = {
   orange: "#FF9F4C", cyan: "#FFD4A8", indigo: "#E8852E",
   sky: "#FFB366", blueLight: "#FFCA80", ice: "#FFF3E0",
@@ -273,10 +275,11 @@ function AnimatedBorder() {
 }
 
 export default function Home() {
+  const shouldAnimate = !isMobile;
   const { scrollYProgress } = useScroll();
-  const smoothScroll = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
-  const visionImgParallax = useTransform(smoothScroll, [0.15, 0.45], [0, -60]);
-  const visionImgScale = useTransform(smoothScroll, [0.15, 0.45], [1, 1.08]);
+  const smoothScroll = useSpring(scrollYProgress, { stiffness: shouldAnimate ? 100 : 0, damping: shouldAnimate ? 30 : 0 });
+  const visionImgParallax = useTransform(smoothScroll, [0.15, 0.45], [0, shouldAnimate ? -60 : 0]);
+  const visionImgScale = useTransform(smoothScroll, [0.15, 0.45], [1, shouldAnimate ? 1.08 : 1]);
   const [carouselIdx, setCarouselIdx] = useState(0);
   const maxIdx = Math.max(0, SHOWCASE_TOOLS.length - 3);
 
@@ -438,7 +441,7 @@ export default function Home() {
                 {[
                   { value: "10+", label: "AI Tools" },
                   { value: "50+", label: "Virtual Labs" },
-                  { value: "0", label: "Always Free" },
+                  { value: "0$", label: "Always Free" },
                 ].map((s, i) => (
                   <motion.div key={s.label} className="flex items-center gap-3 group"
                     initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 2.7 + i * 0.12 }}>
