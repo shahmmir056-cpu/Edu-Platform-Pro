@@ -101,7 +101,7 @@ function FeedbackSection() {
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }} transition={{ duration: 0.6 }}
           className="max-w-xl mx-auto text-center rounded-2xl p-10"
-          style={{ background: "rgba(255,255,255,0.5)", border: "2px solid #2D2D2D", boxShadow: "inset 0 0 0 1px rgba(255,159,76,0.12), inset 0 1px 0 rgba(255,255,255,0.6)" }}>
+          style={{ background: "rgba(255,255,255,0.5)", border: "2px solid #2D2D2D", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6)" }}>
           <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
             style={{ background: "rgba(255,159,76,0.1)", color: C.primary }}>
             <MessageSquareHeart size={26} />
@@ -123,7 +123,7 @@ function FeedbackSection() {
               initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.6, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
               className="relative flex flex-col p-6 rounded-2xl transition-all duration-500 hover:-translate-y-1"
-              style={{ background: "rgba(255,255,255,0.5)", border: "2px solid #2D2D2D", boxShadow: "inset 0 0 0 1px rgba(255,159,76,0.12), inset 0 0 20px rgba(255,159,76,0.04), inset 0 1px 0 rgba(255,255,255,0.6)" }}>
+              style={{ background: "rgba(255,255,255,0.5)", border: "2px solid #2D2D2D", boxShadow: "inset 0 0 20px rgba(255,159,76,0.04), inset 0 1px 0 rgba(255,255,255,0.6)" }}>
               <Quote size={22} className="mb-3" style={{ color: "rgba(255,159,76,0.5)" }} />
               <div className="flex items-center gap-0.5 mb-3">
                 {[1, 2, 3, 4, 5].map((star) => (
@@ -425,7 +425,7 @@ export default function Home() {
                   <motion.span className="absolute inset-0 rounded-xl" style={{ background: "linear-gradient(135deg, rgba(255,159,76,0.05), rgba(232,133,46,0.02))" }}
                     initial={{ opacity: 0 }} whileHover={{ opacity: 1 }} transition={{ duration: 0.4 }} />
                   <motion.div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                    style={{ boxShadow: "inset 0 0 0 1px rgba(255,159,76,0.12), 0 0 30px rgba(255,159,76,0.04)" }} />
+                    style={{ boxShadow: "0 0 30px rgba(255,159,76,0.04)" }} />
                   <FlaskConical size={16} className="relative z-10 group-hover:rotate-[-12deg] transition-transform duration-500" />
                   <span className="relative z-10">Explore Features</span>
                 </Link>
@@ -618,7 +618,7 @@ export default function Home() {
             <motion.div key={s.label} variants={fadeUp}>
               <motion.div className="rounded-2xl px-6 py-6 group"
                 whileHover={{ y: -4, scale: 1.02 }} transition={{ duration: 0.3 }}
-                style={{ background: "rgba(255,255,255,0.5)", border: "2px solid #2D2D2D", boxShadow: "inset 0 0 0 1px rgba(255,159,76,0.1), inset 0 0 20px rgba(255,159,76,0.03), inset 0 1px 0 rgba(255,255,255,0.6)", backdropFilter: "blur(16px)" }}>
+                style={{ background: "rgba(255,255,255,0.5)", border: "2px solid #2D2D2D", boxShadow: "inset 0 0 20px rgba(255,159,76,0.03), inset 0 1px 0 rgba(255,255,255,0.6)", backdropFilter: "blur(16px)" }}>
                 <AnimatedCounter value={s.value} accent={s.accent} />
                 <motion.p className="text-sm uppercase tracking-wide font-medium" style={{ color: "#9A9A9A" }}
                   whileHover={{ color: s.accent }} transition={{ duration: 0.3 }}>{s.label}</motion.p>
@@ -669,7 +669,7 @@ export default function Home() {
                     className="min-w-[340px]">
                     <InteractiveCard intensity={3}
                       className="lg-card group relative flex flex-col h-full p-6 rounded-2xl transition-all duration-500 overflow-hidden text-center"
-                      style={{ background: "rgba(255,255,255,0.5)", border: "2px solid #2D2D2D", boxShadow: "inset 0 0 0 1px rgba(255,159,76,0.12), inset 0 0 20px rgba(255,159,76,0.04), inset 0 1px 0 rgba(255,255,255,0.6)" }}>
+                      style={{ background: "rgba(255,255,255,0.5)", border: "2px solid #2D2D2D", boxShadow: "inset 0 0 20px rgba(255,159,76,0.04), inset 0 1px 0 rgba(255,255,255,0.6)" }}>
                       <Link href={tool.path} className="absolute inset-0 z-10" />
                       <ShimmerOverlay color="rgba(255,255,255,0.05)" />
                       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
@@ -725,7 +725,7 @@ export default function Home() {
         <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }} transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }}>
           <div className="relative max-w-6xl mx-auto rounded-[2rem] overflow-hidden px-8 md:px-16 py-16 md:py-20 text-center isolate"
-            style={{ background: "linear-gradient(135deg, rgba(255,159,76,0.04) 0%, rgba(255,255,255,0.5) 30%, rgba(6,182,212,0.04) 100%)", border: "2px solid #2D2D2D", boxShadow: "inset 0 0 0 1px rgba(255,159,76,0.1)" }}>
+            style={{ background: "linear-gradient(135deg, rgba(255,159,76,0.04) 0%, rgba(255,255,255,0.5) 30%, rgba(6,182,212,0.04) 100%)", border: "2px solid #2D2D2D" }}>
             <AnimatedBorder />
             <motion.div className="absolute inset-0 pointer-events-none"
               style={{ backgroundImage: "radial-gradient(rgba(255,159,76,0.03) 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
