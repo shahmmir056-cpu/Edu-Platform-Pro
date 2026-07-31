@@ -5,7 +5,7 @@ import {
   BookOpen, PenTool, HelpCircle, Layers, ClipboardList,
   FlaskConical, Sigma, Gamepad2, ClipboardCheck, Brain,
   ArrowRight, Zap, Sparkles, Rocket, ChevronRight,
-  GraduationCap, Star,
+  GraduationCap, Star, MessageSquareHeart, Quote,
 } from "lucide-react";
 
 const C = {
@@ -104,9 +104,114 @@ function CountUp({ value, suffix = "" }: { value: string; suffix?: string }) {
   return <span ref={ref}>{display}{suffix}</span>;
 }
 
+interface FeedbackEntry {
+  id: string;
+  name: string;
+  rating: number;
+  category: string;
+  message: string;
+}
+
+const MOBILE_CATEGORY_LABELS: Record<string, string> = {
+  bug: "Bug Report",
+  feature: "Feature Request",
+  ux: "UX / Design",
+  "ai-quality": "AI Quality",
+  general: "General",
+};
+
+const MOBILE_API_BASE = import.meta.env.VITE_API_URL || "https://acceptable-charm-production-2ace.up.railway.app";
+
+function MobileFeedbackSection() {
+  const [entries, setEntries] = useState<FeedbackEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`${MOBILE_API_BASE}/api/feedback`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load feedback");
+        return res.json();
+      })
+      .then((data) => {
+        if (!cancelled) {
+          setEntries(Array.isArray(data.entries) ? data.entries.slice(0, 4) : []);
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  return (
+    <section className="relative py-10 px-5 overflow-hidden">
+      <AnimatedBackground />
+      <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} className="max-w-sm mx-auto">
+        <motion.h2 variants={fadeUp} className="text-lg font-serif font-medium mb-1 flex items-center gap-2.5" style={{ color: C.text }}>
+          <motion.div className="w-1 h-5 rounded-full" style={{ background: C.orange }}
+            animate={{ height: [16, 20, 16] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} />
+          What Students Say
+        </motion.h2>
+        <motion.p variants={fadeUp} className="text-xs mb-5" style={{ color: C.muted }}>
+          Real feedback from the Neural Sync community.
+        </motion.p>
+
+        {loading ? (
+          <div className="flex justify-center py-8">
+            <div className="w-8 h-8 border-2 border-[#FF9F4C]/20 border-t-[#FF9F4C] rounded-full animate-spin" />
+          </div>
+        ) : entries.length === 0 ? (
+          <motion.div variants={fadeUp} className="rounded-2xl p-5 text-center"
+            style={{ background: "rgba(255,255,255,0.45)", border: "1.5px solid rgba(45,45,45,0.1)" }}>
+            <p className="text-xs mb-4" style={{ color: C.muted }}>Be the first to share your thoughts on Neural Sync.</p>
+            <Link href="/contact" className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-bold text-white"
+              style={{ background: "linear-gradient(135deg, #FF9F4C, #E8852E)" }}>
+              <MessageSquareHeart size={13} /> Share Feedback
+            </Link>
+          </motion.div>
+        ) : (
+          <div className="space-y-3">
+            {entries.map((entry, i) => (
+              <motion.div key={entry.id} variants={fadeUp}
+                className="rounded-2xl p-4 relative overflow-hidden"
+                style={{ background: "rgba(255,255,255,0.45)", border: "1.5px solid rgba(45,45,45,0.1)", backdropFilter: "blur(8px)" }}>
+                <Quote size={15} className="mb-2" style={{ color: "rgba(255,159,76,0.5)" }} />
+                <p className="text-xs leading-relaxed mb-3" style={{ color: C.text }}>
+                  "{entry.message}"
+                </p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
+                      style={{ background: "linear-gradient(135deg, #FF9F4C, #E8852E)" }}>
+                      {(entry.name || "U").charAt(0).toUpperCase()}
+                    </div>
+                    <span className="text-xs font-semibold" style={{ color: C.text }}>{entry.name}</span>
+                  </div>
+                  <div className="flex items-center gap-0.5">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star key={star} size={11}
+                        className={star <= entry.rating ? "fill-current" : "text-[#D8D8D8]"}
+                        style={star <= entry.rating ? { color: "#FF9F4C" } : undefined} />
+                    ))}
+                  </div>
+                </div>
+                <span className="absolute top-3 right-3 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
+                  style={{ background: `${C.orange}10`, color: C.orangeDark, border: `1px solid ${C.orange}20` }}>
+                  {MOBILE_CATEGORY_LABELS[entry.category] || entry.category}
+                </span>
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </motion.div>
+    </section>
+  );
+}
+
 export default function MobileHome() {
-  const { scrollYProgress } = useScroll();
-  const smoothProgress = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
+  const { scrollYProgress } = useScroll();  const smoothProgress = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
 
   const heroScale = useTransform(smoothProgress, [0, 0.2], [1, 0.92]);
   const heroOpacity = useTransform(smoothProgress, [0, 0.12], [1, 0]);
@@ -345,6 +450,8 @@ export default function MobileHome() {
           </motion.div>
         </motion.div>
       </section>
+
+      <MobileFeedbackSection />
 
       {/* ═══ FINAL CTA ═══ */}
       <section className="relative py-10 px-5 pb-28 overflow-hidden">

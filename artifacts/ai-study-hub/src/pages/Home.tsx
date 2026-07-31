@@ -5,7 +5,7 @@ import {
   BookOpen, PenTool, HelpCircle, Layers, ClipboardList,
   ArrowRight, Sigma, FlaskConical, Infinity as InfinityIcon,
   Gamepad2, ClipboardCheck, Zap, Brain, Eye, Lightbulb, Cpu, Rocket, Image as ImageIcon,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, Star, Quote, MessageSquareHeart,
 } from "lucide-react";
 import MobileHome from "./MobileHome";
 
@@ -35,6 +35,128 @@ const FEATURE_STRIP = [
   { icon: FlaskConical, title: "Virtual Science Labs", desc: "Real PhET simulations you can touch, drag, and experiment with.", accent: C.cyan },
   { icon: InfinityIcon, title: "Free, Forever", desc: "No account, no paywall, no limits. Just open a tool and start learning.", accent: C.blueLight },
 ];
+
+interface FeedbackEntry {
+  id: string;
+  name: string;
+  rating: number;
+  category: string;
+  message: string;
+  createdAt: string;
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+  bug: "Bug Report",
+  feature: "Feature Request",
+  ux: "UX / Design",
+  "ai-quality": "AI Quality",
+  general: "General",
+};
+
+const API_BASE = import.meta.env.VITE_API_URL || "https://acceptable-charm-production-2ace.up.railway.app";
+
+function FeedbackSection() {
+  const [entries, setEntries] = useState<FeedbackEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`${API_BASE}/api/feedback`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load feedback");
+        return res.json();
+      })
+      .then((data) => {
+        if (!cancelled) {
+          setEntries(Array.isArray(data.entries) ? data.entries.slice(0, 6) : []);
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  return (
+    <section className="px-4 sm:px-6 py-24 md:py-32 max-w-7xl mx-auto">
+      <motion.div className="mb-14 text-center max-w-2xl mx-auto"
+        initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}>
+        <motion.p className="text-sm font-bold uppercase tracking-widest mb-3" style={{ color: C.orange }}
+          animate={{ opacity: [1, 0.6, 1] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>
+          Feedback
+        </motion.p>
+        <h2 className="text-3xl md:text-5xl font-serif mb-4" style={{ color: C.darkSlate }}>What Students Say</h2>
+        <p style={{ color: "#6B6B6B" }} className="text-base sm:text-lg">
+          Real feedback from the Neural Sync community — submitted right from our Feedback page.
+        </p>
+      </motion.div>
+
+      {loading ? (
+        <div className="flex justify-center py-12">
+          <div className="w-10 h-10 border-2 border-[#FF9F4C]/20 border-t-[#FF9F4C] rounded-full animate-spin" />
+        </div>
+      ) : entries.length === 0 ? (
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }} transition={{ duration: 0.6 }}
+          className="max-w-xl mx-auto text-center rounded-2xl p-10"
+          style={{ background: "rgba(255,255,255,0.5)", border: "2px solid #2D2D2D", boxShadow: "inset 0 0 0 1px rgba(255,159,76,0.12), inset 0 1px 0 rgba(255,255,255,0.6)" }}>
+          <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
+            style={{ background: "rgba(255,159,76,0.1)", color: C.primary }}>
+            <MessageSquareHeart size={26} />
+          </div>
+          <h3 className="font-serif text-xl mb-2" style={{ color: C.darkSlate }}>No feedback yet</h3>
+          <p className="text-sm mb-6" style={{ color: "#6B6B6B" }}>
+            Be the first to tell us what you think of Neural Sync.
+          </p>
+          <Link href="/contact"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white transition-all hover:scale-105"
+            style={{ background: "linear-gradient(135deg, #FF9F4C, #E8852E)" }}>
+            Share Your Feedback <ArrowRight size={15} />
+          </Link>
+        </motion.div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {entries.map((entry, i) => (
+            <motion.div key={entry.id}
+              initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.6, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+              className="relative flex flex-col p-6 rounded-2xl transition-all duration-500 hover:-translate-y-1"
+              style={{ background: "rgba(255,255,255,0.5)", border: "2px solid #2D2D2D", boxShadow: "inset 0 0 0 1px rgba(255,159,76,0.12), inset 0 0 20px rgba(255,159,76,0.04), inset 0 1px 0 rgba(255,255,255,0.6)" }}>
+              <Quote size={22} className="mb-3" style={{ color: "rgba(255,159,76,0.5)" }} />
+              <div className="flex items-center gap-0.5 mb-3">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star key={star} size={14}
+                    className={star <= entry.rating ? "fill-current" : "text-[#D8D8D8]"}
+                    style={star <= entry.rating ? { color: "#FF9F4C" } : undefined} />
+                ))}
+              </div>
+              <p className="text-sm leading-relaxed flex-1 mb-5" style={{ color: "#4B4B4B" }}>
+                "{entry.message}"
+              </p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+                    style={{ background: "linear-gradient(135deg, #FF9F4C, #E8852E)" }}>
+                    {(entry.name || "U").charAt(0).toUpperCase()}
+                  </div>
+                  <span className="text-sm font-semibold" style={{ color: C.darkSlate }}>
+                    {entry.name}
+                  </span>
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
+                  style={{ background: `${C.orange}08`, color: C.primary, border: `1px solid ${C.orange}15` }}>
+                  {CATEGORY_LABELS[entry.category] || entry.category}
+                </span>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
 
 const fadeUp = { hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0, transition: { duration: 1.0, ease: [0.16, 1, 0.3, 1] } } };
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.12 } } };
@@ -170,17 +292,41 @@ export default function Home() {
             background: "linear-gradient(135deg, rgba(245,237,228,0.7) 0%, rgba(245,237,228,0.3) 50%, rgba(255,159,76,0.05) 100%)"
           }} />
 
-          {/* Decorative dots — left */}
+          {/* Decorative dots — top-left cluster */}
           <div className="absolute top-12 left-8 z-[1] w-[60px] h-[120px] opacity-30 pointer-events-none"
             style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
           <div className="absolute top-16 left-[88px] z-[1] w-[40px] h-[80px] opacity-20 pointer-events-none"
             style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "16px 16px" }} />
+          <div className="absolute top-32 left-6 z-[1] w-[30px] h-[60px] opacity-15 pointer-events-none"
+            style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "10px 10px" }} />
 
-          {/* Decorative dots — right */}
+          {/* Decorative dots — top-right cluster */}
           <div className="absolute top-16 right-8 z-[1] w-[60px] h-[120px] opacity-30 pointer-events-none"
             style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
           <div className="absolute top-8 right-[88px] z-[1] w-[40px] h-[80px] opacity-20 pointer-events-none"
             style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "16px 16px" }} />
+          <div className="absolute top-24 right-6 z-[1] w-[50px] h-[50px] opacity-15 pointer-events-none"
+            style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "10px 10px" }} />
+
+          {/* Decorative dots — middle-left */}
+          <div className="absolute top-1/2 left-10 z-[1] w-[70px] h-[90px] opacity-[0.08] pointer-events-none"
+            style={{ backgroundImage: "radial-gradient(circle, #000 1.5px, transparent 1.5px)", backgroundSize: "20px 20px" }} />
+
+          {/* Decorative dots — middle-right */}
+          <div className="absolute top-[45%] right-12 z-[1] w-[80px] h-[100px] opacity-[0.08] pointer-events-none"
+            style={{ backgroundImage: "radial-gradient(circle, #000 1.5px, transparent 1.5px)", backgroundSize: "22px 22px" }} />
+
+          {/* Decorative dots — bottom-left */}
+          <div className="absolute bottom-20 left-12 z-[1] w-[50px] h-[80px] opacity-20 pointer-events-none"
+            style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "14px 14px" }} />
+          <div className="absolute bottom-32 left-[100px] z-[1] w-[35px] h-[50px] opacity-15 pointer-events-none"
+            style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "11px 11px" }} />
+
+          {/* Decorative dots — bottom-right */}
+          <div className="absolute bottom-24 right-10 z-[1] w-[55px] h-[90px] opacity-20 pointer-events-none"
+            style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "14px 14px" }} />
+          <div className="absolute bottom-36 right-[110px] z-[1] w-[40px] h-[60px] opacity-15 pointer-events-none"
+            style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 flex-1 flex items-center">
           <div className="w-full max-w-3xl mx-auto pt-24 pb-16 text-center">
@@ -571,6 +717,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <FeedbackSection />
 
       {/* ═══ CTA ═══ */}
       <section className="px-4 sm:px-6 py-24 md:py-32">
