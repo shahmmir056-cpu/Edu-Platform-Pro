@@ -1,10 +1,10 @@
-import React, { useRef, useState, useCallback, useEffect, useMemo } from "react";
+import React, { useRef, useState, useCallback, useEffect } from "react";
 import { Link } from "wouter";
 import { motion, useMotionValue, useTransform, useScroll, useSpring } from "framer-motion";
 import {
   BookOpen, PenTool, HelpCircle, Layers, ClipboardList,
   ArrowRight, Sigma, FlaskConical, Shield, Check, Sparkles,
-  Gamepad2, ClipboardCheck, Zap, Brain, Eye, Lightbulb, Cpu, Rocket, Image as ImageIcon,
+  Gamepad2, ClipboardCheck, Zap, Brain, Eye, Lightbulb, Cpu, Rocket,
   ChevronLeft, ChevronRight, Star, Quote, MessageSquareHeart,
 } from "lucide-react";
 import MobileHome from "./MobileHome";

@@ -25,23 +25,17 @@ import {
   Zap,
   FlaskRound,
   ExternalLink,
-  ArrowLeft,
   Clock,
   Rocket,
   Microscope,
   Leaf,
-  Flower2,
-  Scissors,
   Heart,
-  Sun,
-  BarChart3,
   Bug,
   type LucideIcon,
 } from "lucide-react";
 import { ToolHeader } from "@/components/ui/ToolHeader";
 import { SIMULATIONS, SIM_SUBJECTS, simEmbedUrl, type SimSubject } from "@/lib/simulations";
 import { SIMS_V2, getSimV2 } from "@/features/simulations/simulations-v2";
-import type { SimV2 } from "@/features/simulations/simulations-v2";
 import { cn } from "@/lib/utils";
 
 const SUBJECT_COLORS: Record<SimSubject, string> = {

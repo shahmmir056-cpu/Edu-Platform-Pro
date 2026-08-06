@@ -1,7 +1,6 @@
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import {
-  GraduationCap,
   Sigma,
   FlaskConical,
   Eye,

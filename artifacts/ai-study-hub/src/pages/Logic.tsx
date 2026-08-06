@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "wouter";
-import type { CircuitNode, Wire, GateType, Circuit, Settings, ThemeId, AppTheme } from "@/features/logic/types";
+import type { CircuitNode, Wire, GateType, Circuit, Settings, AppTheme } from "@/features/logic/types";
 import { GATE_DEFS, CATEGORIES, portPos } from "@/features/logic/gates";
 import { simulate, generateTruthTable } from "@/features/logic/engine";
 import { getTheme, THEMES } from "@/features/logic/themes";

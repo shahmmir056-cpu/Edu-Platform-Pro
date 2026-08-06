@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { CheckCircle, ZoomIn, Lightbulb, Crosshair, Camera, AlertTriangle, Droplets } from 'lucide-react';
 import { useLabControls } from './labControls';
 

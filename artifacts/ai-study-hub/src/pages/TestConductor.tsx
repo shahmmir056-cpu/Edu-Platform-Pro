@@ -1,11 +1,10 @@
-﻿import { useState, useEffect, useCallback, useMemo } from "react";
+﻿import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ClipboardCheck,
   Timer,
   CheckCircle2,
   XCircle,
-  ArrowRight,
   RotateCcw,
   Trophy,
   BookOpen,
@@ -15,7 +14,6 @@ import {
   Star,
   Brain,
   FileText,
-  AlertCircle,
   ChevronLeft,
   ChevronRight,
   Send,
@@ -28,7 +26,6 @@ import {
   Beaker,
   Landmark,
   Cpu,
-  ChevronDown,
   Sparkles,
   BarChart3,
 } from "lucide-react";

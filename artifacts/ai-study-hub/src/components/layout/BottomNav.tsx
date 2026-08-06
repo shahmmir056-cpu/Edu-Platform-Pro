@@ -4,7 +4,6 @@ import {
   Home,
   Search,
   FlaskConical,
-  Cpu,
   BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";

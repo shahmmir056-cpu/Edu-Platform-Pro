@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, BookOpen, GraduationCap, Briefcase, RotateCcw, Trophy, Sparkles, Mic, MicOff, X, ChevronDown, Home } from "lucide-react";
+import { MessageSquare, BookOpen, GraduationCap, Briefcase, RotateCcw, Trophy, Sparkles, Mic, X, ChevronDown, Home } from "lucide-react";
 import { NeuralAvatar } from "./components/NeuralAvatar";
 import { VoiceWaveform } from "./components/VoiceWaveform";
 import { ChatInterface } from "./components/ChatInterface";

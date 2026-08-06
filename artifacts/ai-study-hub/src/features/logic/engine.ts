@@ -1,4 +1,4 @@
-import type { Circuit, CircuitNode, GateType, TruthTableResult } from "./types";
+import type { Circuit, CircuitNode, TruthTableResult } from "./types";
 import { realSensors } from "./realSensors";
 
 function evalNode(node: CircuitNode): boolean[] {
