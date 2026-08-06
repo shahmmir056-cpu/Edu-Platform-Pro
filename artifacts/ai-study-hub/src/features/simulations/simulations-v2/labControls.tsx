@@ -95,7 +95,7 @@ export function useLabControls(info: LabControlInfo, handlers: LabHandlers = {})
   const ctx = useControls();
   const infoRef = useRef(info);
   const handlersRef = useRef(handlers);
-  const lastSeq = useRef({ run: 0, step: 0 });
+  const lastSeq = useRef({ run: ctx.runSeq, step: ctx.stepSeq });
   infoRef.current = info;
   handlersRef.current = handlers;
 
@@ -199,11 +199,13 @@ function DataDrawer({
   dataset,
   onClose,
   onCopy,
+  onDownload,
   copied,
 }: {
   dataset: LabDataset;
   onClose: () => void;
   onCopy: () => void;
+  onDownload: () => void;
   copied: boolean;
 }) {
   return (
@@ -295,7 +297,7 @@ function DataDrawer({
           {copied ? "Copied" : "Copy CSV"}
         </button>
         <button
-          onClick={() => downloadCSV(dataset)}
+          onClick={onDownload}
           className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-bold text-white transition-all"
           style={{ background: "linear-gradient(135deg, #FF9F4C, #E8852E)" }}
         >
@@ -495,8 +497,9 @@ export function LabToolbar({ title, children }: { title: string; children: React
         {dataOpen && info?.dataset && (
           <DataDrawer
             dataset={info.dataset}
-            onClose={() => setDataOpen(false)}
-            onCopy={copyData}
+            onClose={() => { setDataOpen(false); refocus(); }}
+            onCopy={() => { copyData(); refocus(); }}
+            onDownload={() => { downloadCSV(info.dataset); refocus(); }}
             copied={copied}
           />
         )}

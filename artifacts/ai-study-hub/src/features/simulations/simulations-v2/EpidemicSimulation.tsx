@@ -301,7 +301,10 @@ export default function EpidemicSimulation() {
       },
     },
     {
-      onToggleRun: pauseResume,
+      onToggleRun: () => {
+        if (!started) startEpidemic();
+        else pauseResume();
+      },
       onStep: manualStep,
     },
   );
