@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Shield, TrendingUp, Activity, Zap, Lock, Unlock, Syringe, BarChart3 } from 'lucide-react';
+import { useLabControls } from './labControls';
 
 type PersonState = 'S' | 'E' | 'I' | 'R' | 'D' | 'V';
 
@@ -268,6 +269,42 @@ export default function EpidemicSimulation() {
     prevTotalIRef.current = 0;
     newCasesDataRef.current = [];
   };
+
+  const manualStep = useCallback(() => {
+    if (running) return;
+    const g = step();
+    setGrid([...g]);
+    setTick(t => {
+      const nt = t + 1;
+      updateCounts(g, nt);
+      return nt;
+    });
+  }, [running, step, updateCounts]);
+
+  useLabControls(
+    {
+      canRun: true,
+      running,
+      progress: ((counts.R + counts.D + counts.I) / N) * 100,
+      dataset: {
+        name: "Epidemic SIR Data",
+        columns: [
+          { key: "t", label: "Day" },
+          { key: "S", label: "Susceptible" },
+          { key: "E", label: "Exposed" },
+          { key: "I", label: "Infected" },
+          { key: "R", label: "Recovered" },
+          { key: "D", label: "Dead" },
+          { key: "V", label: "Vaccinated" },
+        ],
+        rows: sirData,
+      },
+    },
+    {
+      onToggleRun: pauseResume,
+      onStep: manualStep,
+    },
+  );
 
   const vaccinateNow = () => {
     const g = [...gridRef.current];

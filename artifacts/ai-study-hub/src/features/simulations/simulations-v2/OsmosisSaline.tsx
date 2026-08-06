@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
+import { useLabControls } from './labControls';
 
 type SalineType = 'hypotonic' | 'isotonic' | 'hypertonic' | 'custom';
 type Scenario = 'none' | 'dehydration' | 'hyponatremia' | 'brain_edema';
@@ -148,6 +149,24 @@ export default function OsmosisSaline() {
   const chartW = 200;
   const chartH = 60;
   const chartPadding = 5;
+
+  useLabControls({
+    dataset: {
+      name: "IV Saline Cell Response",
+      columns: [
+        { key: "t", label: "Time (min)" },
+        { key: "size", label: "Cell size (%)" },
+        { key: "osmolarity", label: "Osmolarity (mOsm/L)" },
+        { key: "scale", label: "Scale factor" },
+      ],
+      rows: timeCourseData.map((size, t) => ({
+        t,
+        size: Math.round(size * 10) / 10,
+        osmolarity: Math.round(currentOsm),
+        scale: +cellScale.toFixed(2),
+      })),
+    },
+  });
 
   return (
     <div className="sim-container">

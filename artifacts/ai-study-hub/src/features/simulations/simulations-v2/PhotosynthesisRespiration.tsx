@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Sun, Moon, Droplets, Thermometer } from 'lucide-react';
+import { useLabControls } from './labControls';
 
 interface DataPoint { t: number; o2Ps: number; co2Ps: number; o2Resp: number; co2Resp: number; glucose: number; }
 
@@ -110,39 +111,41 @@ export default function PhotosynthesisRespiration() {
   const btbColor = `rgb(${btbR},${btbG},${btbB})`;
   const btbLabel = btbBlue > 0.6 ? 'Basic (high O₂)' : btbBlue < 0.4 ? 'Acidic (high CO₂)' : 'Neutral';
 
+  const doTick = useCallback(() => {
+    tickRef.current += 1;
+
+    // Dark/Light cycle logic
+    let effectivePsRate = psRate;
+    if (darkLightCycle) {
+      const cyclePos = tickRef.current % cycleLength;
+      const isLightPhase = cyclePos < cycleLength / 2;
+      if (!isLightPhase) {
+        effectivePsRate = 0;
+      }
+    }
+
+    const effectiveO2Net = effectivePsRate - respRate;
+
+    setData(prev => {
+      const last = prev[prev.length - 1];
+      const newPt: DataPoint = {
+        t: last.t + 1,
+        o2Ps: Math.min(100, Math.max(0, last.o2Ps + effectiveO2Net * 0.8)),
+        co2Ps: Math.min(100, Math.max(0, last.co2Ps - effectivePsRate * 0.5 + respRate * 0.5)),
+        o2Resp: Math.min(100, Math.max(0, last.o2Resp - respRate * 0.6)),
+        co2Resp: Math.min(100, Math.max(0, last.co2Resp + respRate * 0.6)),
+        glucose: Math.min(100, Math.max(0, last.glucose + effectivePsRate * 0.3 - respRate * 0.3)),
+      };
+      return [...prev.slice(-50), newPt];
+    });
+  }, [psRate, respRate, darkLightCycle, cycleLength]);
+
   useEffect(() => {
     if (running) {
-      timerRef.current = setInterval(() => {
-        tickRef.current += 1;
-
-        // Dark/Light cycle logic
-        let effectivePsRate = psRate;
-        if (darkLightCycle) {
-          const cyclePos = tickRef.current % cycleLength;
-          const isLightPhase = cyclePos < cycleLength / 2;
-          if (!isLightPhase) {
-            effectivePsRate = 0;
-          }
-        }
-
-        const effectiveO2Net = effectivePsRate - respRate;
-
-        setData(prev => {
-          const last = prev[prev.length - 1];
-          const newPt: DataPoint = {
-            t: last.t + 1,
-            o2Ps: Math.min(100, Math.max(0, last.o2Ps + effectiveO2Net * 0.8)),
-            co2Ps: Math.min(100, Math.max(0, last.co2Ps - effectivePsRate * 0.5 + respRate * 0.5)),
-            o2Resp: Math.min(100, Math.max(0, last.o2Resp - respRate * 0.6)),
-            co2Resp: Math.min(100, Math.max(0, last.co2Resp + respRate * 0.6)),
-            glucose: Math.min(100, Math.max(0, last.glucose + effectivePsRate * 0.3 - respRate * 0.3)),
-          };
-          return [...prev.slice(-50), newPt];
-        });
-      }, 500);
+      timerRef.current = setInterval(doTick, 500);
     }
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [running, o2Net, psRate, respRate, co2Net, darkLightCycle, cycleLength]);
+  }, [running, doTick]);
 
   const reset = () => {
     setRunning(false);
@@ -156,6 +159,32 @@ export default function PhotosynthesisRespiration() {
   const GRAPH_W = 380, GRAPH_H = 140;
 
   const isDarkPhase = darkLightCycle && running && (tickRef.current % cycleLength) >= cycleLength / 2;
+
+  const progress = Math.min(100, ((data.length - 1) / 50) * 100);
+
+  useLabControls(
+    {
+      canRun: true,
+      running,
+      progress,
+      dataset: {
+        name: "Photosynthesis & Respiration Data",
+        columns: [
+          { key: "t", label: "Tick" },
+          { key: "o2Ps", label: "O2 (PS)" },
+          { key: "co2Ps", label: "CO2 (PS)" },
+          { key: "o2Resp", label: "O2 (Resp)" },
+          { key: "co2Resp", label: "CO2 (Resp)" },
+          { key: "glucose", label: "Glucose" },
+        ],
+        rows: data,
+      },
+    },
+    {
+      onToggleRun: () => setRunning(r => !r),
+      onStep: doTick,
+    },
+  );
 
   return (
     <div className="sim-container">

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Play, Pause, RotateCcw, Ruler, Beaker, AlertTriangle, Droplets, FlaskConical, Eye } from 'lucide-react';
+import { useLabControls } from './labControls';
 
 type Sample = { id: string; label: string; color: string; fragments: number[]; amount: number };
 type GelPct = '0.8' | '1.0' | '1.5' | '2.0';
@@ -235,6 +236,33 @@ export default function GelElectrophoresis() {
 
   // Stain opacity multiplier
   const stainOpacityMult = stained ? 1.0 : 0.12;
+
+  useLabControls(
+    {
+      canRun: true,
+      running,
+      progress: (time / 300) * 100,
+      dataset: {
+        name: "Gel Electrophoresis Bands",
+        columns: [
+          { key: "sample", label: "Sample" },
+          { key: "bp", label: "Fragment (bp)" },
+          { key: "distance", label: "Distance (px)" },
+        ],
+        rows: samples
+          .filter(s => s.id === 'ladder' || s.amount > 0)
+          .flatMap(s => s.fragments.map(bp => ({
+            sample: s.label,
+            bp,
+            distance: Math.round((getBandY(bp, voltage, Math.max(time, 1), gelPct, buffer, MAX_Y, WELL_Y) - WELL_Y) * 10) / 10,
+          }))),
+      },
+    },
+    {
+      onToggleRun: () => setRunning(r => !r),
+      onStep: () => setTime(t => (t >= 300 ? t : t + 1)),
+    },
+  );
 
   return (
     <div className="sim-container">

@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useMemo } from 'react';
+import { useLabControls } from './labControls';
 
 interface DataRow {
   concentration: number;
@@ -95,6 +96,20 @@ export default function OsmosisDataAnalysis() {
     return Math.round(psi * 1000) / 1000;
   }, [userIsotonicGuess, checked]);
 
+  const { advancedOpen } = useLabControls({
+    hasAdvanced: true,
+    dataset: {
+      name: "Potato Osmosis Data",
+      columns: [
+        { key: "concentration", label: "Sucrose (M)" },
+        { key: "initialMass", label: "Initial mass (g)" },
+        { key: "finalMass", label: "Final mass (g)" },
+        { key: "percentChange", label: "% change" },
+      ],
+      rows: data,
+    },
+  });
+
   const handleSvgClick = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
     const rect = svgRef.current?.getBoundingClientRect();
     if (!rect) return;
@@ -129,6 +144,41 @@ export default function OsmosisDataAnalysis() {
 
   return (
     <div className="sim-container">
+      {advancedOpen && (
+        <div className="sim-panel mb-6">
+          <h3 className="font-bold text-sm mb-3" style={{ fontFamily: 'Space Grotesk' }}>
+            Regression Statistics
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { label: 'Slope', value: slope.toFixed(3), color: '#C46A10' },
+              { label: 'Intercept', value: intercept.toFixed(3), color: '#5B7FA5' },
+              { label: 'R²', value: r2.toFixed(4), color: '#6A9B7A' },
+              { label: 'Std. Error', value: se.toFixed(3), color: '#8B7BB5' },
+            ].map(item => (
+              <div key={item.label} className="p-3 rounded-lg" style={{ background: 'hsl(var(--muted))' }}>
+                <div className="text-[10px] text-muted-foreground mb-1">{item.label}</div>
+                <div className="font-mono text-lg font-bold" style={{ color: item.color }}>{item.value}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
+            {[
+              { label: 'n', value: String(summaryStats.n) },
+              { label: 'Mean % change', value: `${summaryStats.mean.toFixed(2)}%` },
+              { label: 'Range', value: `${summaryStats.min.toFixed(1)}% to ${summaryStats.max.toFixed(1)}%` },
+              { label: 'Estimated isotonic', value: `${estimatedIsotonic.toFixed(3)} M` },
+              { label: 'Solute potential (ψs)', value: waterPotential !== null ? `${waterPotential} MPa` : '—' },
+              { label: 'Line of best fit', value: `y = ${slope.toFixed(2)}x ${intercept >= 0 ? '+' : ''}${intercept.toFixed(2)}` },
+            ].map(item => (
+              <div key={item.label} className="px-3 py-2 rounded-lg" style={{ background: 'hsl(var(--muted))' }}>
+                <div className="text-[10px] text-muted-foreground">{item.label}</div>
+                <div className="font-mono font-bold" style={{ color: '#2D2D2D' }}>{item.value}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Data Table */}
         <div className="space-y-4">

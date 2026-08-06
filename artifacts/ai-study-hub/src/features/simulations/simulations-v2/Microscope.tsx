@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { CheckCircle, ZoomIn, Lightbulb, Crosshair, Camera, AlertTriangle, Droplets } from 'lucide-react';
+import { useLabControls } from './labControls';
 
 type Specimen = 'onion' | 'cheek' | 'bacteria' | 'blood' | 'mitosis';
 type Objective = '4x' | '10x' | '40x' | '100x';
@@ -268,6 +269,42 @@ export default function Microscope() {
     ? (measureLineLength * scaleBarMicron / 60).toFixed(1)
     : '0';
 
+  // Advanced: Precision mode for fine slider steps
+  const [precisionMode, setPrecisionMode] = useState(false);
+
+  const { advancedOpen } = useLabControls({
+    hasAdvanced: true,
+    dataset: {
+      name: "Microscope View State",
+      columns: [
+        { key: "specimen", label: "Specimen" },
+        { key: "objective", label: "Objective" },
+        { key: "totalMag", label: "Total mag" },
+        { key: "coarse", label: "Coarse" },
+        { key: "fine", label: "Fine" },
+        { key: "light", label: "Light (%)" },
+        { key: "diaphragm", label: "Diaphragm (%)" },
+        { key: "condenser", label: "Condenser (%)" },
+        { key: "stageX", label: "Stage X" },
+        { key: "stageY", label: "Stage Y" },
+        { key: "sharpness", label: "Sharpness (%)" },
+      ],
+      rows: [{
+        specimen,
+        objective,
+        totalMag: Math.round(obj.mag * (eyepiece === 'WF15x' ? 1.5 : 1)),
+        coarse,
+        fine,
+        light,
+        diaphragm,
+        condenser,
+        stageX,
+        stageY,
+        sharpness: Math.round(sharpness),
+      }],
+    },
+  });
+
   // Feature 7: Screenshot
   const handleCapture = () => {
     const svgEl = viewerRef.current?.querySelector('svg');
@@ -287,6 +324,40 @@ export default function Microscope() {
 
   return (
     <div className="sim-container space-y-4">
+      {advancedOpen && (
+        <div className="sim-panel">
+          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+            <h3 className="font-bold text-sm" style={{ fontFamily: 'Space Grotesk' }}>Precision & Optical Configuration</h3>
+            <button
+              onClick={() => setPrecisionMode(p => !p)}
+              className="px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all border"
+              style={{
+                background: precisionMode ? 'linear-gradient(135deg, #FF9F4C, #E8852E)' : 'hsl(var(--muted))',
+                color: precisionMode ? '#fff' : 'hsl(var(--muted-foreground))',
+                borderColor: precisionMode ? 'transparent' : 'hsl(var(--border))',
+              }}
+            >
+              {precisionMode ? 'Precision: Fine (0.1 steps)' : 'Precision: Coarse (1.0 steps)'}
+            </button>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+            { label: 'Total Magnification', value: `${Math.round(obj.mag * (eyepiece === 'WF15x' ? 1.5 : 1))}×`, color: '#1A3550' },
+            { label: 'Objective NA', value: obj.na, color: '#5B7FA5' },
+            { label: 'Scale Bar', value: `${scaleBarMicron} µm/div`, color: '#6A9B7A' },
+            { label: 'Brightness', value: `${Math.round(adjustedBrightness * 100)}%`, color: '#B89555' },
+            ].map(item => (
+              <div key={item.label} className="p-3 rounded-lg" style={{ background: 'hsl(var(--muted))' }}>
+                <div className="text-[10px] text-muted-foreground mb-1">{item.label}</div>
+                <div className="font-mono text-lg font-bold" style={{ color: item.color }}>{item.value}</div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-2 text-[11px]" style={{ color: '#9A9A9A' }}>
+            Objective {objective} · Eyepiece {eyepiece} · {specimenInfo.label}. Precision mode enables 0.1-step focus control for fine adjustment near the focal plane.
+          </p>
+        </div>
+      )}
       {/* Top: Compact Controls + Eyepiece side by side */}
       <div className="grid lg:grid-cols-[260px,1fr] gap-4 items-start">
         {/* Compact Controls */}
@@ -346,15 +417,15 @@ export default function Microscope() {
 
           {/* Sliders - compact */}
           {[
-            { label: 'Coarse', val: coarse, set: setCoarse, min: 0, max: 100, color: '#1A3550', test: 'slider-coarse-focus' },
-            { label: 'Fine', val: fine, set: setFine, min: 0, max: 100, color: '#5B7FA5', test: 'slider-fine-focus' },
-            { label: 'Light', val: light, set: setLight, min: 10, max: 100, color: '#B89555', test: 'slider-light' },
-            { label: 'Diaphragm', val: diaphragm, set: setDiaphragm, min: 10, max: 100, color: '#8B7BB5', test: 'slider-diaphragm' },
-            { label: 'Condenser', val: condenser, set: setCondenser, min: 0, max: 100, color: '#B89555', test: 'slider-condenser' },
+            { label: 'Coarse', val: coarse, set: setCoarse, min: 0, max: 100, color: '#1A3550', test: 'slider-coarse-focus', step: precisionMode ? 0.1 : 1 },
+            { label: 'Fine', val: fine, set: setFine, min: 0, max: 100, color: '#5B7FA5', test: 'slider-fine-focus', step: precisionMode ? 0.1 : 1 },
+            { label: 'Light', val: light, set: setLight, min: 10, max: 100, color: '#B89555', test: 'slider-light', step: precisionMode ? 1 : 1 },
+            { label: 'Diaphragm', val: diaphragm, set: setDiaphragm, min: 10, max: 100, color: '#8B7BB5', test: 'slider-diaphragm', step: precisionMode ? 1 : 1 },
+            { label: 'Condenser', val: condenser, set: setCondenser, min: 0, max: 100, color: '#B89555', test: 'slider-condenser', step: precisionMode ? 1 : 1 },
           ].map(ctrl => (
             <div key={ctrl.label} className="flex items-center gap-1 sm:gap-2">
               <span className="text-[10px] text-muted-foreground w-10 sm:w-14 flex-shrink-0">{ctrl.label}</span>
-              <input type="range" min={ctrl.min} max={ctrl.max} value={ctrl.val}
+              <input type="range" min={ctrl.min} max={ctrl.max} step={ctrl.step} value={ctrl.val}
                 data-testid={ctrl.test}
                 onChange={e => ctrl.set(Number(e.target.value))}
                 className="flex-1 h-1 min-w-0" style={{ accentColor: ctrl.color }} />

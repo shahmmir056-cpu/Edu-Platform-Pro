@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useLabControls } from './labControls';
 
 interface PlantPart {
   id: string;
@@ -75,6 +76,21 @@ export default function PlantDissection() {
   const [pollinationStage, setPollinationStage] = useState<number>(0);
 
   const progress = (dissected.size / PARTS.length) * 100;
+
+  const { advancedOpen } = useLabControls({
+    hasAdvanced: true,
+    dataset: {
+      name: "Dissected Flower Parts",
+      columns: [
+        { key: "part", label: "Part" },
+        { key: "function", label: "Function" },
+      ],
+      rows: [...dissected].map(id => {
+        const p = PARTS.find(pp => pp.id === id);
+        return p ? { part: p.name, function: p.function } : { part: id, function: '' };
+      }),
+    },
+  });
 
   const handlePartClick = (partId: string) => {
     if (quizMode) return;
@@ -253,6 +269,46 @@ export default function PlantDissection() {
 
   return (
     <div className="sim-container">
+      {advancedOpen && (
+        <div className="sim-panel mb-6">
+          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+            <h3 className="font-bold text-sm" style={{ fontFamily: 'Space Grotesk' }}>
+              Floral Formula — {species}
+            </h3>
+            <button
+              onClick={() => setSpecies(s => (s === 'Hibiscus' ? 'Lily' : 'Hibiscus'))}
+              className="px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all border"
+              style={{ background: 'hsl(var(--muted))', color: 'hsl(var(--muted-foreground))', borderColor: 'hsl(var(--border))' }}
+            >
+              Switch to {species === 'Hibiscus' ? 'Lily' : 'Hibiscus'}
+            </button>
+          </div>
+          <div className="flex items-center gap-3 mb-3">
+            <span className="font-mono text-base font-bold px-3 py-1.5 rounded-lg" style={{ background: 'rgba(232,133,46,0.12)', color: '#C46A10' }}>
+              {FLORAL_FORMULAS[species].formula}
+            </span>
+            <span className="text-[10px]" style={{ color: '#9A9A9A' }}>Actinomorphic floral formula (floral structure shorthand)</span>
+          </div>
+          <div className="overflow-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr>
+                  <th className="px-3 py-1.5 text-[10px] font-bold uppercase" style={{ color: '#2D2D2D', borderBottom: '1px solid rgba(45,45,45,0.12)' }}>Symbol</th>
+                  <th className="px-3 py-1.5 text-[10px] font-bold uppercase" style={{ color: '#2D2D2D', borderBottom: '1px solid rgba(45,45,45,0.12)' }}>Meaning</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(FLORAL_FORMULAS[species].explanation).map(([k, v]) => (
+                  <tr key={k}>
+                    <td className="px-3 py-1 text-[11px] font-mono font-bold" style={{ color: '#C46A10' }}>{k}</td>
+                    <td className="px-3 py-1 text-[11px]" style={{ color: '#4A4A4A' }}>{v}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
       <div className="grid lg:grid-cols-2 gap-6">
         <div className="sim-panel">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">

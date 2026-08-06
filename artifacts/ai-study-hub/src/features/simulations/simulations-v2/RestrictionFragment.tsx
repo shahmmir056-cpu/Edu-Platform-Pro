@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useLabControls } from './labControls';
 
 type Enzyme = 'EcoRI' | 'HindIII' | 'BamHI';
 type Allele = 'taster' | 'nontaster';
@@ -194,8 +195,68 @@ export default function RestrictionFragment() {
 
   const enzymeColors = selectedEnzymes.map(eid => enzymeMap.get(eid)!.color);
 
+  const { advancedOpen } = useLabControls({
+    hasAdvanced: true,
+    dataset: {
+      name: "Restriction Fragment Analysis",
+      columns: [
+        { key: "sample", label: "Sample" },
+        { key: "bp", label: "Fragment (bp)" },
+      ],
+      rows: [
+        ...LADDER_FRAGS.map(bp => ({ sample: 'Ladder', bp })),
+        ...tasterFrags.map(bp => ({ sample: 'Taster', bp })),
+        ...nontasterFrags.map(bp => ({ sample: 'Non-Taster', bp })),
+        ...(isStarRisk && starFrags.length > 0 ? starFrags.map(bp => ({ sample: 'Star activity', bp })) : []),
+      ],
+    },
+  });
+
   return (
     <div className="sim-container">
+      {advancedOpen && (
+        <div className="sim-panel mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-bold text-sm" style={{ fontFamily: 'Space Grotesk' }}>
+              Recognition Sites & Cut Positions
+            </h3>
+            <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: isStarRisk ? 'rgba(196,123,107,0.15)' : 'rgba(106,155,122,0.15)', color: isStarRisk ? '#C47B6B' : '#6A9B7A' }}>
+              Enzyme activity {activityLevel > 0 ? `${Math.round(activityLevel * 100)}%` : 'denatured'}
+            </span>
+          </div>
+          <div className="overflow-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr>
+                  <th className="px-3 py-1.5 text-[10px] font-bold uppercase" style={{ color: '#2D2D2D', borderBottom: '1px solid rgba(45,45,45,0.12)' }}>Enzyme</th>
+                  <th className="px-3 py-1.5 text-[10px] font-bold uppercase" style={{ color: '#2D2D2D', borderBottom: '1px solid rgba(45,45,45,0.12)' }}>Recognition</th>
+                  <th className="px-3 py-1.5 text-[10px] font-bold uppercase" style={{ color: '#2D2D2D', borderBottom: '1px solid rgba(45,45,45,0.12)' }}>Cut</th>
+                  <th className="px-3 py-1.5 text-[10px] font-bold uppercase" style={{ color: '#2D2D2D', borderBottom: '1px solid rgba(45,45,45,0.12)' }}>Taster cuts (%)</th>
+                  <th className="px-3 py-1.5 text-[10px] font-bold uppercase" style={{ color: '#2D2D2D', borderBottom: '1px solid rgba(45,45,45,0.12)' }}>Non-taster cuts (%)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedEnzymes.map(eid => {
+                  const e = enzymeMap.get(eid)!;
+                  return (
+                    <tr key={eid}>
+                      <td className="px-3 py-1 text-[11px] font-bold" style={{ color: e.color }}>{e.id}</td>
+                      <td className="px-3 py-1 text-[11px] font-mono" style={{ color: '#4A4A4A' }}>{e.recognition}</td>
+                      <td className="px-3 py-1 text-[11px] font-mono" style={{ color: '#4A4A4A' }}>{e.cutPattern}</td>
+                      <td className="px-3 py-1 text-[11px] font-mono" style={{ color: '#4A4A4A' }}>{e.cutsT.join(', ')}</td>
+                      <td className="px-3 py-1 text-[11px] font-mono" style={{ color: '#4A4A4A' }}>{e.cutsN.join(', ')}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-2 text-[11px]" style={{ color: '#9A9A9A' }}>
+            Fragments (bp): Taster {tasterFrags.join(', ')} · Non-taster {nontasterFrags.join(', ')}
+            {isStarRisk && starFrags.length > 0 ? ` · Star activity adds ${starFrags.join(', ')}` : ''}
+          </p>
+        </div>
+      )}
       {/* Star Activity Warning Banner */}
       {isStarRisk && (
         <div className="mb-4 p-3 rounded-xl border-2 flex items-center gap-2"

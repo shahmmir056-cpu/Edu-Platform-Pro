@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RotateCcw, Plus, Download, Crosshair } from 'lucide-react';
+import { useLabControls } from './labControls';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 type Species = 'Arabidopsis' | 'Corn' | 'Cactus';
@@ -297,6 +298,34 @@ export default function Stomata() {
     const blob = new Blob([header + rows], { type: 'text/csv' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'stomata_data.csv'; a.click();
   };
+
+  useLabControls(
+    {
+      canRun: true,
+      running: timeLapse,
+      progress: (time / 24) * 100,
+      dataset: {
+        name: "Stomata Observations",
+        columns: [
+          { key: "species", label: "Species" },
+          { key: "light", label: "Light (%)" },
+          { key: "co2", label: "CO2 (ppm)" },
+          { key: "water", label: "Water (%)" },
+          { key: "humidity", label: "Humidity (%)" },
+          { key: "aba", label: "ABA" },
+          { key: "aperture", label: "Aperture (%)" },
+          { key: "transpiration", label: "Transpiration" },
+          { key: "vpd", label: "VPD (kPa)" },
+          { key: "time", label: "Time" },
+        ],
+        rows: observations,
+      },
+    },
+    {
+      onToggleRun: () => setTimeLapse(t => !t),
+      onStep: () => setTime(t => (t + 0.5) % 24),
+    },
+  );
 
   const speciesInfo = SPECIES_INFO[species];
 

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useLabControls } from './labControls';
 import {
   Calculator,
   Download,
@@ -266,6 +267,26 @@ export default function Spectrophotometer() {
       if (kineticsRef.current) clearInterval(kineticsRef.current);
     };
   }, []);
+
+  useLabControls(
+    {
+      canRun: true,
+      running: kineticsRunning,
+      dataset: {
+        name: "Spectrophotometer Readings",
+        columns: [
+          { key: "timestamp", label: "Time" },
+          { key: "wavelength", label: "Wavelength (nm)" },
+          { key: "absorbance", label: "Absorbance" },
+          { key: "transmittance", label: "Transmittance (%)" },
+        ],
+        rows: readings,
+      },
+    },
+    {
+      onToggleRun: kineticsRunning ? stopKinetics : startKinetics,
+    },
+  );
 
   const kineticsSlope = (() => {
     if (kineticsData.length < 2) return 0;

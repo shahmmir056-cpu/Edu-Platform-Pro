@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Play, Pause, RotateCcw, Download, Scale, Thermometer } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine, ErrorBar } from 'recharts';
+import { useLabControls } from './labControls';
 
 type Solution = 'hypotonic' | 'isotonic' | 'hypertonic';
 type TissueType = 'egg' | 'potato' | 'apple';
@@ -200,6 +201,52 @@ export default function EggLab() {
     }
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [running, step]);
+
+  const manualStep = useCallback(() => {
+    setTimeHours(t => {
+      const next = Math.min(72, t + 0.25);
+      if (next % 2 < 0.26) {
+        const hyo = computeMass('hypotonic', next, tempCRef.current, tissueTypeRef.current, true);
+        const hyper = computeMass('hypertonic', next, tempCRef.current, tissueTypeRef.current, true);
+        setMassRecords(prev => [...prev.filter(r => r.t !== Math.round(next)), {
+          t: Math.round(next),
+          hypo: +hyo.toFixed(2),
+          iso: +BASE_MASS.toFixed(2),
+          hyper: +hyper.toFixed(2),
+          hypoErr: SD,
+          isoErr: SD,
+          hyperErr: SD,
+        }].sort((a, b) => a.t - b.t));
+      }
+      if (next >= 72) setRunning(false);
+      return next;
+    });
+  }, []);
+
+  useLabControls(
+    {
+      canRun: true,
+      running,
+      progress: (timeHours / 72) * 100,
+      dataset: {
+        name: "Osmosis Mass Records",
+        columns: [
+          { key: "t", label: "Time (h)" },
+          { key: "hypo", label: "Hypotonic (g)" },
+          { key: "iso", label: "Isotonic (g)" },
+          { key: "hyper", label: "Hypertonic (g)" },
+          { key: "hypoErr", label: "Hypotonic SD" },
+          { key: "isoErr", label: "Isotonic SD" },
+          { key: "hyperErr", label: "Hypertonic SD" },
+        ],
+        rows: massRecords,
+      },
+    },
+    {
+      onToggleRun: () => setRunning(r => !r),
+      onStep: manualStep,
+    },
+  );
 
   const steps: { id: Step; label: string; desc: string }[] = [
     { id: 'decalcify', label: '1. Decalcify', desc: 'Soak egg in vinegar (acetic acid) for 24–48h to dissolve CaCO₃ shell, leaving semi-permeable membrane' },

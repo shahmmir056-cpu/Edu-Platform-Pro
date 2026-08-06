@@ -1,9 +1,9 @@
-import { useState, Suspense, lazy } from "react";
+import { useState, Suspense, useMemo } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Clock, FlaskConical, ChevronRight } from "lucide-react";
 import { SIMS_V2, getSimV2 } from "./simulations-v2";
 import type { SimV2 } from "./simulations-v2";
-import { Link } from "wouter";
+import { LabControlsProvider, LabToolbar } from "./simulations-v2/labControls";
 
 const CATEGORY_ICONS: Record<string, string> = {
   Microscopy: "🔬",
@@ -89,6 +89,32 @@ function SimCard({ sim, onClick }: { sim: SimV2; onClick: () => void }) {
 function SimViewer({ sim, onBack }: { sim: SimV2; onBack: () => void }) {
   const SimComponent = sim.component;
 
+  const SimPanel = useMemo(
+    () =>
+      function SimPanel() {
+        return (
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center py-20">
+                <div className="text-center">
+                  <div
+                    className="w-10 h-10 rounded-full border-3 border-t-transparent animate-spin mx-auto mb-3"
+                    style={{ borderColor: "#E8852E", borderTopColor: "transparent" }}
+                  />
+                  <p className="text-xs" style={{ color: "#9A9A9A" }}>
+                    Loading simulation...
+                  </p>
+                </div>
+              </div>
+            }
+          >
+            <SimComponent />
+          </Suspense>
+        );
+      },
+    [SimComponent],
+  );
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -159,25 +185,13 @@ function SimViewer({ sim, onBack }: { sim: SimV2; onBack: () => void }) {
       </div>
 
       {/* Simulation */}
-      <div className="lg-card p-4 overflow-auto">
-        <Suspense
-          fallback={
-            <div className="flex items-center justify-center py-20">
-              <div className="text-center">
-                <div
-                  className="w-10 h-10 rounded-full border-3 border-t-transparent animate-spin mx-auto mb-3"
-                  style={{ borderColor: "#E8852E", borderTopColor: "transparent" }}
-                />
-                <p className="text-xs" style={{ color: "#9A9A9A" }}>
-                  Loading simulation...
-                </p>
-              </div>
-            </div>
-          }
-        >
-          <SimComponent />
-        </Suspense>
-      </div>
+      <LabControlsProvider key={sim.id}>
+        <LabToolbar title={sim.title}>
+          <div className="p-4">
+            <SimPanel />
+          </div>
+        </LabToolbar>
+      </LabControlsProvider>
     </motion.div>
   );
 }

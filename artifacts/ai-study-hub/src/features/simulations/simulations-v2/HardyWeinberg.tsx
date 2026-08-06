@@ -1,4 +1,5 @@
 ﻿import { useState } from 'react';
+import { useLabControls } from './labControls';
 
 interface GenData {
   gen: number;
@@ -236,6 +237,22 @@ export default function HardyWeinberg() {
         })
       : null;
 
+  const { advancedOpen } = useLabControls({
+    hasAdvanced: true,
+    dataset: {
+      name: "Hardy-Weinberg Generation Data",
+      columns: [
+        { key: "gen", label: "Generation" },
+        { key: "p", label: "p" },
+        { key: "q", label: "q" },
+        { key: "AA", label: "AA" },
+        { key: "Aa", label: "Aa" },
+        { key: "aa", label: "aa" },
+      ],
+      rows: results,
+    },
+  });
+
   const GRAPH_W = 380, GRAPH_H = 180;
 
   const noForces =
@@ -243,6 +260,50 @@ export default function HardyWeinberg() {
 
   return (
     <div className="sim-container">
+      {advancedOpen && (
+        <div className="sim-panel mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-bold text-sm" style={{ fontFamily: 'Space Grotesk' }}>
+              Replicate Trial Statistics (Randomized)
+            </h3>
+            <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: 'rgba(232,133,46,0.12)', color: '#C46A10' }}>
+              {replicates} replicate{replicates > 1 ? 's' : ''}
+            </span>
+          </div>
+          {ran && allReplicateResults.length > 1 ? (
+            <div className="overflow-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr>
+                    <th className="px-3 py-1.5 text-[10px] font-bold uppercase" style={{ color: '#2D2D2D', borderBottom: '1px solid rgba(45,45,45,0.12)' }}>Gen</th>
+                    {allReplicateResults.map((_, r) => (
+                      <th key={r} className="px-3 py-1.5 text-[10px] font-bold uppercase" style={{ color: '#2D2D2D', borderBottom: '1px solid rgba(45,45,45,0.12)' }}>Trial {r + 1} p</th>
+                    ))}
+                    <th className="px-3 py-1.5 text-[10px] font-bold uppercase" style={{ color: '#C46A10', borderBottom: '1px solid rgba(45,45,45,0.12)' }}>Mean p ± SD</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {allReplicateResults[0].map((_, i) => (
+                    <tr key={i}>
+                      <td className="px-3 py-1 text-[11px] font-mono" style={{ color: '#4A4A4A' }}>{allReplicateResults[0][i].gen}</td>
+                      {allReplicateResults.map((rep, r) => (
+                        <td key={r} className="px-3 py-1 text-[11px] font-mono" style={{ color: '#4A4A4A' }}>{rep[i].p.toFixed(4)}</td>
+                      ))}
+                      <td className="px-3 py-1 text-[11px] font-mono font-bold" style={{ color: '#C46A10' }}>
+                        {replicateStats ? `${replicateStats[i].meanP.toFixed(4)} ± ${replicateStats[i].sdP.toFixed(4)}` : '-'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="text-xs" style={{ color: '#9A9A9A' }}>
+              Set Replicates to 2+ and run the simulation to compare randomized trial outcomes and see the mean ± SD allele frequency drift.
+            </p>
+          )}
+        </div>
+      )}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Controls */}
         <div className="space-y-4">
