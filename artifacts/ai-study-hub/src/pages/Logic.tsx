@@ -7,6 +7,7 @@ import { getTheme, THEMES } from "@/features/logic/themes";
 import { TEMPLATES, TEMPLATE_CATEGORIES } from "@/features/logic/templates";
 import { generateVerilog, generateVHDL } from "@/features/logic/verilog";
 import { realSensors, SENSOR_TYPE_MAP, SENSOR_CHANNELS, type SensorChannel } from "@/features/logic/realSensors";
+import RealCircuits from "@/features/logic/RealCircuits";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 
@@ -1398,6 +1399,7 @@ export default function Logic() {
   const [showSettings, setShowSettings] = useState(false);
   const [showVerilog, setShowVerilog] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
+  const [showRealCircuits, setShowRealCircuits] = useState(false);
   const [showSensorConnect, setShowSensorConnect] = useState(false);
   const [sensorConnectNode, setSensorConnectNode] = useState<string | null>(null);
   const [realSensorTick, setRealSensorTick] = useState(0);
@@ -1701,6 +1703,19 @@ export default function Logic() {
           } : { color: "#6B6B6B" }}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
           Templates
+        </button>
+
+        {/* Real Circuits */}
+        <button onClick={() => setShowRealCircuits(!showRealCircuits)}
+          className={cn("logic-toolbar-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium", showRealCircuits && "text-white")}
+          style={showRealCircuits ? {
+            background: "linear-gradient(135deg, rgba(239,68,68,0.2), rgba(239,68,68,0.06))",
+            color: "#ef4444",
+            boxShadow: "0 0 16px rgba(239,68,68,0.12), inset 0 1px 0 rgba(239,68,68,0.15)",
+            border: "1px solid rgba(239,68,68,0.25)",
+          } : { color: "#6B6B6B" }} title="Real Circuits — Live fire alarm system with real sensor support">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 11-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg>
+          Real Circuits
         </button>
 
         <div className="w-px h-6 mx-0.5" style={{ background: "rgba(0,0,0,0.08)" }} />
@@ -4527,6 +4542,9 @@ export default function Logic() {
           </div>
         </div>
       )}
+
+      {/* Real Circuits */}
+      {showRealCircuits && <RealCircuits onClose={() => setShowRealCircuits(false)} />}
     </div>
   );
 }
