@@ -119,6 +119,7 @@ export default function RealCircuits({ onClose }: { onClose: () => void }) {
 
   const history = useRef<number[]>([]);
   const lastSample = useRef(0);
+  const lastVerify = useRef(0);
   const fireTarget = useRef(0);
 
   const addLog = useCallback((kind: LogKind, msg: string) => {
@@ -225,33 +226,30 @@ export default function RealCircuits({ onClose }: { onClose: () => void }) {
       const smokeDetect = smokePct >= smokeThresh;
       const anyDetect = heatFixed || heatRate || smokeDetect || flameOn || manualOn;
 
-      setVerifyLeft((vl) => {
-        if (vl > 0 && !anyDetect) {
+      if (!latched && anyDetect && verifyLeft === 0) {
+        setPhase("prealarm");
+        setVerifyLeft(Math.max(1, Math.round(verifySecs)));
+        lastVerify.current = nowMs;
+        addLog("warn", `PRE-ALARM · zone event detected (T=${t.toFixed(1)}°C, RoR=${rate.toFixed(1)}°/min, smoke=${smokePct.toFixed(1)}%). Verifying…`);
+      } else if (verifyLeft > 0) {
+        if (!anyDetect) {
+          setVerifyLeft(0);
+          setPhase("normal");
           addLog("info", "Detection cleared during verification — alarm not confirmed.");
-          return 0;
+        } else if (verifyLeft <= 1) {
+          setVerifyLeft(0);
+          setLatched(true);
+          setPhase("alarm");
+          const detName =
+            heatFixed || heatRate ? "HEAT DETECTOR" :
+            smokeDetect ? "SMOKE DETECTOR" :
+            flameOn ? "FLAME DETECTOR" : "MANUAL CALL POINT";
+          addLog("fire", `FIRE CONFIRMED · ${detName} — latching alarm.`);
+        } else if (nowMs - lastVerify.current >= 1000) {
+          setVerifyLeft(verifyLeft - 1);
+          lastVerify.current = nowMs;
         }
-        if (anyDetect && vl > 0 && vl - 1 <= 0) {
-          if (!latched) {
-            setLatched(true);
-            setPhase("alarm");
-            addLog("fire", `FIRE CONFIRMED · ${SENSORS.find((s) => heatFixed || heatRate ? s.id === "heat" : s.id === "smoke")?.name ?? "DEVICE"} — latching alarm.`);
-          }
-          return 0;
-        }
-        return vl;
-      });
-
-      if (anyDetect && verifyLeft === 0 && !latched) {
-        setPhase((p) => {
-          if (p === "normal") {
-            addLog("warn", `PRE-ALARM · zone event detected (T=${t.toFixed(1)}°C, RoR=${rate.toFixed(1)}°/min, smoke=${smokePct.toFixed(1)}%). Verifying…`);
-            setVerifyLeft(Math.max(1, Math.round(verifySecs)));
-          }
-          return "prealarm";
-        });
-      }
-
-      if (!anyDetect && !latched && verifyLeft === 0) {
+      } else if (!latched) {
         setPhase("normal");
       }
 
@@ -273,7 +271,6 @@ export default function RealCircuits({ onClose }: { onClose: () => void }) {
   }, [tempC]);
   const smokeDetect = smokePct >= smokeThresh;
   const anyDetect = heatFixed || rateVal >= rateThresh || smokeDetect || flameOn || manualOn;
-  const alarmActive = latched && !silenced;
   const adcHeat = mapToBits(tempC, TEMP_MIN, TEMP_MAX, TEMP_BITS);
 
   const sirenOn = (latched || testMode) && !silenced;
@@ -423,7 +420,7 @@ export default function RealCircuits({ onClose }: { onClose: () => void }) {
                 <Block x={20} y={470} w={170} h={80} title="POWER" sub="Mains + batt" val={fault ? "FAULT" : "24.1V OK"} status={fault ? "warn" : "ok"} accent={fault ? "#f59e0b" : "#16a34a"} />
 
                 {/* CONDITIONING */}
-                <Block x={250} y={30} w={180} h={64} title="TEMP → ADC" sub="10-bit mapping" val={`${adcHeat} / 255`} status="ok" accent="#FF9F4C" />
+                <Block x={250} y={30} w={180} h={64} title="TEMP → ADC" sub="8-bit mapping" val={`${adcHeat} / 255`} status="ok" accent="#FF9F4C" />
                 <Block x={250} y={120} w={180} h={64} title="OBSCURATION" sub="Photo cell" val={`${Math.min(100, Math.round(smokePct * 20))}%`} status="ok" accent="#FF9F4C" />
                 <Block x={250} y={210} w={180} h={64} title="IR/UV ANALOG" sub="Wideband" val={flameOn ? "HIGH" : "LOW"} status="ok" accent="#FF9F4C" />
 
