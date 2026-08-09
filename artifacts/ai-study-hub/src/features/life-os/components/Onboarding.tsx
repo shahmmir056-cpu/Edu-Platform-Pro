@@ -93,14 +93,20 @@ export function Onboarding({ initial, onComplete }: { initial?: LifeProfile | nu
           </div>
         </div>
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={step}
-            initial={{ opacity: 0, x: 24 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -24 }}
-            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          >
+        <div
+          className="lg-scroll-y"
+          style={{
+            maxHeight: "min(58vh, 520px)",
+          }}
+        >
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={step}
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -24 }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            >
             {/* ── BASICS ── */}
             {step === 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -323,6 +329,7 @@ export function Onboarding({ initial, onComplete }: { initial?: LifeProfile | nu
             )}
           </motion.div>
         </AnimatePresence>
+        </div>
 
         <div className="flex items-center justify-between mt-8 pt-5" style={{ borderTop: `1px solid ${t.inputBorder}` }}>
           <Button variant="outline" onClick={() => setStep((s) => Math.max(0, s - 1))} disabled={step === 0}>

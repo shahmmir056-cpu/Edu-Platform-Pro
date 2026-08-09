@@ -397,15 +397,15 @@ export default function LifeOsPage() {
       {state.profile && state.onboarded ? (
         <Hub state={state} setState={setState} />
       ) : (
-        <div className="min-h-dvh relative" style={{ background: theme === "dark" ? "#191512" : "#FFF8F0" }}>
+        <div className="relative h-dvh flex flex-col overflow-hidden" style={{ background: theme === "dark" ? "#191512" : "#FFF8F0" }}>
           <ParticleField />
-          <header className="relative z-10 flex items-center justify-between px-4 md:px-6 py-3">
+          <header className="relative z-10 flex shrink-0 items-center justify-between px-4 md:px-6 py-3">
             <Logo />
             <Link href="/" className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: theme === "dark" ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.85)", border: `1px solid ${theme === "dark" ? "rgba(255,255,255,0.14)" : "rgba(45,45,45,0.16)"}`, color: theme === "dark" ? "#F5EDE3" : "#2D2D2D" }} aria-label="Back to home">
               <Home size={16} />
             </Link>
           </header>
-          <main className="relative z-10 py-10 px-4">
+          <main className="relative z-10 flex-1 overflow-y-auto lg-scroll py-10 px-4">
             <Onboarding initial={state.profile} onComplete={completeOnboarding} />
           </main>
         </div>
