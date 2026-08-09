@@ -10,7 +10,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const isLogicPage = location === "/logic";
   const isLabPage = location.startsWith("/virtual-lab");
   const isDebatePage = location.startsWith("/debate-mentor");
-  const isAppPage = isLogicPage || isDebatePage;
+  const isLifeOsPage = location.startsWith("/life-os");
+  const isAppPage = isLogicPage || isDebatePage || isLifeOsPage;
 
   return (
     <div className={cn("flex w-full flex-col", isAppPage ? "h-dvh overflow-hidden" : "min-h-[100dvh]")}>

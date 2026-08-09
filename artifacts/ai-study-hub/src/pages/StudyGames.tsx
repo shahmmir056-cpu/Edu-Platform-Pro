@@ -20,6 +20,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { ToolHeader } from "@/components/ui/ToolHeader";
+import { trackAction } from "@/features/life-os/tracker";
 import { cn } from "@/lib/utils";
 
 const VOCAB_SETS = [
@@ -279,6 +280,11 @@ function MemoryGame({ onBack }: { onBack: () => void }) {
     if (matches === 6 && started) setGameOver(true);
   }, [matches, started]);
 
+  useEffect(() => {
+    if (!gameOver) return;
+    trackAction("/study-games", "game-played", undefined, 1, "Memory Match", `${matches}/6 matched in ${moves} moves`);
+  }, [gameOver, matches, moves]);
+
   const handleFlip = (id: number) => {
     if (flippedIds.length >= 2 || cards[id].flipped || cards[id].matched) return;
     const newCards = cards.map((c) => (c.id === id ? { ...c, flipped: true } : c));
@@ -434,6 +440,11 @@ function WordScrambleGame({ onBack }: { onBack: () => void }) {
     return () => clearInterval(interval);
   }, [started, gameOver]);
 
+  useEffect(() => {
+    if (!gameOver) return;
+    trackAction("/study-games", "game-played", undefined, 1, "Word Scramble", `Score: ${score} (${currentIdx}/${words.length} words)`);
+  }, [gameOver, score, currentIdx, words]);
+
   const check = () => {
     if (input.toLowerCase().trim() === words[currentIdx].toLowerCase()) {
       const bonus = showHint ? 0 : 5;
@@ -571,6 +582,11 @@ function SpeedMathGame({ onBack }: { onBack: () => void }) {
     return () => clearInterval(interval);
   }, [started, gameOver]);
 
+  useEffect(() => {
+    if (!gameOver) return;
+    trackAction("/study-games", "game-played", undefined, 1, "Speed Math", `Score: ${score} (${correct} correct, ${wrong} wrong)`);
+  }, [gameOver, score, correct, wrong]);
+
   const check = () => {
     const answer = parseFloat(input);
     if (answer === current.a) {
@@ -678,6 +694,11 @@ function TriviaGame({ onBack }: { onBack: () => void }) {
     return () => clearInterval(interval);
   }, [started, gameOver, showAnswer]);
 
+  useEffect(() => {
+    if (!gameOver) return;
+    trackAction("/study-games", "game-played", undefined, 1, "Brain Trivia", `Score: ${score}/${questions.length * 10}`);
+  }, [gameOver, score, questions]);
+
   const handleSelect = (idx: number) => {
     if (showAnswer) return;
     setSelected(idx); setShowAnswer(true);
@@ -783,6 +804,11 @@ function CodeBreakerGame({ onBack }: { onBack: () => void }) {
     const interval = setInterval(() => setTimer((t) => { if (t <= 1) { setShowAnswer(true); return 0; } return t - 1; }), 1000);
     return () => clearInterval(interval);
   }, [started, gameOver, showAnswer]);
+
+  useEffect(() => {
+    if (!gameOver) return;
+    trackAction("/study-games", "game-played", undefined, 1, "Code Breaker", `Score: ${score}`);
+  }, [gameOver, score]);
 
   const handleSelect = (opt: string) => {
     if (showAnswer) return;
@@ -909,6 +935,11 @@ function HangmanGame({ onBack }: { onBack: () => void }) {
     if (allGuessed && word.length > 0) { setWon(true); setGameOver(true); }
     else if (wrongCount >= MAX_WRONG) { setGameOver(true); setWon(false); }
   }, [guessed, wrongCount, word, started]);
+
+  useEffect(() => {
+    if (!gameOver) return;
+    trackAction("/study-games", "game-played", undefined, 1, "Word Master", won ? `Solved "${word}"` : `Lost - the word was "${word}"`);
+  }, [gameOver, won, word]);
 
   const keyboard = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 

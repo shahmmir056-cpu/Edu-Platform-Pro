@@ -98,7 +98,7 @@ export default function About() {
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.7, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
               className={`relative overflow-hidden rounded-2xl ${img.span}`}
-              style={{ border: "2px solid #2D2D2D", boxShadow: "inset 0 0 20px rgba(255,159,76,0.03), 0 4px 16px rgba(0,0,0,0.04)" }}
+              style={{ border: "1.5px solid rgba(255,255,255,0.72)", boxShadow: "inset 0 0 20px rgba(255,159,76,0.03), 0 4px 16px rgba(0,0,0,0.04)" }}
             >
               <img src={img.src} alt={img.alt} className={`w-full ${img.height} object-cover hover:scale-105 transition-transform duration-700`} />
               <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
@@ -117,7 +117,7 @@ export default function About() {
           className="relative rounded-[2rem] p-10 md:p-16 overflow-hidden"
           style={{
             background: "rgba(255,255,255,0.5)",
-            border: "2px solid #2D2D2D",
+            border: "1.5px solid rgba(255,255,255,0.72)",
             boxShadow: "inset 0 0 0 1.5px rgba(45,45,45,0.06), inset 0 0 24px rgba(255,159,76,0.03), inset 0 1px 0 rgba(255,255,255,0.6), 0 4px 16px rgba(0,0,0,0.03)",
             backdropFilter: "blur(16px)",
           }}
@@ -151,7 +151,7 @@ export default function About() {
               className="rounded-2xl p-8 text-center"
               style={{
                 background: "rgba(255,255,255,0.5)",
-                border: "2px solid #2D2D2D",
+                border: "1.5px solid rgba(255,255,255,0.72)",
                 boxShadow: "inset 0 0 20px rgba(255,159,76,0.03), inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 8px rgba(0,0,0,0.03)",
                 backdropFilter: "blur(16px)",
               }}
@@ -175,12 +175,12 @@ export default function About() {
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             className="relative overflow-hidden rounded-2xl"
-            style={{ border: "2px solid #2D2D2D", boxShadow: "inset 0 0 20px rgba(255,159,76,0.03), 0 4px 16px rgba(0,0,0,0.04)" }}
+            style={{ border: "1.5px solid rgba(255,255,255,0.72)", boxShadow: "inset 0 0 20px rgba(255,159,76,0.03), 0 4px 16px rgba(0,0,0,0.04)" }}
           >
             <img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=85" alt="AI-powered tutor helping a student" className="w-full h-80 object-cover hover:scale-105 transition-transform duration-700" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/15 to-transparent pointer-events-none" />
             <div className="absolute bottom-4 left-4 right-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold" style={{ background: "rgba(255,255,255,0.8)", border: "2px solid #2D2D2D", color: "#FF9F4C", backdropFilter: "blur(8px)" }}>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold" style={{ background: "rgba(255,255,255,0.8)", border: "1.5px solid rgba(255,255,255,0.72)", color: "#FF9F4C", backdropFilter: "blur(8px)" }}>
                 <Sparkles size={12} /> AI-Powered Learning
               </div>
             </div>
@@ -192,12 +192,12 @@ export default function About() {
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             className="relative overflow-hidden rounded-2xl"
-            style={{ border: "2px solid #2D2D2D", boxShadow: "inset 0 0 20px rgba(255,159,76,0.03), 0 4px 16px rgba(0,0,0,0.04)" }}
+            style={{ border: "1.5px solid rgba(255,255,255,0.72)", boxShadow: "inset 0 0 20px rgba(255,159,76,0.03), 0 4px 16px rgba(0,0,0,0.04)" }}
           >
             <img src="https://images.unsplash.com/photo-1509062526246-a8fbbc2e7c5a?w=800&q=85" alt="Students conducting research experiments" className="w-full h-80 object-cover hover:scale-105 transition-transform duration-700" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/15 to-transparent pointer-events-none" />
             <div className="absolute bottom-4 left-4 right-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold" style={{ background: "rgba(255,255,255,0.8)", border: "2px solid #2D2D2D", color: "#FF9F4C", backdropFilter: "blur(8px)" }}>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold" style={{ background: "rgba(255,255,255,0.8)", border: "1.5px solid rgba(255,255,255,0.72)", color: "#FF9F4C", backdropFilter: "blur(8px)" }}>
                 <FlaskConical size={12} /> Real Simulations
               </div>
             </div>
@@ -215,15 +215,15 @@ export default function About() {
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             className="relative overflow-hidden rounded-2xl"
-            style={{ border: "2px solid #2D2D2D", boxShadow: "inset 0 0 20px rgba(255,159,76,0.03), 0 4px 16px rgba(0,0,0,0.04)" }}
+            style={{ border: "1.5px solid rgba(255,255,255,0.72)", boxShadow: "inset 0 0 20px rgba(255,159,76,0.03), 0 4px 16px rgba(0,0,0,0.04)" }}
           >
             <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=85" alt="AI Debate Mentor — interactive voice-powered debate practice" className="w-full h-80 md:h-96 object-cover hover:scale-105 transition-transform duration-700" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/15 to-transparent pointer-events-none" />
             <div className="absolute bottom-4 left-4 right-4 flex items-center gap-3">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold" style={{ background: "rgba(255,255,255,0.85)", border: "2px solid #2D2D2D", color: "#FF9F4C", backdropFilter: "blur(8px)" }}>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold" style={{ background: "rgba(255,255,255,0.85)", border: "1.5px solid rgba(255,255,255,0.72)", color: "#FF9F4C", backdropFilter: "blur(8px)" }}>
                 <MessageSquare size={12} /> AI Debate Mentor
               </div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold" style={{ background: "rgba(255,255,255,0.85)", border: "2px solid #2D2D2D", color: "#4CAF50", backdropFilter: "blur(8px)" }}>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold" style={{ background: "rgba(255,255,255,0.85)", border: "1.5px solid rgba(255,255,255,0.72)", color: "#4CAF50", backdropFilter: "blur(8px)" }}>
                 <Mic size={11} /> Voice Enabled
               </div>
             </div>
@@ -295,7 +295,7 @@ export default function About() {
             className="relative max-w-6xl mx-auto rounded-[2rem] overflow-hidden px-8 md:px-16 py-16 md:py-20 text-center isolate"
             style={{
               background: "linear-gradient(135deg, rgba(255,159,76,0.04) 0%, rgba(255,255,255,0.5) 30%, rgba(255,212,168,0.04) 100%)",
-              border: "2px solid #2D2D2D",
+              border: "1.5px solid rgba(255,255,255,0.72)",
               boxShadow: "inset 0 0 0 1.5px rgba(45,45,45,0.06), inset 0 0 24px rgba(255,159,76,0.03), inset 0 1px 0 rgba(255,255,255,0.6), 0 4px 16px rgba(0,0,0,0.03)",
             }}
           >
@@ -331,7 +331,7 @@ export default function About() {
                 className="group relative inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold transition-all duration-500 hover:-translate-y-0.5"
                 style={{
                   background: "linear-gradient(135deg, rgba(255,255,255,0.55), rgba(255,255,255,0.25))",
-                  border: "2px solid #2D2D2D",
+                  border: "1.5px solid rgba(255,255,255,0.72)",
                   color: "#2D2D2D",
                   backdropFilter: "blur(16px)",
                   boxShadow: "inset 0 1px 0 rgba(255,255,255,0.5), 0 4px 16px rgba(0,0,0,0.04)",

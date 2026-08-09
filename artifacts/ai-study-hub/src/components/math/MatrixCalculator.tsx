@@ -170,7 +170,7 @@ export default function MatrixCalculator() {
                 "px-3.5 py-2 rounded-lg font-bold text-sm transition-all duration-300 border-2",
                 size === n ? "text-white" : "text-[#6B6B6B] hover:text-primary border-black/10 bg-white/60"
               )}
-              style={size === n ? { background: "linear-gradient(135deg, #FF9F4C, #FFD4A8)", borderColor: "#2D2D2D" } : undefined}
+              style={size === n ? { background: "linear-gradient(135deg, #FF9F4C, #FFD4A8)", borderColor: "rgba(120,90,60,0.3)" } : undefined}
             >
               {n} × {n}
             </button>
@@ -192,7 +192,7 @@ export default function MatrixCalculator() {
                 "inline-flex items-center gap-1 px-3.5 py-2 rounded-lg font-bold text-sm transition-all duration-300 border-2",
                 op === o.id ? "text-white" : "text-[#6B6B6B] hover:text-primary border-black/10 bg-white/60"
               )}
-              style={op === o.id ? { background: "linear-gradient(135deg, #FF9F4C, #FFD4A8)", borderColor: "#2D2D2D" } : undefined}
+              style={op === o.id ? { background: "linear-gradient(135deg, #FF9F4C, #FFD4A8)", borderColor: "rgba(120,90,60,0.3)" } : undefined}
             >
               {o.id === "add" && <Plus size={14} />}
               {o.id === "sub" && <Minus size={14} />}

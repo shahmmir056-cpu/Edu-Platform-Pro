@@ -30,6 +30,7 @@ import {
   BarChart3,
 } from "lucide-react";
 import { ToolHeader } from "@/components/ui/ToolHeader";
+import { trackAction } from "@/features/life-os/tracker";
 import { cn } from "@/lib/utils";
 
 type TestPhase = "hub" | "config" | "taking" | "results";
@@ -406,6 +407,9 @@ export default function TestConductor() {
     setResults(res);
     setScore(res.reduce((s, r) => s + r.points, 0));
     setPhase("results");
+    const totalPoints = res.reduce((s, r) => s + r.points, 0);
+    const correctCount = res.filter((r) => r.correct).length;
+    trackAction("/test-conductor", "test-done", undefined, 1, config.subject, `${correctCount}/${questions.length} correct, ${Math.round((totalPoints / (questions.length * 10)) * 100)}%`);
   };
 
   const setAnswer = (ans: string | number | boolean | null) => {

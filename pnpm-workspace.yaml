@@ -161,4 +161,5 @@ overrides:
 
 allowBuilds:
   better-sqlite3: true
+  core-js: set this to true or false
   esbuild: true

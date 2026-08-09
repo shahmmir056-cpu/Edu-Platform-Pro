@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 export const PANEL_STYLE: CSSProperties = {
   background: "rgba(255,255,255,0.5)",
   backdropFilter: "blur(20px) saturate(180%)",
-  border: "2px solid #2D2D2D",
+  border: "1.5px solid rgba(255,255,255,0.72)",
   boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7), 0 4px 16px rgba(0,0,0,0.04)",
 };
 

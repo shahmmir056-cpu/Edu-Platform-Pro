@@ -206,7 +206,7 @@ function LinearSystemSolver() {
             )}
             style={
               size === n
-                ? { background: "linear-gradient(135deg, #FF9F4C, #FFD4A8)", borderColor: "#2D2D2D" }
+                ? { background: "linear-gradient(135deg, #FF9F4C, #FFD4A8)", borderColor: "rgba(120,90,60,0.3)" }
                 : undefined
             }
           >
@@ -343,7 +343,7 @@ export default function EquationSolver() {
               "inline-flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all duration-300 border-2",
               mode === "roots" ? "text-white" : "text-[#6B6B6B] hover:text-primary border-black/10 bg-white/60"
             )}
-            style={mode === "roots" ? { background: "linear-gradient(135deg, #FF9F4C, #FFD4A8)", borderColor: "#2D2D2D" } : undefined}
+            style={mode === "roots" ? { background: "linear-gradient(135deg, #FF9F4C, #FFD4A8)", borderColor: "rgba(120,90,60,0.3)" } : undefined}
           >
             <Search size={15} />
             Find Roots f(x) = 0
@@ -355,7 +355,7 @@ export default function EquationSolver() {
               "inline-flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all duration-300 border-2",
               mode === "system" ? "text-white" : "text-[#6B6B6B] hover:text-primary border-black/10 bg-white/60"
             )}
-            style={mode === "system" ? { background: "linear-gradient(135deg, #FF9F4C, #FFD4A8)", borderColor: "#2D2D2D" } : undefined}
+            style={mode === "system" ? { background: "linear-gradient(135deg, #FF9F4C, #FFD4A8)", borderColor: "rgba(120,90,60,0.3)" } : undefined}
           >
             <Grid3x3 size={15} />
             Linear Systems

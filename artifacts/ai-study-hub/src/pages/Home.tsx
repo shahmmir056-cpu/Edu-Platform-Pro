@@ -5,7 +5,7 @@ import {
   BookOpen, PenTool, HelpCircle, Layers, ClipboardList,
   ArrowRight, Sigma, FlaskConical, Shield, Check, Sparkles,
   Gamepad2, ClipboardCheck, Zap, Brain, Eye, Lightbulb, Cpu, Rocket,
-  ChevronLeft, ChevronRight, Star, Quote, MessageSquareHeart,
+  ChevronLeft, ChevronRight, Star, Quote, MessageSquareHeart, CalendarClock,
 } from "lucide-react";
 import MobileHome from "./MobileHome";
 
@@ -19,6 +19,7 @@ const C = {
 };
 
 const SHOWCASE_TOOLS = [
+  { name: "Life OS", path: "/life-os", icon: CalendarClock, desc: "Your AI Routine Architect — minute-level schedules, live adaptation, mission mode & a Future Self that never lets you quit.", iconColor: C.primary, tag: "Flagship" },
   { name: "Deep Research Assistant", path: "/research", icon: BookOpen, desc: "Generate structured, academic-grade research reports on any topic.", iconColor: C.orange, tag: "Research" },
   { name: "Essay Writer", path: "/essay", icon: PenTool, desc: "Draft complete essays with outlines, tailored to specific styles and word counts.", iconColor: C.indigo, tag: "Writing" },
   { name: "Math Solver", path: "/math-solver", icon: Sigma, desc: "Type any equation or word problem and get a clean, numbered step-by-step solution.", iconColor: C.sky, tag: "Popular" },
@@ -96,7 +97,7 @@ function FeedbackSection() {
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }} transition={{ duration: 0.6 }}
           className="max-w-xl mx-auto text-center rounded-2xl p-10"
-          style={{ background: "rgba(255,255,255,0.5)", border: "2px solid #2D2D2D", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6)" }}>
+          style={{ background: "rgba(255,255,255,0.5)", border: "1.5px solid rgba(255,255,255,0.72)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6)" }}>
           <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
             style={{ background: "rgba(255,159,76,0.1)", color: C.primary }}>
             <MessageSquareHeart size={26} />
@@ -118,7 +119,7 @@ function FeedbackSection() {
               initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.6, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
               className="relative flex flex-col p-6 rounded-2xl transition-all duration-500 hover:-translate-y-1"
-              style={{ background: "rgba(255,255,255,0.5)", border: "2px solid #2D2D2D", boxShadow: "inset 0 0 20px rgba(255,159,76,0.04), inset 0 1px 0 rgba(255,255,255,0.6)" }}>
+              style={{ background: "rgba(255,255,255,0.5)", border: "1.5px solid rgba(255,255,255,0.72)", boxShadow: "inset 0 0 20px rgba(255,159,76,0.04), inset 0 1px 0 rgba(255,255,255,0.6)" }}>
               <Quote size={22} className="mb-3" style={{ color: "rgba(255,159,76,0.5)" }} />
               <div className="flex items-center gap-0.5 mb-3">
                 {[1, 2, 3, 4, 5].map((star) => (
@@ -591,7 +592,7 @@ export default function Home() {
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}>
           <motion.p className="text-sm font-bold uppercase tracking-widest mb-3" style={{ color: C.orange }}
             animate={{ opacity: [1, 0.6, 1] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>Our Toolkit</motion.p>
-          <h2 className="text-3xl md:text-5xl font-serif mb-4" style={{ color: C.darkSlate }}>Ten Tools. One Tutor.</h2>
+          <h2 className="text-3xl md:text-5xl font-serif mb-4" style={{ color: C.darkSlate }}>Eleven Tools. One Tutor.</h2>
           <p style={{ color: "#6B6B6B" }} className="text-base sm:text-lg">Pick a tool below — everything runs instantly, right in your browser.</p>
         </motion.div>
 
@@ -599,7 +600,7 @@ export default function Home() {
           {/* Left arrow */}
           <button onClick={() => setCarouselIdx((p) => Math.max(p - 1, 0))}
             className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-30 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
-            style={{ background: "rgba(255,255,255,0.8)", border: "1.5px solid #2D2D2D", boxShadow: "0 4px 16px rgba(0,0,0,0.06)", backdropFilter: "blur(8px)", color: "#2D2D2D" }}>
+            style={{ background: "rgba(255,255,255,0.8)", border: "1.5px solid rgba(255,255,255,0.72)", boxShadow: "0 4px 16px rgba(0,0,0,0.06)", backdropFilter: "blur(8px)", color: "#2D2D2D" }}>
             <ChevronLeft size={18} />
           </button>
 
@@ -625,7 +626,7 @@ export default function Home() {
                     className="min-w-[340px]">
                     <InteractiveCard intensity={3}
                       className="lg-card group relative flex flex-col h-full rounded-2xl transition-all duration-500 overflow-hidden text-center"
-                      style={{ background: "rgba(255,255,255,0.5)", border: "2px solid #2D2D2D", boxShadow: "inset 0 0 20px rgba(255,159,76,0.04), inset 0 1px 0 rgba(255,255,255,0.6)" }}>
+                      style={{ background: "rgba(255,255,255,0.5)", border: "1.5px solid rgba(255,255,255,0.72)", boxShadow: "inset 0 0 20px rgba(255,159,76,0.04), inset 0 1px 0 rgba(255,255,255,0.6)" }}>
                       <Link href={tool.path} className="flex flex-col flex-1 h-full p-6 relative z-10">
                         <ShimmerOverlay color="rgba(255,255,255,0.05)" />
                         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
@@ -656,7 +657,7 @@ export default function Home() {
           {/* Right arrow */}
           <button onClick={() => setCarouselIdx((p) => Math.min(p + 1, maxIdx))}
             className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-30 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
-            style={{ background: "rgba(255,255,255,0.8)", border: "1.5px solid #2D2D2D", boxShadow: "0 4px 16px rgba(0,0,0,0.06)", backdropFilter: "blur(8px)", color: "#2D2D2D" }}>
+            style={{ background: "rgba(255,255,255,0.8)", border: "1.5px solid rgba(255,255,255,0.72)", boxShadow: "0 4px 16px rgba(0,0,0,0.06)", backdropFilter: "blur(8px)", color: "#2D2D2D" }}>
             <ChevronRight size={18} />
           </button>
 
@@ -679,7 +680,7 @@ export default function Home() {
         <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }} transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }}>
           <div className="relative max-w-6xl mx-auto rounded-[2rem] overflow-hidden px-8 md:px-16 py-16 md:py-20 text-center isolate"
-            style={{ background: "linear-gradient(135deg, rgba(255,159,76,0.04) 0%, rgba(255,255,255,0.5) 30%, rgba(6,182,212,0.04) 100%)", border: "2px solid #2D2D2D" }}>
+            style={{ background: "linear-gradient(135deg, rgba(255,159,76,0.04) 0%, rgba(255,255,255,0.5) 30%, rgba(6,182,212,0.04) 100%)", border: "1.5px solid rgba(255,255,255,0.72)" }}>
             <AnimatedBorder />
             <motion.div className="absolute inset-0 pointer-events-none"
               style={{ backgroundImage: "radial-gradient(rgba(255,159,76,0.03) 1px, transparent 1px)", backgroundSize: "20px 20px" }} />

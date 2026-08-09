@@ -92,7 +92,7 @@ export default function SimulationsPage() {
                   className="text-left rounded-2xl overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg group"
                   style={{
                     background: "rgba(255,255,255,0.5)",
-                    border: "2px solid #2D2D2D",
+                    border: "1.5px solid rgba(255,255,255,0.72)",
                   }}
                 >
                   {/* Header */}
@@ -175,7 +175,7 @@ export default function SimulationsPage() {
                 className="text-left rounded-xl p-3 transition-all hover:-translate-y-0.5 hover:shadow-md group"
                 style={{
                   background: "rgba(255,255,255,0.5)",
-                  border: "2px solid #2D2D2D",
+                  border: "1.5px solid rgba(255,255,255,0.72)",
                 }}
               >
                 <span
@@ -201,7 +201,7 @@ export default function SimulationsPage() {
             <button
               onClick={() => setViewMode("phet-grid")}
               className="mt-4 w-full py-3 rounded-xl text-sm font-semibold transition-all hover:scale-[1.01]"
-              style={{ background: "rgba(255,255,255,0.5)", color: "#FF9F4C", border: "2px solid #2D2D2D" }}
+              style={{ background: "rgba(255,255,255,0.5)", color: "#FF9F4C", border: "1.5px solid rgba(255,255,255,0.72)" }}
             >
               View All {PHET_SIMS.length} PhET Simulations →
             </button>
@@ -231,7 +231,7 @@ export default function SimulationsPage() {
                   transition={{ delay: i * 0.02 }}
                   onClick={() => openPhetSim(sim.slug)}
                   className="text-left rounded-xl p-3 transition-all hover:-translate-y-0.5 hover:shadow-md"
-                  style={{ background: "rgba(255,255,255,0.5)", border: "2px solid #2D2D2D" }}
+                  style={{ background: "rgba(255,255,255,0.5)", border: "1.5px solid rgba(255,255,255,0.72)" }}
                 >
                   <span
                     className="text-[9px] font-bold px-1.5 py-0.5 rounded-full inline-block mb-1.5"
@@ -265,9 +265,9 @@ export default function SimulationsPage() {
               exit={{ opacity: 0, scale: 0.96, y: 10 }}
               transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white overflow-clip w-full flex flex-col shadow-2xl border-2 border-[#2D2D2D] rounded-2xl h-[100dvh] mx-2 sm:mx-4"
+              className="bg-white overflow-clip w-full flex flex-col shadow-2xl border-2 border-[rgba(120,90,60,0.28)] rounded-2xl h-[100dvh] mx-2 sm:mx-4"
             >
-              <div className="flex items-center justify-between px-5 py-3 border-b-2 border-[#2D2D2D] shrink-0" style={{ background: "rgba(255,159,76,0.06)" }}>
+              <div className="flex items-center justify-between px-5 py-3 border-b-2 border-[rgba(120,90,60,0.28)] shrink-0" style={{ background: "rgba(255,159,76,0.06)" }}>
                 <p className="font-serif text-lg leading-none text-[#FF9F4C]">
                   {PHET_SIMS.find((s) => s.slug === activePhetSlug)?.name}
                 </p>

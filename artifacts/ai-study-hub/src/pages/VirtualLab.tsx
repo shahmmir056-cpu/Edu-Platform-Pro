@@ -1,4 +1,4 @@
-import { useMemo, useState, Suspense } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FlaskConical,
@@ -36,6 +36,9 @@ import {
 import { ToolHeader } from "@/components/ui/ToolHeader";
 import { SIMULATIONS, SIM_SUBJECTS, simEmbedUrl, type SimSubject } from "@/lib/simulations";
 import { SIMS_V2, getSimV2 } from "@/features/simulations/simulations-v2";
+import { LabControlsProvider, LabToolbar } from "@/features/simulations/simulations-v2/labControls";
+import { readShareFromHash, SHARE_KEY } from "@/features/simulations/simulations-v2/Microscope";
+import { trackAction } from "@/features/life-os/tracker";
 import { cn } from "@/lib/utils";
 
 const SUBJECT_COLORS: Record<SimSubject, string> = {
@@ -158,6 +161,15 @@ export default function VirtualLab() {
   const [activeV2Id, setActiveV2Id] = useState<string | null>(null);
   const [iframeFailed, setIframeFailed] = useState(false);
 
+  useEffect(() => {
+    const payload = readShareFromHash();
+    if (!payload || !Array.isArray(payload.obs)) return;
+    try { localStorage.setItem(SHARE_KEY, JSON.stringify(payload)); } catch { /* noop */ }
+    setTab("interactive");
+    setActiveV2Id("using-light-microscope");
+    window.history.replaceState(null, "", window.location.pathname + window.location.search);
+  }, []);
+
   const filtered = useMemo(() => {
     return SIMULATIONS.filter((sim) => {
       const matchesSubject = activeSubject === "All" || sim.subject === activeSubject;
@@ -196,7 +208,7 @@ export default function VirtualLab() {
               boxShadow: "0 4px 12px rgba(255,159,76,0.3)",
             } : {
               background: "rgba(255,255,255,0.5)",
-              border: "2px solid #2D2D2D",
+              border: "1.5px solid rgba(255,255,255,0.72)",
               color: "#6B6B6B",
             }}
           >
@@ -216,7 +228,7 @@ export default function VirtualLab() {
           {/* Stats */}
           <div className="flex flex-wrap gap-3 mb-8">
             <div className="px-4 py-2 rounded-xl text-sm font-medium"
-              style={{ background: "rgba(255,159,76,0.08)", border: "2px solid #2D2D2D", color: "#E8852E" }}
+              style={{ background: "rgba(255,159,76,0.08)", border: "1.5px solid rgba(255,255,255,0.72)", color: "#E8852E" }}
             >
               {SIMULATIONS.length} PhET Simulations
             </div>
@@ -278,7 +290,7 @@ export default function VirtualLab() {
                   className="group text-left rounded-2xl overflow-hidden transition-all duration-500 hover:-translate-y-1"
                   style={{
                     background: "rgba(255,255,255,0.5)",
-                    border: "2px solid #2D2D2D",
+                    border: "1.5px solid rgba(255,255,255,0.72)",
                     boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7), 0 4px 16px rgba(0,0,0,0.04)",
                     backdropFilter: "blur(20px) saturate(180%)",
                   }}
@@ -392,11 +404,14 @@ export default function VirtualLab() {
                 transition={{ delay: i * 0.04 }}
                 whileHover={{ y: -4, scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => setActiveV2Id(sim.id)}
+                onClick={() => {
+                  setActiveV2Id(sim.id);
+                  trackAction("/virtual-lab", "experiment", undefined, 1, sim.title, `Launched ${sim.title} (${sim.category})`);
+                }}
                 className="group text-left rounded-2xl overflow-hidden transition-all"
                 style={{
                   background: "rgba(255,255,255,0.5)",
-                  border: "2px solid #2D2D2D",
+                  border: "1.5px solid rgba(255,255,255,0.72)",
                   boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7), 0 4px 16px rgba(0,0,0,0.04)",
                   backdropFilter: "blur(20px) saturate(180%)",
                   cursor: "pointer",
@@ -485,9 +500,9 @@ export default function VirtualLab() {
               exit={{ opacity: 0, scale: 0.96, y: 10 }}
               transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white overflow-clip w-full flex flex-col shadow-2xl border-2 border-[#2D2D2D] rounded-2xl h-[100dvh]"
+              className="bg-white overflow-clip w-full flex flex-col shadow-2xl border-2 border-[rgba(120,90,60,0.28)] rounded-2xl h-[100dvh]"
             >
-              <div className="flex items-center justify-between px-5 py-3 border-b-2 border-[#2D2D2D] shrink-0" style={{ background: "rgba(255,159,76,0.06)" }}>
+              <div className="flex items-center justify-between px-5 py-3 border-b-2 border-[rgba(120,90,60,0.28)] shrink-0" style={{ background: "rgba(255,159,76,0.06)" }}>
                 <div className="flex items-center gap-3">
                   <p className="font-serif text-lg leading-none text-[#FF9F4C]">{activeSim.name}</p>
                 </div>
@@ -556,9 +571,9 @@ export default function VirtualLab() {
               exit={{ opacity: 0, scale: 0.96, y: 10 }}
               transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white overflow-clip w-full flex flex-col shadow-2xl border-2 border-[#2D2D2D] rounded-2xl h-[100dvh]"
+              className="bg-white overflow-clip w-full flex flex-col shadow-2xl border-2 border-[rgba(120,90,60,0.28)] rounded-2xl h-[100dvh]"
             >
-              <div className="flex items-center justify-between px-5 py-3 border-b-2 border-[#2D2D2D] shrink-0" style={{ background: "rgba(255,159,76,0.06)" }}>
+              <div className="flex items-center justify-between px-5 py-3 border-b-2 border-[rgba(120,90,60,0.28)] shrink-0" style={{ background: "rgba(255,159,76,0.06)" }}>
                 <div className="flex items-center gap-3">
                   {(() => {
                     const LbIcon = V2_CATEGORY_ICONS[activeV2Sim.category] ?? FlaskRound;
@@ -595,7 +610,13 @@ export default function VirtualLab() {
                     </div>
                   }
                 >
-                  <activeV2Sim.component />
+                  <LabControlsProvider key={activeV2Sim.id}>
+                    <LabToolbar title={activeV2Sim.title}>
+                      <div className="p-4">
+                        <activeV2Sim.component />
+                      </div>
+                    </LabToolbar>
+                  </LabControlsProvider>
                 </Suspense>
               </div>
             </motion.div>

@@ -8,6 +8,7 @@ import { ChatInterface } from "./components/ChatInterface";
 import { ParticleBackground } from "./components/ParticleBackground";
 import { useVoice } from "./hooks/useVoice";
 import { sendDebateMessage, generateScore, API_TTS } from "./lib/api";
+import { trackAction } from "@/features/life-os/tracker";
 import type { ChatMessage, DebateMode, DebateScore, InterviewStyle } from "./types";
 
 const MODES: { id: DebateMode; label: string; icon: typeof MessageSquare; desc: string; roleDesc: string; features: string[] }[] = [
@@ -112,6 +113,14 @@ export default function DebateMentorPage() {
 
     try {
       const reply = await sendDebateMessage(updated, mode, topicActive, interviewStyle ?? undefined);
+      trackAction(
+        "/debate-mentor",
+        "debate-exchange",
+        undefined,
+        1,
+        text.trim(),
+        reply.length > 150 ? `${reply.slice(0, 150)}...` : reply,
+      );
       const aiMsg: ChatMessage = { id: `a-${Date.now()}`, role: "assistant", content: reply, timestamp: Date.now() };
       const final = [...updated, aiMsg];
       messagesRef.current = final;
@@ -187,7 +196,7 @@ export default function DebateMentorPage() {
             className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all hover:scale-105 lg-card">
             <Home size={16} style={{ color: "#E8852E" }} />
           </Link>
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(255,159,76,0.12)", border: "2px solid #2D2D2D" }}>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(255,159,76,0.12)", border: "1.5px solid rgba(255,255,255,0.72)" }}>
             <span className="text-base">🤖</span>
           </div>
 

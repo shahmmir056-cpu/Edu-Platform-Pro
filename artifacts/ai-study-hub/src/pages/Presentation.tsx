@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGeneratePresentation } from "@workspace/api-client-react";
 import { MonitorPlay, Download, ChevronRight, ChevronLeft, LayoutTemplate } from "lucide-react";
 import { ToolHeader } from "@/components/ui/ToolHeader";
 import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
+import { trackAction } from "@/features/life-os/tracker";
 import { cn } from "@/lib/utils";
 
 export default function Presentation() {
@@ -20,6 +21,11 @@ export default function Presentation() {
     generatePres.mutate({ data: { topic, numSlides } });
     setCurrentSlide(0);
   };
+
+  useEffect(() => {
+    if (!presentation) return;
+    trackAction("/presentation", "presentation-generated", undefined, 1, topic.trim(), `Presentation with ${presentation.slides.length} slides`);
+  }, [presentation, topic]);
 
   const nextSlide = () => {
     if (presentation && currentSlide < presentation.slides.length - 1) {

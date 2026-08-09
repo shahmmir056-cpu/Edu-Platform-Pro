@@ -113,7 +113,7 @@ export function Footer() {
                   className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 hover:-translate-y-1"
                   style={{
                     background: "rgba(255,255,255,0.4)",
-                    border: "2px solid #2D2D2D",
+                    border: "1.5px solid rgba(255,255,255,0.72)",
                     color: "#9A9A9A",
                   }}
                   onMouseEnter={(e) => {
@@ -123,7 +123,7 @@ export function Footer() {
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.background = "rgba(255,255,255,0.4)";
-                    e.currentTarget.style.borderColor = "#2D2D2D";
+                    e.currentTarget.style.borderColor = "rgba(120,90,60,0.3)";
                     e.currentTarget.style.color = "#9A9A9A";
                   }}
                 >

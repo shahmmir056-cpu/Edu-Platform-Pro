@@ -64,7 +64,7 @@ export function ChatInterface({
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: "spring", stiffness: 200 }}
               className="w-16 h-16 rounded-2xl flex items-center justify-center"
-              style={{ background: "rgba(255,159,76,0.08)", border: "2px solid #2D2D2D" }}
+              style={{ background: "rgba(255,159,76,0.08)", border: "1.5px solid rgba(255,255,255,0.72)" }}
             >
               <span className="text-2xl">🤖</span>
             </motion.div>
@@ -104,7 +104,7 @@ export function ChatInterface({
               <div className={`max-w-[85%] sm:max-w-[82%] ${msg.role === "user" ? "rounded-2xl rounded-br-md" : "rounded-2xl rounded-bl-md"}`}>
                 {msg.role === "assistant" && (
                   <div className="flex items-center gap-1.5 mb-1.5 px-1">
-                    <div className="w-5 h-5 rounded-lg flex items-center justify-center" style={{ background: "rgba(255,159,76,0.12)", border: "1.5px solid #2D2D2D" }}>
+                    <div className="w-5 h-5 rounded-lg flex items-center justify-center" style={{ background: "rgba(255,159,76,0.12)", border: "1.5px solid rgba(255,255,255,0.72)" }}>
                       <span className="text-[9px]">🤖</span>
                     </div>
                     <span className="text-[10px] font-semibold" style={{ color: "#9A9A9A" }}>Neural Sync AI</span>
@@ -139,7 +139,7 @@ export function ChatInterface({
           >
             <div>
               <div className="flex items-center gap-1.5 mb-1.5 px-1">
-                <div className="w-5 h-5 rounded-lg flex items-center justify-center" style={{ background: "rgba(255,159,76,0.12)", border: "1.5px solid #2D2D2D" }}>
+                <div className="w-5 h-5 rounded-lg flex items-center justify-center" style={{ background: "rgba(255,159,76,0.12)", border: "1.5px solid rgba(255,255,255,0.72)" }}>
                   <span className="text-[9px]">🤖</span>
                 </div>
                 <span className="text-[10px] font-semibold" style={{ color: "#9A9A9A" }}>Thinking...</span>
@@ -204,7 +204,7 @@ export function ChatInterface({
             style={{
               background: isListening ? "linear-gradient(135deg, #FF9F4C, #E8852E)" : "rgba(255,159,76,0.10)",
               color: isListening ? "#fff" : "#E8852E",
-              border: "1.5px solid #2D2D2D",
+              border: "1.5px solid rgba(255,255,255,0.72)",
             }}
           >
             {isListening ? <Mic size={16} /> : <MicOff size={16} />}

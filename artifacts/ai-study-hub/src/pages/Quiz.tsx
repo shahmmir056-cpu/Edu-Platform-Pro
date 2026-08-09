@@ -3,6 +3,7 @@ import { useGenerateQuiz } from "@workspace/api-client-react";
 import { HelpCircle, CheckCircle2, XCircle, RefreshCw, Trophy } from "lucide-react";
 import { ToolHeader } from "@/components/ui/ToolHeader";
 import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
+import { trackAction } from "@/features/life-os/tracker";
 import { cn } from "@/lib/utils";
 
 type Difficulty = "easy" | "medium" | "hard";
@@ -21,6 +22,7 @@ export default function Quiz() {
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
     generateQuiz.mutate({ data: { topic, numQuestions, difficulty } });
+    trackAction("/quiz", "quiz-generated", topic, 1, topic.trim(), `Quiz with ${numQuestions} questions on ${topic}`);
     setCurrentQuestionIdx(0);
     setSelectedAnswers({});
     setShowResults(false);
@@ -47,6 +49,7 @@ export default function Quiz() {
       setCurrentQuestionIdx(prev => prev + 1);
     } else {
       setShowResults(true);
+      trackAction("/quiz", "quiz-done", topic, 2, topic.trim(), `${score}/${quiz?.questions.length ?? 0} correct`);
     }
   };
 

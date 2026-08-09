@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import type { Simulation, Step } from "./engine/types";
 import { SimulationEngine, type SimulationContext } from "./engine/SimulationEngine";
+import { trackAction } from "@/features/life-os/tracker";
 import { Beaker } from "./equipment/Beaker";
 import { Pipette } from "./equipment/Pipette";
 import { TestTube } from "./equipment/TestTube";
@@ -75,6 +76,20 @@ function SimViewInner({
       }
     }
   }, [ctx.state.completedSteps, simulation.steps, completedSteps]);
+
+  // Track a completed simulation run
+  useEffect(() => {
+    if (ctx.state.results.isComplete) {
+      trackAction(
+        "/simulations",
+        "simulation-run",
+        undefined,
+        1,
+        simulation.title,
+        `Completed all ${simulation.steps.length} steps of ${simulation.title}`
+      );
+    }
+  }, [ctx.state.results.isComplete, simulation.title, simulation.steps.length]);
 
   const registerEquip = useCallback((id: string, el: HTMLDivElement | null) => {
     if (el) equipRefs.current.set(id, el);
@@ -274,10 +289,10 @@ function SimViewInner({
   return (
     <div className="min-h-screen pb-24" style={{ background: "#FFF8F0" }}>
       {/* Top bar */}
-      <div className="sticky top-0 z-50 border-b-2 border-[#2D2D2D]" style={{ background: "rgba(255,248,240,0.97)", backdropFilter: "blur(12px)" }}>
+      <div className="sticky top-0 z-50 border-b-2 border-[rgba(120,90,60,0.28)]" style={{ background: "rgba(255,248,240,0.97)", backdropFilter: "blur(12px)" }}>
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-3">
-            <button onClick={onBack} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all hover:scale-[1.02]" style={{ background: "rgba(255,255,255,0.7)", color: "#2D2D2D", border: "2px solid #2D2D2D" }}>
+            <button onClick={onBack} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all hover:scale-[1.02]" style={{ background: "rgba(255,255,255,0.7)", color: "#2D2D2D", border: "1.5px solid rgba(255,255,255,0.72)" }}>
               <ArrowLeft size={14} />
               Back
             </button>
@@ -309,7 +324,7 @@ function SimViewInner({
           <div className="flex-1">
             <div
               ref={boardRef}
-              className="rounded-2xl border-2 border-[#2D2D2D] overflow-x-auto overflow-y-hidden relative select-none"
+              className="rounded-2xl border-2 border-[rgba(120,90,60,0.28)] overflow-x-auto overflow-y-hidden relative select-none"
               style={{ background: "rgba(255,255,255,0.5)", minHeight: 520, touchAction: "none" }}
               onPointerMove={handleDragMove}
               onPointerUp={handleDragEnd}
@@ -400,7 +415,7 @@ function SimViewInner({
               {/* Timer overlay */}
               {ctx.currentStep?.trigger.type === "timer" && !ctx.state.results.isComplete && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/5 pointer-events-none">
-                  <div className="px-6 py-4 rounded-2xl text-center" style={{ background: "rgba(255,248,240,0.95)", border: "2px solid #2D2D2D" }}>
+                  <div className="px-6 py-4 rounded-2xl text-center" style={{ background: "rgba(255,248,240,0.95)", border: "1.5px solid rgba(255,255,255,0.72)" }}>
                     <p className="text-sm font-semibold mb-2" style={{ color: "#2D2D2D" }}>
                       ⏳ {ctx.currentStep.instruction}
                     </p>
@@ -434,7 +449,7 @@ function SimViewInner({
                     <button
                       onClick={() => { ctx.resetSim(); setCompletedSteps([]); setMessage(null); }}
                       className="mt-4 px-6 py-2 rounded-lg text-sm font-semibold text-white pointer-events-auto transition-all hover:scale-105"
-                      style={{ background: cat, border: "2px solid #2D2D2D" }}
+                      style={{ background: cat, border: "1.5px solid rgba(255,255,255,0.72)" }}
                     >
                       Run Again
                     </button>
@@ -452,7 +467,7 @@ function SimViewInner({
                 key={ctx.currentStep.id}
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="rounded-xl p-4 border-2 border-[#2D2D2D]"
+                className="rounded-xl p-4 border-2 border-[rgba(120,90,60,0.28)]"
                 style={{ background: `${cat}08` }}
               >
                 <div className="flex items-start gap-2">
@@ -475,7 +490,7 @@ function SimViewInner({
                       ctx.completeStep(ctx.currentStep!.id, ctx.currentStep!.result?.data);
                     }}
                     className="mt-3 w-full py-2.5 rounded-lg text-sm font-semibold text-white transition-all hover:scale-[1.02]"
-                    style={{ background: cat, border: "2px solid #2D2D2D" }}
+                    style={{ background: cat, border: "1.5px solid rgba(255,255,255,0.72)" }}
                   >
                     Continue →
                   </button>
@@ -518,7 +533,7 @@ function SimViewInner({
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="rounded-xl p-3 border-2 border-[#2D2D2D]"
+                  className="rounded-xl p-3 border-2 border-[rgba(120,90,60,0.28)]"
                   style={{ background: "rgba(255,248,240,0.95)" }}
                 >
                   <p className="text-xs leading-relaxed" style={{ color: "#2D2D2D" }}>{message}</p>
@@ -528,7 +543,7 @@ function SimViewInner({
 
             {/* Results log */}
             {Object.keys(ctx.state.results).length > 0 && (
-              <div className="rounded-xl p-4 border-2 border-[#2D2D2D]" style={{ background: "rgba(255,255,255,0.5)" }}>
+              <div className="rounded-xl p-4 border-2 border-[rgba(120,90,60,0.28)]" style={{ background: "rgba(255,255,255,0.5)" }}>
                 <h3 className="font-semibold text-xs mb-2" style={{ color: "#2D2D2D" }}>📊 Results Log</h3>
                 <div className="space-y-1.5 max-h-48 overflow-y-auto">
                   {Object.entries(ctx.state.results)
@@ -546,7 +561,7 @@ function SimViewInner({
             )}
 
             {/* Step checklist */}
-            <div className="rounded-xl p-4 border-2 border-[#2D2D2D]" style={{ background: "rgba(255,255,255,0.5)" }}>
+            <div className="rounded-xl p-4 border-2 border-[rgba(120,90,60,0.28)]" style={{ background: "rgba(255,255,255,0.5)" }}>
               <h3 className="font-semibold text-xs mb-2" style={{ color: "#2D2D2D" }}>📝 Protocol</h3>
               <div className="space-y-1">
                 {simulation.steps.map((step, i) => {
@@ -679,7 +694,7 @@ function renderEquip(
     case "knob":
       return (
         <button
-          className="w-16 h-16 rounded-full border-2 border-[#2D2D2D] flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+          className="w-16 h-16 rounded-full border-2 border-[rgba(120,90,60,0.28)] flex items-center justify-center transition-all hover:scale-110 active:scale-95"
           style={{ background: "rgba(255,159,76,0.08)" }}
         >
           <div className="w-9 h-9 rounded-full border-2 border-[#FF9F4C] flex items-center justify-center relative">
@@ -694,7 +709,7 @@ function renderEquip(
     case "objective":
       return (
         <button
-          className="px-4 py-2.5 rounded-xl border-2 border-[#2D2D2D] text-sm font-bold transition-all hover:scale-105 active:scale-95"
+          className="px-4 py-2.5 rounded-xl border-2 border-[rgba(120,90,60,0.28)] text-sm font-bold transition-all hover:scale-105 active:scale-95"
           style={{ background: "rgba(255,159,76,0.08)", color: "#2D2D2D", fontFamily: "monospace" }}
         >
           {(s.power as number) ?? "?"}×
@@ -704,7 +719,7 @@ function renderEquip(
     case "power-supply":
       return (
         <button
-          className="w-24 h-20 rounded-xl border-2 border-[#2D2D2D] flex flex-col items-center justify-center gap-1 transition-all hover:scale-105"
+          className="w-24 h-20 rounded-xl border-2 border-[rgba(120,90,60,0.28)] flex flex-col items-center justify-center gap-1 transition-all hover:scale-105"
           style={{ background: s.isOn ? "rgba(76,175,80,0.1)" : "rgba(45,45,45,0.04)" }}
         >
           <Zap size={20} style={{ color: s.isOn ? "#4CAF50" : "#9A9A9A" }} />
@@ -716,7 +731,7 @@ function renderEquip(
 
     case "slide":
       return (
-        <div className="w-24 h-8 rounded border-2 border-[#2D2D2D] flex items-center justify-center" style={{ background: "rgba(200,220,240,0.3)" }}>
+        <div className="w-24 h-8 rounded border-2 border-[rgba(120,90,60,0.28)] flex items-center justify-center" style={{ background: "rgba(200,220,240,0.3)" }}>
           <span className="text-[10px] font-mono font-bold" style={{ color: "#6B6B6B" }}>
             {(s.specimen as string) || "slide"}
           </span>

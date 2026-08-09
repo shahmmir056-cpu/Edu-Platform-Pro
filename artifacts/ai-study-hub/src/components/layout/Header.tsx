@@ -19,6 +19,7 @@ import {
   MessageCircle,
   MonitorPlay,
   Brain,
+  CalendarClock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +37,7 @@ import {
 } from "@/components/ui/sheet";
 
 const TOOLS = [
+  { name: "Life OS", path: "/life-os", icon: CalendarClock },
   { name: "Deep Research", path: "/research", icon: BookOpen },
   { name: "Essay Writer", path: "/essay", icon: PenTool },
   { name: "Quiz Generator", path: "/quiz", icon: HelpCircle },
@@ -49,6 +51,7 @@ const TOOLS = [
 
 const NAV_LINKS = [
   { name: "Home", path: "/", icon: Home },
+  { name: "Life OS", path: "/life-os", icon: CalendarClock },
   { name: "Math Solver", path: "/math-solver", icon: BookOpen },
   { name: "Virtual Lab", path: "/virtual-lab", icon: FlaskConical },
   { name: "AI Debate", path: "/debate-mentor", icon: Brain },

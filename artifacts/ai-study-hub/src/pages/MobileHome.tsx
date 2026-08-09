@@ -229,14 +229,14 @@ export default function MobileHome() {
             className="flex flex-col gap-3 w-full max-w-[280px]">
             <Link href="/math-solver"
               className="group relative w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl text-sm font-bold overflow-hidden transition-all duration-300 active:scale-95"
-              style={{ background: "linear-gradient(135deg, #FF9F4C, #E8852E)", color: "#fff", border: "1.5px solid #2D2D2D", boxShadow: "0 4px 20px rgba(255,159,76,0.3)" }}>
+              style={{ background: "linear-gradient(135deg, #FF9F4C, #E8852E)", color: "#fff", border: "1.5px solid rgba(255,255,255,0.72)", boxShadow: "0 4px 20px rgba(255,159,76,0.3)" }}>
               <Zap size={16} className="relative z-10" />
               <span className="relative z-10">Get Started Free</span>
               <ArrowRight size={14} className="relative z-10" />
             </Link>
             <Link href="/virtual-lab"
               className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-2xl text-sm font-semibold transition-all duration-300 active:scale-95"
-              style={{ background: "rgba(255,255,255,0.5)", color: C.text, border: "1.5px solid #2D2D2D", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6)" }}>
+              style={{ background: "rgba(255,255,255,0.5)", color: C.text, border: "1.5px solid rgba(255,255,255,0.72)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6)" }}>
               <FlaskConical size={16} style={{ color: C.orange }} /> Explore Virtual Lab
             </Link>
           </motion.div>
@@ -277,7 +277,7 @@ export default function MobileHome() {
                     transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}>
                     <Link href={tool.path}
                       className="block w-[160px] rounded-2xl p-4 transition-all duration-300"
-                      style={{ background: "rgba(255,255,255,0.55)", border: "1.5px solid #2D2D2D", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6), 0 4px 16px rgba(0,0,0,0.03)" }}>
+                      style={{ background: "rgba(255,255,255,0.55)", border: "1.5px solid rgba(255,255,255,0.72)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6), 0 4px 16px rgba(0,0,0,0.03)" }}>
                       <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ background: `${tool.color}12`, border: `1px solid ${tool.color}20` }}>
                         <tool.icon size={18} style={{ color: tool.color }} />
                       </div>
@@ -313,7 +313,7 @@ export default function MobileHome() {
           ].map((s) => (
             <motion.div key={s.label} variants={scaleIn} whileTap={{ scale: 0.98 }}
               className="rounded-2xl p-5 text-center relative overflow-hidden group"
-              style={{ background: "rgba(255,255,255,0.5)", border: "1.5px solid #2D2D2D", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6)" }}>
+              style={{ background: "rgba(255,255,255,0.5)", border: "1.5px solid rgba(255,255,255,0.72)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6)" }}>
               <motion.div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                 style={{ background: `radial-gradient(circle at 50% 0%, ${s.color}06, transparent 70%)` }} />
               <div className="relative z-10 mx-auto mb-2 w-8 h-8 rounded-lg flex items-center justify-center"
@@ -369,7 +369,7 @@ export default function MobileHome() {
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="max-w-sm mx-auto rounded-[1.5rem] p-7 text-center relative overflow-hidden"
-          style={{ background: "linear-gradient(135deg, rgba(255,248,240,0.8), rgba(255,255,255,0.5))", border: "1.5px solid #2D2D2D", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6)" }}>
+          style={{ background: "linear-gradient(135deg, rgba(255,248,240,0.8), rgba(255,255,255,0.5))", border: "1.5px solid rgba(255,255,255,0.72)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6)" }}>
           <div className="relative z-10">
             <div className="mx-auto mb-3 w-10 h-10 rounded-xl flex items-center justify-center"
               style={{ background: `${C.orange}10`, border: `1px solid ${C.orange}20` }}>
@@ -395,7 +395,7 @@ export default function MobileHome() {
         <motion.div initial={{ opacity: 0, y: 40, scale: 0.95 }} whileInView={{ opacity: 1, y: 0, scale: 1 }}
           viewport={{ once: true }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="max-w-sm mx-auto rounded-[1.5rem] p-7 text-center relative overflow-hidden"
-          style={{ background: "linear-gradient(135deg, #FF9F4C, #E8852E)", border: "1.5px solid #2D2D2D", boxShadow: "0 8px 40px rgba(255,159,76,0.25)" }}>
+          style={{ background: "linear-gradient(135deg, #FF9F4C, #E8852E)", border: "1.5px solid rgba(255,255,255,0.72)", boxShadow: "0 8px 40px rgba(255,159,76,0.25)" }}>
           <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px)", backgroundSize: "16px 16px" }} />
           <div className="relative z-10">
             <div className="mx-auto mb-3 w-12 h-12 rounded-xl flex items-center justify-center"
@@ -407,7 +407,7 @@ export default function MobileHome() {
               No sign-ups, no paywalls. Just pick a tool and start learning right now.
             </p>
             <Link href="/math-solver" className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl text-sm font-bold transition-all duration-300"
-              style={{ background: "#fff", color: C.orangeDark, border: "1.5px solid #2D2D2D", boxShadow: "0 4px 16px rgba(0,0,0,0.06)" }}>
+              style={{ background: "#fff", color: C.orangeDark, border: "1.5px solid rgba(255,255,255,0.72)", boxShadow: "0 4px 16px rgba(0,0,0,0.06)" }}>
               <Zap size={16} /> Start Learning Free
             </Link>
           </div>

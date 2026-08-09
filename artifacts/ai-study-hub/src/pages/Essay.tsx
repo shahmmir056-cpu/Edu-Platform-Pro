@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGenerateEssay } from "@workspace/api-client-react";
 import { PenTool, FileText, Download, Layers } from "lucide-react";
 import { ToolHeader } from "@/components/ui/ToolHeader";
 import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
+import { trackAction } from "@/features/life-os/tracker";
 
 type EssayType = "argumentative" | "narrative" | "expository" | "persuasive" | "descriptive" | "compare-contrast";
 
@@ -13,6 +14,12 @@ export default function Essay() {
   const [tone, setTone] = useState("academic");
   const generateEssay = useGenerateEssay();
   const essay = generateEssay.data;
+
+  useEffect(() => {
+    if (essay) {
+      trackAction("/essay", "essay-generated", undefined, 1, topic.trim(), essay.title);
+    }
+  }, [essay]);
 
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -169,7 +176,7 @@ export default function Essay() {
             style={{ 
               background: "rgba(255,255,255,0.8)", 
               backdropFilter: "blur(20px) saturate(180%)",
-               border: "2px solid #2D2D2D",
+               border: "1.5px solid rgba(255,255,255,0.72)",
               color: "#2D2D2D",
               boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7), 0 4px 16px rgba(0,0,0,0.04)"
             }}>

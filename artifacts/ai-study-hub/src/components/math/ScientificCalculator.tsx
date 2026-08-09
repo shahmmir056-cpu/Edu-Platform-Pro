@@ -172,7 +172,7 @@ export default function ScientificCalculator() {
         : key.kind === "act"
           ? { background: "rgba(0,0,0,0.04)", color: "#6B6B6B" }
           : key.kind === "eq"
-            ? { background: "linear-gradient(135deg, #FF9F4C, #FFD4A8)", color: "#fff", borderColor: "#2D2D2D" }
+            ? { background: "linear-gradient(135deg, #FF9F4C, #FFD4A8)", color: "#fff", borderColor: "rgba(120,90,60,0.3)" }
             : { background: "rgba(255,255,255,0.9)", color: "#2D2D2D" };
 
     return (

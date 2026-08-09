@@ -1,13 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGenerateStudyNotes } from "@workspace/api-client-react";
 import { ClipboardList, Download, Book } from "lucide-react";
 import { ToolHeader } from "@/components/ui/ToolHeader";
 import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
+import { trackAction } from "@/features/life-os/tracker";
 
 export default function StudyNotes() {
   const [topic, setTopic] = useState("");
   const generateNotes = useGenerateStudyNotes();
   const notes = generateNotes.data;
+
+  useEffect(() => {
+    if (notes) {
+      trackAction("/study-notes", "notes-generated", undefined, 1, topic.trim(), `${notes.sections.length} sections: ${notes.title}`);
+    }
+  }, [notes]);
 
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();

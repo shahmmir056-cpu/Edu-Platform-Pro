@@ -9,6 +9,9 @@ import { ScrollToTop } from '@/components/layout/ScrollToTop';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageTransition } from '@/components/layout/PageTransition';
 
+// Global Life OS activity tracker (records real time in every tool)
+import { RouteTracker } from '@/features/life-os/tracker';
+
 // Pages (lazy-loaded for code-splitting)
 const Home = lazy(() => import('@/pages/Home'));
 const Research = lazy(() => import('@/pages/Research'));
@@ -26,6 +29,7 @@ const TestConductor = lazy(() => import('@/pages/TestConductor'));
 const SimulationsPage = lazy(() => import('@/features/simulations/SimulationsPage'));
 const DebateMentorPage = lazy(() => import('@/features/debate-mentor/DebateMentorPage'));
 const SimulationsV2Page = lazy(() => import('@/features/simulations/SimulationsV2Page'));
+const LifeOsPage = lazy(() => import('@/features/life-os/LifeOsPage'));
 const About = lazy(() => import('@/pages/About'));
 const Contact = lazy(() => import('@/pages/Contact'));
 const NotFound = lazy(() => import('@/pages/not-found'));
@@ -62,6 +66,7 @@ function Router() {
               <Route path="/simulations" component={SimulationsPage} />
               <Route path="/simulations-v2" component={SimulationsV2Page} />
               <Route path="/debate-mentor" component={DebateMentorPage} />
+              <Route path="/life-os" component={LifeOsPage} />
               <Route path="/about" component={About} />
               <Route path="/contact" component={Contact} />
               <Route component={NotFound} />
@@ -77,6 +82,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+          <RouteTracker />
           <ScrollToTop />
           <Router />
         </WouterRouter>

@@ -1,8 +1,9 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useTransformText } from "@workspace/api-client-react";
 import { Wand2, Copy, Check, Type, RotateCcw } from "lucide-react";
 import { ToolHeader } from "@/components/ui/ToolHeader";
 import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
+import { trackAction } from "@/features/life-os/tracker";
 import { cn } from "@/lib/utils";
 
 type Mode = "summarize" | "expand" | "simplify" | "rewrite" | "translate" | "fix-grammar";
@@ -40,6 +41,13 @@ export default function TextPlayground() {
     const words = trimmed ? trimmed.split(/\s+/).length : 0;
     const chars = result.length;
     return { words, chars };
+  }, [result]);
+
+  useEffect(() => {
+    if (!result) return;
+    const words = result.trim().split(/\s+/).filter(Boolean).length;
+    trackAction("/text-playground", "text-processed", undefined, 1, text.trim(), `Produced ${words} words (${result.length} chars)`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result]);
 
   const handleSubmit = () => {

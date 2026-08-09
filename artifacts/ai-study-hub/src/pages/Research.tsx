@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGenerateResearch } from "@workspace/api-client-react";
 import { BookOpen, Search, Download } from "lucide-react";
 import { ToolHeader } from "@/components/ui/ToolHeader";
 import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
+import { trackAction } from "@/features/life-os/tracker";
 
 type Depth = "overview" | "standard" | "deep";
 
@@ -11,6 +12,12 @@ export default function Research() {
   const [depth, setDepth] = useState<Depth>("standard");
   const generateResearch = useGenerateResearch();
   const report = generateResearch.data;
+
+  useEffect(() => {
+    if (report) {
+      trackAction("/research", "research-done", undefined, 1, topic.trim(), `${report.sections.length} sections: ${report.title}`);
+    }
+  }, [report]);
 
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();

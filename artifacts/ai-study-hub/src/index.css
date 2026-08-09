@@ -5,6 +5,37 @@
 
 html, body { overflow-x: hidden; }
 
+/* ═══════════════════════════════════════════════════
+   GLOBAL SCROLLBARS — visible frosted water-glass scrollbars
+   on every scrollable surface, every page.
+   ═══════════════════════════════════════════════════ */
+html {
+  scrollbar-gutter: stable;
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(120, 90, 60, 0.35) rgba(255, 255, 255, 0.35);
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 9999px;
+}
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(255, 159, 76, 0.45), rgba(232, 133, 46, 0.4));
+  border-radius: 9999px;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(255, 159, 76, 0.65), rgba(232, 133, 46, 0.6));
+}
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 /* ═══════════════════════════════════════════════════
@@ -280,7 +311,7 @@ html, body { overflow-x: hidden; }
     background: rgba(255, 255, 255, 0.50);
     backdrop-filter: blur(var(--lg-blur, 20px)) saturate(var(--lg-saturate, 180%));
     -webkit-backdrop-filter: blur(var(--lg-blur, 20px)) saturate(var(--lg-saturate, 180%));
-    border: 2px solid #2D2D2D;
+    border: 1.5px solid rgba(255,255,255,0.72);
     box-shadow:
       inset 0 1px 0 0 rgba(255, 255, 255, 0.7),
       inset 0 -1px 0 0 rgba(0, 0, 0, 0.02),
@@ -293,7 +324,7 @@ html, body { overflow-x: hidden; }
     background: rgba(255, 255, 255, 0.68);
     backdrop-filter: blur(24px) saturate(200%);
     -webkit-backdrop-filter: blur(24px) saturate(200%);
-    border: 2px solid #2D2D2D;
+    border: 1.5px solid rgba(255,255,255,0.72);
     box-shadow:
       inset 0 1px 0 0 rgba(255, 255, 255, 0.8),
       inset 0 -1px 0 0 rgba(0, 0, 0, 0.03),
@@ -305,7 +336,7 @@ html, body { overflow-x: hidden; }
     background: rgba(255, 255, 255, 0.35);
     backdrop-filter: blur(12px) saturate(150%);
     -webkit-backdrop-filter: blur(12px) saturate(150%);
-    border: 2px solid #2D2D2D;
+    border: 1.5px solid rgba(255,255,255,0.72);
   }
 
   /* ── Glass Card ── */
@@ -313,7 +344,7 @@ html, body { overflow-x: hidden; }
     background: rgba(255, 255, 255, 0.50);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 2px solid #2D2D2D;
+    border: 1.5px solid rgba(255,255,255,0.72);
     border-radius: var(--lg-radius, 1rem);
     box-shadow:
       inset 0 1px 0 0 rgba(255, 255, 255, 0.7),
@@ -324,7 +355,7 @@ html, body { overflow-x: hidden; }
   }
   .lg-card:hover {
     background: rgba(255, 255, 255, 0.65);
-    border: 2px solid #2D2D2D;
+    border: 1.5px solid rgba(255,255,255,0.72);
     box-shadow:
       inset 0 1px 0 0 rgba(255, 255, 255, 0.8),
       0 8px 32px rgba(0, 0, 0, 0.06),
@@ -337,7 +368,7 @@ html, body { overflow-x: hidden; }
     background: rgba(255, 255, 255, 0.50);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 2px solid #2D2D2D;
+    border: 1.5px solid rgba(255,255,255,0.72);
     border-radius: var(--lg-radius, 1rem);
     box-shadow:
       inset 0 1px 0 0 rgba(255, 255, 255, 0.7),
@@ -346,7 +377,7 @@ html, body { overflow-x: hidden; }
   }
   .lg-glow:hover {
     background: rgba(255, 255, 255, 0.65);
-    border: 2px solid #2D2D2D;
+    border: 1.5px solid rgba(255,255,255,0.72);
     box-shadow:
       inset 0 1px 0 0 rgba(255, 255, 255, 0.8),
       0 8px 32px rgba(0, 0, 0, 0.06),
@@ -429,7 +460,7 @@ html, body { overflow-x: hidden; }
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(32px) saturate(200%);
     -webkit-backdrop-filter: blur(32px) saturate(200%);
-    border: 2px solid #2D2D2D;
+    border: 1.5px solid rgba(255,255,255,0.72);
     border-radius: 1.25rem;
     box-shadow:
       inset 0 1px 0 0 rgba(255, 255, 255, 0.8),
@@ -557,6 +588,77 @@ html, body { overflow-x: hidden; }
 }
 
 /* ═══════════════════════════════════════════════════
+   LIFE OS HELPERS — quiet, clean motion utilities
+   ═══════════════════════════════════════════════════ */
+
+@keyframes lg-spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes lg-float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes lg-blip {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.lg-blip {
+  animation: lg-blip 2s ease-in-out infinite;
+}
+
+/* flowing dashed SVG stroke (subtle orbit) */
+.lg-dash-flow {
+  stroke-dasharray: 12 10;
+  animation: lg-spin-slow 6s linear infinite;
+}
+
+/* thin scrollbars for horizontal panels */
+.lg-scroll::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+.lg-scroll::-webkit-scrollbar-thumb {
+  background: rgba(120, 90, 60, 0.28);
+  border-radius: 9999px;
+}
+.lg-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ═══════════════════════════════════════════════════
+   SECTION SCROLL — every dashboard section gets its
+   own visible, always-on scrollbar.
+   ═══════════════════════════════════════════════════ */
+.lg-scroll-y {
+  overflow-y: scroll;
+  max-height: 460px;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(120, 90, 60, 0.35) rgba(255, 255, 255, 0.35);
+  padding-right: 6px;
+}
+.lg-scroll-y::-webkit-scrollbar {
+  width: 8px;
+}
+.lg-scroll-y::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 9999px;
+}
+.lg-scroll-y::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(255, 159, 76, 0.5), rgba(232, 133, 46, 0.45));
+  border-radius: 9999px;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+}
+.lg-scroll-y::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(255, 159, 76, 0.7), rgba(232, 133, 46, 0.65));
+}
+
+
+/* ═══════════════════════════════════════════════════
    SHADCN OVERRIDES — Water Glass Theme Compatible
    ═══════════════════════════════════════════════════ */
 
@@ -565,7 +667,7 @@ html, body { overflow-x: hidden; }
   background: rgba(255, 255, 255, 0.50);
   backdrop-filter: blur(16px) saturate(160%);
   -webkit-backdrop-filter: blur(16px) saturate(160%);
-  border: 2px solid #2D2D2D;
+  border: 1.5px solid rgba(255,255,255,0.72);
   border-radius: 1rem;
   box-shadow:
     inset 0 1px 0 0 rgba(255, 255, 255, 0.6),
@@ -659,7 +761,7 @@ html, body { overflow-x: hidden; }
   background: rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 2px solid #2D2D2D;
+  border: 1.5px solid rgba(255,255,255,0.72);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.7),
     inset 0 -1px 0 rgba(255, 159, 76, 0.08),

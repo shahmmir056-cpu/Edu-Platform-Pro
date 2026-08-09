@@ -26,6 +26,7 @@ import ScientificCalculator from "@/components/math/ScientificCalculator";
 import StatisticsAnalyzer from "@/components/math/StatisticsAnalyzer";
 import MatrixCalculator from "@/components/math/MatrixCalculator";
 import FormulaReference from "@/components/math/FormulaReference";
+import { trackAction } from "@/features/life-os/tracker";
 import { cn } from "@/lib/utils";
 
 const EXAMPLES = [
@@ -149,7 +150,7 @@ function HistoryPanel({
       className="rounded-2xl p-5 backdrop-blur-xl mt-6"
       style={{
         background: "rgba(255,255,255,0.5)",
-        border: "2px solid #2D2D2D",
+        border: "1.5px solid rgba(255,255,255,0.72)",
         boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7), 0 4px 16px rgba(0,0,0,0.04)",
       }}
     >
@@ -242,6 +243,7 @@ export default function MathSolver() {
       const next = [entry, ...loadHistory().filter((h) => h.problem !== problem)].slice(0, 12);
       persistHistory(next);
       setHistory(next);
+      trackAction("/math-solver", "solve", undefined, 1, problem.trim(), solution.finalAnswer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [solution]);
@@ -375,7 +377,7 @@ export default function MathSolver() {
               tab === t.id
                 ? {
                     background: "linear-gradient(135deg, #FF9F4C, #FFD4A8)",
-                    borderColor: "#2D2D2D",
+                    borderColor: "rgba(120,90,60,0.3)",
                     boxShadow: "0 6px 24px rgba(255,159,76,0.3)",
                   }
                 : undefined
@@ -443,7 +445,7 @@ export default function MathSolver() {
                   <motion.form
                     onSubmit={handleSubmit}
                     className="relative rounded-2xl p-4 sm:p-6 lg:p-8 overflow-hidden"
-                    style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(20px)", border: "2px solid #2D2D2D" }}
+                    style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(20px)", border: "1.5px solid rgba(255,255,255,0.72)" }}
                   >
                     <div className="absolute -top-20 -right-20 w-60 h-60 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
                     <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
@@ -551,7 +553,7 @@ export default function MathSolver() {
                      style={{
                        background: "rgba(255,255,255,0.5)",
                        backdropFilter: "blur(20px) saturate(180%)",
-                       border: "2px solid #2D2D2D",
+                       border: "1.5px solid rgba(255,255,255,0.72)",
                        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7), 0 4px 16px rgba(0,0,0,0.04)",
                      }}>
                   <div className="flex-1 min-w-0">
@@ -592,7 +594,7 @@ export default function MathSolver() {
                            style={{
                              background: "rgba(255,255,255,0.5)",
                              backdropFilter: "blur(20px) saturate(180%)",
-                             border: "2px solid #2D2D2D",
+                             border: "1.5px solid rgba(255,255,255,0.72)",
                              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7), 0 4px 16px rgba(0,0,0,0.04)",
                            }}>
                         <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-accent to-primary/30 rounded-l-xl" />

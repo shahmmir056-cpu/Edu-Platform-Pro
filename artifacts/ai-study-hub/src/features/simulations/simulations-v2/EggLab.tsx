@@ -22,33 +22,32 @@ const JARS: JarData[] = [
   { solution: 'hypertonic', label: 'Hypertonic', concentration: 'Corn syrup (55% sucrose)', color: '#B89555', liquidColor: '#F5EDE0', description: 'Water moves OUT of specimen by osmosis → net mass loss' },
 ];
 
-const TISSUES: Record<TissueType, { label: string; rate: number; color: string }> = {
-  egg:    { label: 'Egg',    rate: 1.0, color: '#B89555' },
-  potato: { label: 'Potato', rate: 0.7, color: '#8B4513' },
-  apple:  { label: 'Apple',  rate: 1.3, color: '#C47B6B' },
+const TISSUES: Record<TissueType, { label: string; rate: number; color: string; mass: number }> = {
+  egg:    { label: 'Egg',    rate: 1.0, color: '#B89555', mass: 60 },
+  potato: { label: 'Potato', rate: 0.7, color: '#8B4513', mass: 85 },
+  apple:  { label: 'Apple',  rate: 1.3, color: '#C47B6B', mass: 105 },
 };
 
 const SD = 1.5;
 const BASE_MASS = 60;
-const INITIAL_MASS = 60;
 const INITIAL_VOLUME = 200;
 
-function computeMass(solution: Solution, timeHours: number, tempC: number, tissueType: TissueType, active: boolean): number {
-  if (!active) return BASE_MASS;
+function computeMass(solution: Solution, timeHours: number, tempC: number, tissueType: TissueType, active: boolean, initial: number = BASE_MASS): number {
+  if (!active) return initial;
   const rate = TISSUES[tissueType].rate * (1 + (tempC - 22) * 0.02);
-  if (solution === 'isotonic') return BASE_MASS;
+  if (solution === 'isotonic') return initial;
   if (solution === 'hypotonic') {
     const change = Math.min(18, timeHours * 2.8 * rate * (1 - Math.exp(-timeHours * 0.08)));
-    return BASE_MASS + change;
+    return initial + change;
   }
   const change = Math.min(22, timeHours * 3.2 * rate * (1 - Math.exp(-timeHours * 0.07)));
-  return BASE_MASS - change;
+  return initial - change;
 }
 
-function computeVolume(solution: Solution, timeHours: number, tempC: number, tissueType: TissueType, active: boolean): number {
+function computeVolume(solution: Solution, timeHours: number, tempC: number, tissueType: TissueType, active: boolean, initial: number = BASE_MASS): number {
   if (!active) return INITIAL_VOLUME;
-  const mass = computeMass(solution, timeHours, tempC, tissueType, true);
-  const massChange = mass - BASE_MASS;
+  const mass = computeMass(solution, timeHours, tempC, tissueType, true, initial);
+  const massChange = mass - initial;
   if (solution === 'hypotonic') return INITIAL_VOLUME - massChange;
   if (solution === 'hypertonic') return INITIAL_VOLUME + Math.abs(massChange);
   return INITIAL_VOLUME;
@@ -102,6 +101,23 @@ function WatchGlass({ mass, label }: { mass: number; label: string }) {
 }
 
 function ElectronicBalance({ reading, showEgg }: { reading: number; showEgg: boolean }) {
+  const [display, setDisplay] = useState(0);
+
+  useEffect(() => {
+    if (!showEgg) { setDisplay(0); return; }
+    let raf = 0;
+    const start = performance.now();
+    const dur = 1000;
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - start) / dur);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setDisplay(reading * eased);
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [showEgg, reading]);
+
   return (
     <svg viewBox="0 0 220 150" width="100%" style={{ maxWidth: 220 }} className="mx-auto">
       <ellipse cx="110" cy="142" rx="85" ry="6" fill="#000" opacity="0.06"/>
@@ -111,7 +127,7 @@ function ElectronicBalance({ reading, showEgg }: { reading: number; showEgg: boo
       <rect x="30" y="20" width="85" height="42" rx="3" fill="#052e16"/>
       <rect x="30" y="20" width="85" height="42" rx="3" fill="#6A9B7A" opacity="0.04"/>
       <text x="72" y="50" textAnchor="middle" fontSize="22" fill="#6A9B7A" fontFamily="'Courier New', monospace" fontWeight="bold">
-        {reading.toFixed(2)}
+        {display.toFixed(2)}
       </text>
       <text x="103" y="50" fontSize="11" fill="#6A9B7A" fontFamily="'Courier New', monospace">g</text>
       <text x="72" y="68" textAnchor="middle" fontSize="4.5" fill="#6A9B7A" opacity="0.4" letterSpacing="2">PRECISION BALANCE</text>
@@ -156,23 +172,34 @@ export default function EggLab() {
   const [tissueType, setTissueType] = useState<TissueType>('egg');
   const [balancePlaced, setBalancePlaced] = useState(false);
   const [balanceReadings, setBalanceReadings] = useState<Record<Solution, number>>({
-    hypotonic: 60, isotonic: 60, hypertonic: 60
+    hypotonic: 0, isotonic: 0, hypertonic: 0
+  });
+  const [initialMasses, setInitialMasses] = useState<Record<Solution, number>>({
+    hypotonic: BASE_MASS, isotonic: BASE_MASS, hypertonic: BASE_MASS
   });
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const tempCRef = useRef(tempC);
   const tissueTypeRef = useRef(tissueType);
+  const initialMassesRef = useRef(initialMasses);
 
   useEffect(() => { tempCRef.current = tempC; }, [tempC]);
   useEffect(() => { tissueTypeRef.current = tissueType; }, [tissueType]);
+  useEffect(() => { initialMassesRef.current = initialMasses; }, [initialMasses]);
   useEffect(() => { if (step !== 'weigh_initial') setBalancePlaced(false); }, [step]);
+  useEffect(() => {
+    const base = TISSUES[tissueType].mass;
+    setInitialMasses({ hypotonic: base, isotonic: base, hypertonic: base });
+    setBalancePlaced(false);
+    setBalanceReadings({ hypotonic: 0, isotonic: 0, hypertonic: 0 });
+  }, [tissueType]);
 
   const active = step === 'observe' || step === 'final_weigh';
-  const hypoMass = computeMass('hypotonic', timeHours, tempC, tissueType, active);
-  const isoMass = computeMass('isotonic', timeHours, tempC, tissueType, active);
-  const hyperMass = computeMass('hypertonic', timeHours, tempC, tissueType, active);
-  const hypoVol = computeVolume('hypotonic', timeHours, tempC, tissueType, active);
-  const isoVol = computeVolume('isotonic', timeHours, tempC, tissueType, active);
-  const hyperVol = computeVolume('hypertonic', timeHours, tempC, tissueType, active);
+  const hypoMass = computeMass('hypotonic', timeHours, tempC, tissueType, active, initialMasses.hypotonic);
+  const isoMass = computeMass('isotonic', timeHours, tempC, tissueType, active, initialMasses.isotonic);
+  const hyperMass = computeMass('hypertonic', timeHours, tempC, tissueType, active, initialMasses.hypertonic);
+  const hypoVol = computeVolume('hypotonic', timeHours, tempC, tissueType, active, initialMasses.hypotonic);
+  const isoVol = computeVolume('isotonic', timeHours, tempC, tissueType, active, initialMasses.isotonic);
+  const hyperVol = computeVolume('hypertonic', timeHours, tempC, tissueType, active, initialMasses.hypertonic);
 
   useEffect(() => {
     if (running && step === 'observe') {
@@ -180,12 +207,13 @@ export default function EggLab() {
         setTimeHours(t => {
           const next = Math.min(72, t + 0.25);
           if (next % 2 < 0.26) {
-            const hyo = computeMass('hypotonic', next, tempCRef.current, tissueTypeRef.current, true);
-            const hyper = computeMass('hypertonic', next, tempCRef.current, tissueTypeRef.current, true);
+            const init = initialMassesRef.current;
+            const hyo = computeMass('hypotonic', next, tempCRef.current, tissueTypeRef.current, true, init.hypotonic);
+            const hyper = computeMass('hypertonic', next, tempCRef.current, tissueTypeRef.current, true, init.hypertonic);
             setMassRecords(prev => [...prev.filter(r => r.t !== Math.round(next)), {
               t: Math.round(next),
               hypo: +hyo.toFixed(2),
-              iso: +BASE_MASS.toFixed(2),
+              iso: +init.isotonic.toFixed(2),
               hyper: +hyper.toFixed(2),
               hypoErr: SD,
               isoErr: SD,
@@ -206,12 +234,13 @@ export default function EggLab() {
     setTimeHours(t => {
       const next = Math.min(72, t + 0.25);
       if (next % 2 < 0.26) {
-        const hyo = computeMass('hypotonic', next, tempCRef.current, tissueTypeRef.current, true);
-        const hyper = computeMass('hypertonic', next, tempCRef.current, tissueTypeRef.current, true);
+        const init = initialMassesRef.current;
+        const hyo = computeMass('hypotonic', next, tempCRef.current, tissueTypeRef.current, true, init.hypotonic);
+        const hyper = computeMass('hypertonic', next, tempCRef.current, tissueTypeRef.current, true, init.hypertonic);
         setMassRecords(prev => [...prev.filter(r => r.t !== Math.round(next)), {
           t: Math.round(next),
           hypo: +hyo.toFixed(2),
-          iso: +BASE_MASS.toFixed(2),
+          iso: +init.isotonic.toFixed(2),
           hyper: +hyper.toFixed(2),
           hypoErr: SD,
           isoErr: SD,
@@ -260,16 +289,19 @@ export default function EggLab() {
   const canNext = step !== 'final_weigh';
   const canPrev = stepIndex > 0;
 
-  const pctChange = (final: number) => (((final - INITIAL_MASS) / INITIAL_MASS) * 100).toFixed(1);
+  const pctChange = (final: number, initial: number) => (((final - initial) / initial) * 100).toFixed(1);
   const molecules = Math.round(timeHours / 6);
 
   const handlePlaceEggs = () => {
+    const base = TISSUES[tissueType].mass;
+    const readings: Record<Solution, number> = {
+      hypotonic: base + (Math.random() * 0.1 - 0.05),
+      isotonic: base + (Math.random() * 0.1 - 0.05),
+      hypertonic: base + (Math.random() * 0.1 - 0.05),
+    };
     setBalancePlaced(true);
-    setBalanceReadings({
-      hypotonic: BASE_MASS + (Math.random() * 0.1 - 0.05),
-      isotonic: BASE_MASS + (Math.random() * 0.1 - 0.05),
-      hypertonic: BASE_MASS + (Math.random() * 0.1 - 0.05),
-    });
+    setBalanceReadings(readings);
+    setInitialMasses(readings);
   };
 
   const finalMass = (s: Solution) => s === 'hypotonic' ? hypoMass : s === 'isotonic' ? isoMass : hyperMass;
@@ -342,7 +374,17 @@ export default function EggLab() {
             )}
             {balancePlaced && (
               <div className="text-xs text-center text-muted-foreground mb-3 bg-green-50 dark:bg-green-950 rounded-lg py-2 px-3">
-                Readings stabilized — record masses above. Variation of ±0.05g is normal instrument noise.
+                Readings stabilized — record the initial masses above. These values are used as the baseline for your experiment.
+              </div>
+            )}
+            {balancePlaced && (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
+                {JARS.map(jar => (
+                  <div key={jar.solution} className="bg-muted rounded-lg p-2 text-center">
+                    <div className="text-[10px] text-muted-foreground">{jar.label}</div>
+                    <div className="font-mono font-bold text-sm" style={{ color: jar.color }}>{initialMasses[jar.solution].toFixed(2)} g</div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -396,7 +438,7 @@ export default function EggLab() {
                       {running ? <Pause className="w-3 h-3"/> : <Play className="w-3 h-3"/>}
                       {running ? 'Pause' : 'Run'}
                     </button>
-                    <button onClick={() => { setTimeHours(0); setRunning(false); setMassRecords([{ t: 0, hypo: 60, iso: 60, hyper: 60, hypoErr: SD, isoErr: SD, hyperErr: SD }]); }}
+                    <button onClick={() => { setTimeHours(0); setRunning(false); const init = initialMassesRef.current; setMassRecords([{ t: 0, hypo: init.hypotonic, iso: init.isotonic, hyper: init.hypertonic, hypoErr: SD, isoErr: SD, hyperErr: SD }]); }}
                       className="p-1.5 rounded-lg border border-border hover:bg-muted">
                       <RotateCcw className="w-3 h-3"/>
                     </button>
@@ -408,7 +450,7 @@ export default function EggLab() {
                 {JARS.map(jar => {
                   const m = jar.solution === 'hypotonic' ? hypoMass : jar.solution === 'isotonic' ? isoMass : hyperMass;
                   const vol = jar.solution === 'hypotonic' ? hypoVol : jar.solution === 'isotonic' ? isoVol : hyperVol;
-                  const mc = active ? m - INITIAL_MASS : 0;
+                  const mc = active ? m - initialMasses[jar.solution] : 0;
                   const volChange = vol - INITIAL_VOLUME;
                   const liquidHeight = 63 * (vol / INITIAL_VOLUME);
                   return (
@@ -489,14 +531,14 @@ export default function EggLab() {
                   {JARS.map(jar => {
                     const m = finalMass(jar.solution);
                     const vol = jar.solution === 'hypotonic' ? hypoVol : jar.solution === 'isotonic' ? isoVol : hyperVol;
-                    const chg = m - INITIAL_MASS;
+                    const chg = m - initialMasses[jar.solution];
                     const volChange = vol - INITIAL_VOLUME;
                     return (
                       <div key={jar.solution} className="bg-muted rounded-xl p-3 text-center">
                         <div className="text-xs font-bold mb-1" style={{ color: jar.color }}>{jar.label}</div>
                         <WatchGlass mass={m} label="Final"/>
                         <div className="text-xs mt-1 font-mono"><b>Δ{chg >= 0 ? '+' : ''}{chg.toFixed(1)}g</b></div>
-                        <div className="text-xs text-muted-foreground">({pctChange(m)}%)</div>
+                        <div className="text-xs text-muted-foreground">({pctChange(m, initialMasses[jar.solution])}%)</div>
                         <div className="text-[10px] text-muted-foreground mt-0.5">Vol: {vol.toFixed(0)} mL (Δ{volChange >= 0 ? '+' : ''}{volChange.toFixed(1)})</div>
                         <div className={`text-xs mt-1 font-semibold ${chg > 0.5 ? 'text-blue-600' : chg < -0.5 ? 'text-amber-600' : 'text-green-600'}`}>
                           {chg > 0.5 ? '↑ Net H₂O gain' : chg < -0.5 ? '↓ Net H₂O loss' : '= No net flow'}
@@ -527,8 +569,8 @@ export default function EggLab() {
                   <LineChart data={massRecords} margin={{ top: 4, right: 12, left: 0, bottom: 4 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))"/>
                     <XAxis dataKey="t" tick={{ fontSize: 9 }} label={{ value: 'Time (h)', position: 'insideBottom', offset: -2, fontSize: 9 }}/>
-                    <YAxis tick={{ fontSize: 9 }} domain={[20, 95]} label={{ value: 'Mass (g)', angle: -90, position: 'insideLeft', fontSize: 9 }}/>
-                    <ReferenceLine y={INITIAL_MASS} stroke="#94a3b8" strokeDasharray="4 4" label={{ value: 'Initial', fontSize: 8, fill: '#94a3b8' }}/>
+                    <YAxis tick={{ fontSize: 9 }} domain={[0, 130]} label={{ value: 'Mass (g)', angle: -90, position: 'insideLeft', fontSize: 9 }}/>
+                    <ReferenceLine y={TISSUES[tissueType].mass} stroke="#94a3b8" strokeDasharray="4 4" label={{ value: 'Initial', fontSize: 8, fill: '#94a3b8' }}/>
                     <Tooltip formatter={(v: number, name: string) => [name.includes('Err') ? `±${v.toFixed(1)}g` : `${v.toFixed(2)}g`, name.replace('Err', ' SD')]}/>
                     <Legend wrapperStyle={{ fontSize: 10 }}/>
                     <Line type="monotone" dataKey="hypo" stroke="#5B7FA5" strokeWidth={2} dot={false} name="Hypotonic">

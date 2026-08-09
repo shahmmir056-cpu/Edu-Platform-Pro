@@ -4,6 +4,7 @@ import { ArrowLeft, Clock, FlaskConical, ChevronRight } from "lucide-react";
 import { SIMS_V2, getSimV2 } from "./simulations-v2";
 import type { SimV2 } from "./simulations-v2";
 import { LabControlsProvider, LabToolbar } from "./simulations-v2/labControls";
+import { trackAction } from "@/features/life-os/tracker";
 
 const CATEGORY_ICONS: Record<string, string> = {
   Microscopy: "🔬",
@@ -202,6 +203,11 @@ export default function SimulationsV2Page() {
 
   const activeSim = activeId ? getSimV2(activeId) : null;
 
+  const openSim = (sim: SimV2) => {
+    setActiveId(sim.id);
+    trackAction("/simulations-v2", "simulation-run", undefined, 1, sim.title, sim.description);
+  };
+
   const categories = ["All", ...Array.from(new Set(SIMS_V2.map((s) => s.category)))];
 
   const filtered = filter === "All" ? SIMS_V2 : SIMS_V2.filter((s) => s.category === filter);
@@ -228,7 +234,7 @@ export default function SimulationsV2Page() {
           <div className="flex items-center gap-3 mb-2 flex-wrap">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: "rgba(255,159,76,0.12)", border: "2px solid #2D2D2D" }}
+              style={{ background: "rgba(255,159,76,0.12)", border: "1.5px solid rgba(255,255,255,0.72)" }}
             >
               <FlaskConical size={18} style={{ color: "#E8852E" }} />
             </div>
@@ -275,7 +281,7 @@ export default function SimulationsV2Page() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
             >
-              <SimCard sim={sim} onClick={() => setActiveId(sim.id)} />
+              <SimCard sim={sim} onClick={() => openSim(sim)} />
             </motion.div>
           ))}
         </div>

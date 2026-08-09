@@ -160,7 +160,7 @@ export default function StatisticsAnalyzer() {
                         cursor={{ fill: "rgba(255,159,76,0.08)" }}
                         contentStyle={{
                           background: "rgba(255,255,255,0.95)",
-                          border: "2px solid #2D2D2D",
+                          border: "1.5px solid rgba(255,255,255,0.72)",
                           borderRadius: 12,
                           fontSize: 12,
                           fontFamily: "monospace",
