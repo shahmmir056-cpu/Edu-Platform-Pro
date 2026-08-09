@@ -58,7 +58,7 @@ export default function SimulationsPage() {
     <div className="min-h-screen pb-24" style={{ background: "#FFF8F0" }}>
       <ToolHeader
         title="Interactive Simulations"
-        subtitle="Lab-quality virtual experiments — build intuition through hands-on exploration"
+        description="Lab-quality virtual experiments — build intuition through hands-on exploration"
         icon={FlaskConical}
       />
 

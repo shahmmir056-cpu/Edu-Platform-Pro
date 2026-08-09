@@ -154,7 +154,7 @@ function FeedbackSection() {
   );
 }
 
-const fadeUp = { hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0, transition: { duration: 1.0, ease: [0.16, 1, 0.3, 1] } } };
+const fadeUp = { hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0, transition: { duration: 1.0, ease: [0.16, 1, 0.3, 1] as const } } };
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.12 } } };
 
 /* ─── Interactive Card with enhanced 3D tilt ─── */

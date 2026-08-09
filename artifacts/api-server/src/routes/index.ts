@@ -7,6 +7,7 @@ import debateMentorRouter from "./debate-mentor";
 import ttsRouter from "./tts";
 import whatsappRouter from "./whatsapp";
 import emailRouter from "./email";
+import testConductorRouter from "./test-conductor";
 
 const router: IRouter = Router();
 
@@ -18,5 +19,6 @@ router.use(debateMentorRouter);
 router.use(ttsRouter);
 router.use(whatsappRouter);
 router.use(emailRouter);
+router.use(testConductorRouter);
 
 export default router;

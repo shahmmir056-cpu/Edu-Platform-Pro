@@ -499,7 +499,7 @@ export function LabToolbar({ title, children }: { title: string; children: React
             dataset={info.dataset}
             onClose={() => { setDataOpen(false); refocus(); }}
             onCopy={() => { copyData(); refocus(); }}
-            onDownload={() => { downloadCSV(info.dataset); refocus(); }}
+            onDownload={() => { downloadCSV(info.dataset!); refocus(); }}
             copied={copied}
           />
         )}

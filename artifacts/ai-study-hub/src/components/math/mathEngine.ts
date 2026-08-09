@@ -125,10 +125,9 @@ class Parser {
 
   private expression(): (x: number) => number {
     let left = this.term();
-    while (
-      this.peek()?.type === "op" &&
-      (this.peek()!.value === "+" || this.peek()!.value === "-")
-    ) {
+    while (true) {
+      const t = this.peek();
+      if (!t || t.type !== "op" || (t.value !== "+" && t.value !== "-")) break;
       const op = (this.next() as Token & { value: string }).value;
       const right = this.term();
       const l = left;
@@ -140,10 +139,9 @@ class Parser {
 
   private term(): (x: number) => number {
     let left = this.factor();
-    while (
-      this.peek()?.type === "op" &&
-      (this.peek()!.value === "*" || this.peek()!.value === "/")
-    ) {
+    while (true) {
+      const t = this.peek();
+      if (!t || t.type !== "op" || (t.value !== "*" && t.value !== "/")) break;
       const op = (this.next() as Token & { value: string }).value;
       const right = this.factor();
       const l = left;
@@ -155,7 +153,8 @@ class Parser {
 
   private factor(): (x: number) => number {
     const base = this.unary();
-    if (this.peek()?.type === "op" && this.peek()!.value === "^") {
+    const t = this.peek();
+    if (t && t.type === "op" && t.value === "^") {
       this.next();
       const exp = this.factor();
       const b = base;
@@ -165,7 +164,8 @@ class Parser {
   }
 
   private unary(): (x: number) => number {
-    if (this.peek()?.type === "op" && this.peek()!.value === "-") {
+    const t = this.peek();
+    if (t && t.type === "op" && t.value === "-") {
       this.next();
       const inner = this.unary();
       return (x) => -inner(x);

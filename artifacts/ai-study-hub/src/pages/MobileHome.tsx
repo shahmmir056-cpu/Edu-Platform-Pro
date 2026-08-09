@@ -31,9 +31,9 @@ const TOOLS = [
   { name: "AI Debate", path: "/debate-mentor", icon: Brain, color: C.orangeDark, tag: "New" },
 ];
 
-const fadeUp = { hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } } };
+const fadeUp = { hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] as const } } };
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
-const scaleIn = { hidden: { opacity: 0, scale: 0.88 }, show: { opacity: 1, scale: 1, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } } };
+const scaleIn = { hidden: { opacity: 0, scale: 0.88 }, show: { opacity: 1, scale: 1, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const } } };
 
 function useInView(ref: React.RefObject<HTMLDivElement | null>) {
   const [inView, setInView] = useState(false);

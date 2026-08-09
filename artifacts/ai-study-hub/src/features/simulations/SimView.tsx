@@ -436,7 +436,7 @@ function SimViewInner({
               )}
 
               {/* Completion overlay */}
-              {ctx.state.results.isComplete && (
+              {Boolean(ctx.state.results.isComplete) && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -663,7 +663,6 @@ function renderEquip(
           voltage={s.voltage ?? 0}
           time={s.time ?? 0}
           bands={s.bands ?? []}
-          isDropTarget={opts.isDropTarget}
           isHovered={opts.isHovered}
           width={220}
           height={280}

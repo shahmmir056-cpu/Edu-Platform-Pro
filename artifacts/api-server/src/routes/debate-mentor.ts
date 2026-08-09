@@ -144,9 +144,9 @@ router.post("/debate-mentor/chat", async (req, res) => {
     }
 
     const reply = data.choices?.[0]?.message?.content || "I couldn't generate a response. Please try again.";
-    res.json({ reply });
+    return res.json({ reply });
   } catch (err: any) {
-    res.status(500).json({ error: err.message || "Server error" });
+    return res.status(500).json({ error: err.message || "Server error" });
   }
 });
 
@@ -176,9 +176,9 @@ router.post("/debate-mentor/score", async (req, res) => {
     try { score = JSON.parse(content); }
     catch { score = { overall: 50, confidence: 50, communication: 50, grammar: 50, criticalThinking: 50, debatePerformance: 50, feedback: [], strongAreas: [], weakAreas: [], recommendations: [] }; }
 
-    res.json({ score });
+    return res.json({ score });
   } catch (err: any) {
-    res.status(500).json({ error: err.message || "Server error" });
+    return res.status(500).json({ error: err.message || "Server error" });
   }
 });
 

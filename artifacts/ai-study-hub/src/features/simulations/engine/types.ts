@@ -34,7 +34,7 @@ export type Trigger =
 
 export interface StepResult {
   visual?: string;
-  data?: Record<string, number | string>;
+  data?: Record<string, number | string | boolean>;
   message?: string;
 }
 
