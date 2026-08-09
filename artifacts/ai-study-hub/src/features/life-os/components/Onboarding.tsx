@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Sparkles, UserPlus, BookOpen, Clock, Brain, MonitorSmartphone, Heart, Calendar } from "lucide-react";
 import type { LifeProfile, Subject, LearningStyle } from "../types";
 import { defaultProfile } from "../storage";
-import { Button, Field, Glass, SectionTitle, SelectInput, Slider, TextInput, Toggle, inputCls, useTheme } from "./ui";
+import { Button, Field, Glass, SectionTitle, SelectInput, Slider, TextInput, TimeInput, Toggle, inputCls, useTheme } from "./ui";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const STYLE_OPTIONS: { value: LearningStyle; label: string }[] = [
@@ -144,16 +144,16 @@ export function Onboarding({ initial, onComplete }: { initial?: LifeProfile | nu
             {step === 1 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Wake Up Time">
-                  <TextInput type="time" value={profile.wakeTime} onChange={(v) => patch({ wakeTime: v })} />
+                  <TimeInput value={profile.wakeTime} onChange={(v) => patch({ wakeTime: v })} />
                 </Field>
                 <Field label="Sleep Time">
-                  <TextInput type="time" value={profile.sleepTime} onChange={(v) => patch({ sleepTime: v })} />
+                  <TimeInput value={profile.sleepTime} onChange={(v) => patch({ sleepTime: v })} />
                 </Field>
                 <Field label="School Starts">
-                  <TextInput type="time" value={profile.schoolStart} onChange={(v) => patch({ schoolStart: v })} />
+                  <TimeInput value={profile.schoolStart} onChange={(v) => patch({ schoolStart: v })} />
                 </Field>
                 <Field label="School Ends">
-                  <TextInput type="time" value={profile.schoolEnd} onChange={(v) => patch({ schoolEnd: v })} />
+                  <TimeInput value={profile.schoolEnd} onChange={(v) => patch({ schoolEnd: v })} />
                 </Field>
                 <Field label="Travel Time (min)">
                   <TextInput type="number" value={String(profile.travelMin)} onChange={(v) => patch({ travelMin: Number(v) || 0 })} />
@@ -164,10 +164,10 @@ export function Onboarding({ initial, onComplete }: { initial?: LifeProfile | nu
                 {profile.hasCoaching && (
                   <>
                     <Field label="Coaching Starts">
-                      <TextInput type="time" value={profile.coachingStart || "16:00"} onChange={(v) => patch({ coachingStart: v })} />
+                      <TimeInput value={profile.coachingStart || "16:00"} onChange={(v) => patch({ coachingStart: v })} />
                     </Field>
                     <Field label="Coaching Ends">
-                      <TextInput type="time" value={profile.coachingEnd || "17:30"} onChange={(v) => patch({ coachingEnd: v })} />
+                      <TimeInput value={profile.coachingEnd || "17:30"} onChange={(v) => patch({ coachingEnd: v })} />
                     </Field>
                     <div className="sm:col-span-2">
                       <span className="block text-[11px] font-semibold uppercase tracking-wider mb-2" style={{ color: t.muted }}>

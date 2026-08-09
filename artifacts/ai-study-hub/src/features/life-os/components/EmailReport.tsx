@@ -5,7 +5,7 @@ import type { LifeOsState } from "../types";
 import { buildDailyReport, todayKey } from "../engine";
 import { downloadDailyReportPdf } from "../pdf";
 import { sendEmail, getEmailStatus, type EmailStatus } from "../emailClient";
-import { Glass, PanelHeader, useTheme } from "./ui";
+import { Glass, PanelHeader, TimeInput, useTheme } from "./ui";
 
 export function EmailReport({ state, onStateChange }: { state: LifeOsState; onStateChange: (s: LifeOsState | ((prev: LifeOsState) => LifeOsState)) => void }) {
   const { t } = useTheme();
@@ -132,13 +132,9 @@ export function EmailReport({ state, onStateChange }: { state: LifeOsState; onSt
           <div className="flex items-center gap-2.5">
             <div className="relative flex-1">
               <Clock3 size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: t.muted }} />
-              <input
-                type="time"
-                value={cfg.time}
-                onChange={(e) => update({ time: e.target.value })}
-                className="w-full rounded-xl pl-9 pr-3 py-2.5 text-sm outline-none"
-                style={{ background: t.inputBg, border: `1.5px solid ${t.inputBorder}`, color: t.text }}
-              />
+              <div className="pl-9">
+                <TimeInput value={cfg.time} onChange={(v) => update({ time: v })} />
+              </div>
             </div>
             <button
               onClick={() => update({ enabled: !cfg.enabled })}

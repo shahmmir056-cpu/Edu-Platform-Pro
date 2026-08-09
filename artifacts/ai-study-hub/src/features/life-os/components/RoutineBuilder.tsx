@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 import type { BlockType, LifeOsState, LifeProfile, RoutineBlock } from "../types";
 import { blockColor, brainLoadOf, computeDailyStats, energyAt, orderedSubjects, todayKey } from "../engine";
-import { PanelHeader, useTheme, useNow } from "./ui";
+import { PanelHeader, TimeInput, useTheme, useNow } from "./ui";
 
 const DAY = 1440;
 
@@ -481,32 +481,25 @@ export function RoutineBuilder({ state, onStateChange, onClose }: { state: LifeO
 
                 <div>
                   <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: t.muted }}>Start</label>
-                  <input
-                    type="time"
+                  <TimeInput
                     value={timeOf(editor.startMin)}
-                    onChange={(e) => {
-                      const v = parseTime(e.target.value);
-                      if (Number.isNaN(v)) return;
-                      const end = v + (editor.endMin - editor.startMin);
-                      setEditor((prev) => ({ ...prev!, startMin: v, endMin: end }));
+                    onChange={(v) => {
+                      const start = parseTime(v);
+                      if (Number.isNaN(start)) return;
+                      setEditor((prev) => ({ ...prev!, startMin: start, endMin: start + (editor.endMin - editor.startMin) }));
                     }}
-                    className="w-full rounded-lg px-2.5 py-2 text-sm outline-none"
-                    style={{ background: t.inputBg, border: `1.5px solid ${t.inputBorder}`, color: t.text }}
                   />
                 </div>
 
                 <div>
                   <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: t.muted }}>End</label>
-                  <input
-                    type="time"
+                  <TimeInput
                     value={timeOf(editor.endMin)}
-                    onChange={(e) => {
-                      const v = parseTime(e.target.value);
-                      if (Number.isNaN(v)) return;
-                      setEditor((prev) => ({ ...prev!, endMin: v }));
+                    onChange={(v) => {
+                      const end = parseTime(v);
+                      if (Number.isNaN(end)) return;
+                      setEditor((prev) => ({ ...prev!, endMin: end }));
                     }}
-                    className="w-full rounded-lg px-2.5 py-2 text-sm outline-none"
-                    style={{ background: t.inputBg, border: `1.5px solid ${t.inputBorder}`, color: t.text }}
                   />
                 </div>
 

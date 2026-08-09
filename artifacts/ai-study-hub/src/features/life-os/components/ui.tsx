@@ -393,6 +393,35 @@ export function SelectInput({ value, onChange, options }: { value: string; onCha
   );
 }
 
+function pad2(n: number): string {
+  return String(n).padStart(2, "0");
+}
+
+export function TimeInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const { t } = useTheme();
+  const [h = 0, m = 0] = String(value || "").split(":").map(Number);
+  const set = (hh: number, mm: number) => onChange(`${pad2(hh)}:${pad2(mm)}`);
+  const hours = Array.from({ length: 24 }, (_, i) => i);
+  const minutes = Array.from({ length: 60 }, (_, i) => i);
+  const selectCls = cn("cursor-pointer text-sm outline-none rounded-lg px-2 py-2 appearance-none", "flex-1 min-w-0");
+  const selectStyle = { background: t.inputBg, border: `1.5px solid ${t.inputBorder}`, color: t.text };
+  return (
+    <div className="flex items-stretch gap-1.5 w-full">
+      <select value={h} onChange={(e) => set(Number(e.target.value), m)} aria-label="Hour" className={selectCls} style={selectStyle}>
+        {hours.map((i) => (
+          <option key={i} value={i} style={{ background: t.bg, color: t.text }}>{pad2(i)}</option>
+        ))}
+      </select>
+      <span className="flex items-center font-mono text-sm" style={{ color: t.muted }}>:</span>
+      <select value={m} onChange={(e) => set(h, Number(e.target.value))} aria-label="Minute" className={selectCls} style={selectStyle}>
+        {minutes.map((i) => (
+          <option key={i} value={i} style={{ background: t.bg, color: t.text }}>{pad2(i)}</option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 /* ═══════════════════════════════════════════════════
    RANGE SLIDER + TOGGLE
    ═══════════════════════════════════════════════════ */
