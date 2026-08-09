@@ -5,6 +5,7 @@ RUN apk add --no-cache curl python3 make g++
 FROM base AS deps
 WORKDIR /app
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY tsconfig.json tsconfig.base.json ./
 COPY lib/ ./lib/
 COPY artifacts/api-server/package.json ./artifacts/api-server/
 COPY artifacts/ai-study-hub/package.json ./artifacts/ai-study-hub/
