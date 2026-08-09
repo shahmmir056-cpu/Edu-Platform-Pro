@@ -53,21 +53,22 @@ function parseConfig(raw: any): DraftConfig {
     classNumber: num(raw?.classNumber),
     subject: subject(raw?.subject),
     topic: topic(raw?.topic),
-    testType: testType(raw?.testType),
+    testType: testType(raw?.testType ?? raw?.type),
     numQuestions: count(raw?.numQuestions),
     difficulty: difficulty(raw?.difficulty),
   };
 }
 
-function isReady(cfg: DraftConfig): boolean {
-  return (
-    cfg.classNumber !== null &&
-    cfg.subject !== null &&
-    cfg.topic !== null &&
-    cfg.testType !== null &&
-    cfg.numQuestions !== null &&
-    cfg.difficulty !== null
-  );
+function applyDefaults(cfg: DraftConfig): ReadyConfig {
+  const subject = cfg.subject ?? "General Knowledge";
+  return {
+    classNumber: cfg.classNumber ?? 10,
+    subject,
+    topic: cfg.topic ?? subject,
+    testType: cfg.testType ?? "mcq",
+    numQuestions: cfg.numQuestions ?? 10,
+    difficulty: cfg.difficulty ?? "Medium",
+  };
 }
 
 /**
@@ -106,9 +107,10 @@ router.post("/test-conductor/plan", async (req, res) => {
         "- numQuestions: integer 5-20. Default 10 if not mentioned.\n" +
         "- difficulty: \"Easy\", \"Medium\", or \"Hard\". Default \"Medium\" if not mentioned.\n" +
         "- Preserve already-known values unless the new message clearly changes them.\n" +
-        "- status is \"ask\" if any of classNumber, subject, topic, or testType is null, otherwise \"ready\".\n" +
-        "- reply: a friendly assistant message under 45 words. If asking, list ONLY the missing fields " +
-        "one at a time. If ready, confirm the plan in a natural sentence.\n\n" +
+        "- status is always \"ready\": never block generation. Missing fields are fine; the server fills " +
+        "defaults (class 10, General Knowledge, topic = subject, mcq, 10 questions, Medium).\n" +
+        "- reply: a friendly confirmation under 45 words that states the final plan, e.g. " +
+        "\"Here's your Class 10 Physics MCQ test on Electricity.\".\n\n" +
         'Respond ONLY with a single JSON object: {"status":"ask"|"ready","reply":string,' +
         '"config":{"classNumber":number|null,"subject":string|null,"topic":string|null,' +
         '"testType":"mcq"|"true-false"|"fill-blank"|"short-answer"|"essay"|"speed"|null,' +
@@ -116,13 +118,16 @@ router.post("/test-conductor/plan", async (req, res) => {
       user: `Student message: "${message}"\nAlready known: ${JSON.stringify(collected)}`,
     });
 
-    const config = parseConfig(result.config);
-    const status = result.status === "ready" ? "ready" : "ask";
+    const config = applyDefaults(parseConfig(result.config));
+    const reply =
+      typeof result.reply === "string" && result.reply.trim()
+        ? result.reply.trim()
+        : `Test ready: Class ${config.classNumber} ${config.subject}, topic "${config.topic}", ${config.numQuestions} ${config.testType} questions.`;
     res.json({
-      status,
-      reply: typeof result.reply === "string" && result.reply.trim() ? result.reply.trim() : undefined,
+      status: "ready",
+      reply,
       config,
-      ready: isReady(config),
+      ready: true,
     });
   } catch (err) {
     if (err instanceof AiNotConfiguredError) {
@@ -141,13 +146,9 @@ router.post("/test-conductor/plan", async (req, res) => {
  * in the shapes the frontend test runner already consumes.
  */
 router.post("/test-conductor/generate", async (req, res) => {
-  const cfg = parseConfig(req.body?.config);
-  if (!isReady(cfg)) {
-    res.status(400).json({ error: "Incomplete test config. Provide class, subject, topic, and test type." });
-    return;
-  }
-
-  const { classNumber, subject, topic, testType, numQuestions, difficulty } = cfg as ReadyConfig;
+  const parsed = parseConfig(req.body?.config);
+  const cfg = applyDefaults(parsed) as ReadyConfig;
+  const { classNumber, subject, topic, testType, numQuestions, difficulty } = cfg;
 
   let responseShape: string;
   let gradingInstruction: string;
