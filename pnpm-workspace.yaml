@@ -70,6 +70,8 @@ autoInstallPeers: false
 
 onlyBuiltDependencies:
   - '@swc/core'
+  - better-sqlite3
+  - core-js
   - esbuild
   - msw
   - unrs-resolver
@@ -161,5 +163,5 @@ overrides:
 
 allowBuilds:
   better-sqlite3: true
-  core-js: set this to true or false
+  core-js: true
   esbuild: true
