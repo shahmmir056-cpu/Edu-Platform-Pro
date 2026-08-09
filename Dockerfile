@@ -18,12 +18,14 @@ RUN pnpm install --no-frozen-lockfile
 FROM base AS api-build
 WORKDIR /app
 COPY --from=deps /app ./
+COPY artifacts/api-server ./artifacts/api-server
 WORKDIR /app/artifacts/api-server
 RUN pnpm run build
 
 FROM base AS frontend-build
 WORKDIR /app
 COPY --from=deps /app ./
+COPY artifacts/ai-study-hub ./artifacts/ai-study-hub
 ENV PORT=10000
 ENV BASE_PATH=/
 ENV NODE_ENV=production
