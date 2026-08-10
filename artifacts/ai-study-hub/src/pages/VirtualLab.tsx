@@ -38,6 +38,7 @@ import { SIMULATIONS, SIM_SUBJECTS, simEmbedUrl, type SimSubject } from "@/lib/s
 import { SIMS_V2, getSimV2 } from "@/features/simulations/simulations-v2";
 import { LabControlsProvider, LabToolbar } from "@/features/simulations/simulations-v2/labControls";
 import { readShareFromHash, SHARE_KEY } from "@/features/simulations/simulations-v2/Microscope";
+import { setSimFullscreen } from "@/features/simulations/simFullscreen";
 import { trackAction } from "@/features/life-os/tracker";
 import { cn } from "@/lib/utils";
 
@@ -183,6 +184,11 @@ export default function VirtualLab() {
 
   const activeSim = SIMULATIONS.find((s) => s.id === activeSimId) ?? null;
   const activeV2Sim = activeV2Id ? getSimV2(activeV2Id) : null;
+
+  useEffect(() => {
+    setSimFullscreen(!!activeV2Sim);
+    return () => setSimFullscreen(false);
+  }, [activeV2Sim]);
 
   return (
     <div className="max-w-7xl mx-auto p-6 md:p-10">

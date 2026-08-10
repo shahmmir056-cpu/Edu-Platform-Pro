@@ -4,6 +4,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { cn } from "@/lib/utils";
+import { useSimFullscreen } from "@/features/simulations/simFullscreen";
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
@@ -12,6 +13,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const isDebatePage = location.startsWith("/debate-mentor");
   const isLifeOsPage = location.startsWith("/life-os");
   const isAppPage = isLogicPage || isDebatePage || isLifeOsPage;
+  const isSimFullscreen = useSimFullscreen();
 
   return (
     <div className={cn("flex w-full flex-col", isAppPage ? "h-dvh overflow-hidden" : "min-h-[100dvh]")}>
@@ -24,7 +26,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       >
         Skip to content
       </a>
-      {!isAppPage && <Header />}
+      {!isAppPage && !isSimFullscreen && <Header />}
       <main
         id="main-content"
         className={cn(
@@ -36,8 +38,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
       >
         {children}
       </main>
-      {!isAppPage && !isLabPage && <Footer />}
-      {!isAppPage && !isLabPage && <BottomNav />}
+      {!isAppPage && !isSimFullscreen && !isLabPage && <Footer />}
+      {!isAppPage && !isSimFullscreen && !isLabPage && <BottomNav />}
     </div>
   );
 }

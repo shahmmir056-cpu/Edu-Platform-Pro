@@ -1,9 +1,10 @@
-import { useState, Suspense, useMemo } from "react";
+import { useState, Suspense, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Clock, FlaskConical, ChevronRight } from "lucide-react";
 import { SIMS_V2, getSimV2 } from "./simulations-v2";
 import type { SimV2 } from "./simulations-v2";
 import { LabControlsProvider, LabToolbar } from "./simulations-v2/labControls";
+import { setSimFullscreen } from "./simFullscreen";
 import { trackAction } from "@/features/life-os/tracker";
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -202,6 +203,11 @@ export default function SimulationsV2Page() {
   const [filter, setFilter] = useState<string>("All");
 
   const activeSim = activeId ? getSimV2(activeId) : null;
+
+  useEffect(() => {
+    setSimFullscreen(!!activeSim);
+    return () => setSimFullscreen(false);
+  }, [activeSim]);
 
   const openSim = (sim: SimV2) => {
     setActiveId(sim.id);
