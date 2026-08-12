@@ -136,9 +136,10 @@ export default function Essay() {
       )}
 
       {generateEssay.isError && (
-        <ErrorState 
-          onRetry={() => handleSubmit()} 
-          message="Failed to generate the essay. Please adjust your prompt and try again." 
+        <ErrorState
+          onRetry={() => handleSubmit()}
+          error={generateEssay.error ?? null}
+          message="Failed to generate the essay. Please adjust your prompt and try again."
         />
       )}
 

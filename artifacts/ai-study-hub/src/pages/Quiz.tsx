@@ -141,7 +141,7 @@ export default function Quiz() {
       )}
 
       {generateQuiz.isError && (
-        <ErrorState onRetry={() => handleSubmit()} />
+        <ErrorState onRetry={() => handleSubmit()} error={generateQuiz.error ?? null} message="Could not generate the quiz. Please reword your topic and try again." />
       )}
 
       {quiz && !generateQuiz.isPending && !showResults && (

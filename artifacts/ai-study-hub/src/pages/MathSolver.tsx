@@ -538,6 +538,7 @@ export default function MathSolver() {
             {solveMath.isError && (
               <ErrorState
                 onRetry={() => handleSubmit()}
+                error={solveMath.error ?? null}
                 message="Couldn't solve that one. Try rephrasing the problem and try again."
               />
             )}

@@ -101,7 +101,7 @@ export default function Flashcards() {
       )}
 
       {generateFlashcards.isError && (
-        <ErrorState onRetry={() => handleSubmit()} />
+        <ErrorState onRetry={() => handleSubmit()} error={generateFlashcards.error ?? null} message="Could not create flashcards. Please reword your topic and try again." />
       )}
 
       {deck && !generateFlashcards.isPending && (

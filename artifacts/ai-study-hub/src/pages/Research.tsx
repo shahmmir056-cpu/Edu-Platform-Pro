@@ -126,9 +126,10 @@ export default function Research() {
       )}
 
       {generateResearch.isError && (
-        <ErrorState 
-          onRetry={() => handleSubmit()} 
-          message="Failed to generate the research report. Please try modifying your topic." 
+        <ErrorState
+          onRetry={() => handleSubmit()}
+          error={generateResearch.error ?? null}
+          message="Failed to generate the research report. Please try modifying your topic."
         />
       )}
 

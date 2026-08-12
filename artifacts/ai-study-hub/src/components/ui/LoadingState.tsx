@@ -111,24 +111,30 @@ export function LoadingState({
   );
 }
 
-export function ErrorState({ 
-  title = "Something went wrong", 
-  message = "The AI encountered an error processing your request.", 
-  onRetry 
-}: { 
-  title?: string; 
-  message?: string; 
+export function ErrorState({
+  title = "Something went wrong",
+  message = "The AI encountered an error processing your request.",
+  error,
+  onRetry,
+}: {
+  title?: string;
+  message?: string;
+  error?: { message?: string; status?: number } | null;
   onRetry?: () => void;
 }) {
+  // Surface clear validation messages (status 422) thrown for gibberish input.
+  const isValidation = error && typeof error.status === "number" && error.status === 422;
+  const displayTitle = isValidation ? "Please re-enter your prompt" : title;
+  const displayMessage = isValidation && error?.message ? error.message : message;
   return (
     <div className="flex flex-col items-center justify-center py-16 px-4 text-center max-w-md mx-auto">
       <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mb-6">
-        <span className="text-2xl text-destructive font-serif font-bold">!</span>
+        <span className="text-2xl text-destructive font-serif font-bold">{isValidation ? "!" : "×"}</span>
       </div>
-      <h3 className="font-serif text-xl font-medium text-foreground mb-2">{title}</h3>
-      <p className="text-muted-foreground mb-8 text-sm leading-relaxed">{message}</p>
+      <h3 className="font-serif text-xl font-medium text-foreground mb-2">{displayTitle}</h3>
+      <p className="text-muted-foreground mb-8 text-sm leading-relaxed">{displayMessage}</p>
       {onRetry && (
-        <button 
+        <button
           onClick={onRetry}
           className="px-6 py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:bg-primary/90 transition-all shadow-md hover:-translate-y-0.5"
         >

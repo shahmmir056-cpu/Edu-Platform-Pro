@@ -94,7 +94,7 @@ export default function StudyNotes() {
       )}
 
       {generateNotes.isError && (
-        <ErrorState onRetry={() => handleSubmit()} />
+        <ErrorState onRetry={() => handleSubmit()} error={generateNotes.error ?? null} message="Could not generate study notes. Please reword your topic and try again." />
       )}
 
       {notes && !generateNotes.isPending && (

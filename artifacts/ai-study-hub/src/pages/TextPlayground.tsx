@@ -153,7 +153,7 @@ export default function TextPlayground() {
             </div>
           ) : transformText.isError ? (
             <div className="absolute inset-0 flex items-center justify-center bg-white/[0.8] backdrop-blur-sm z-10">
-              <ErrorState onRetry={() => handleSubmit()} />
+              <ErrorState onRetry={() => handleSubmit()} error={transformText.error ?? null} message="Couldn't transform that text. Please re-enter your input and try again." />
             </div>
           ) : null}
 

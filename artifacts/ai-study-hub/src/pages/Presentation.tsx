@@ -103,7 +103,7 @@ export default function Presentation() {
       )}
 
       {generatePres.isError && (
-        <ErrorState onRetry={() => handleSubmit()} />
+        <ErrorState onRetry={() => handleSubmit()} error={generatePres.error ?? null} message="Could not build the presentation. Please reword your topic and try again." />
       )}
 
       {presentation && !generatePres.isPending && (

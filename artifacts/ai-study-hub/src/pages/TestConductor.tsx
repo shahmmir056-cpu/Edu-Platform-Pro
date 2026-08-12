@@ -16,6 +16,7 @@ import {
   Bot,
 } from "lucide-react";
 import { ToolHeader } from "@/components/ui/ToolHeader";
+import { validatePromptText } from "@workspace/api-client-react";
 import { trackAction } from "@/features/life-os/tracker";
 import { cn } from "@/lib/utils";
 
@@ -230,6 +231,15 @@ function ChatPanel({ onGenerate }: {
   const sendMessage = async (raw: string) => {
     const text = raw.trim();
     if (!text || thinking !== "idle") return;
+    const gibberish = validatePromptText(text);
+    if (gibberish) {
+      setThinking("idle");
+      setMessages((prev) => [
+        ...prev,
+        { id: uid(), role: "bot", text: gibberish },
+      ]);
+      return;
+    }
     setMessages((prev) => [...prev, { id: uid(), role: "user", text }]);
     setShowChips(false);
     setInput("");

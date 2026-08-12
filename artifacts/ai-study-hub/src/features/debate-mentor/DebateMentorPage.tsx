@@ -8,6 +8,7 @@ import { ChatInterface } from "./components/ChatInterface";
 import { ParticleBackground } from "./components/ParticleBackground";
 import { useVoice } from "./hooks/useVoice";
 import { sendDebateMessage, generateScore, API_TTS } from "./lib/api";
+import { validatePromptText } from "@workspace/api-client-react";
 import { trackAction } from "@/features/life-os/tracker";
 import type { ChatMessage, DebateMode, DebateScore, InterviewStyle } from "./types";
 
@@ -98,7 +99,14 @@ export default function DebateMentorPage() {
 
   const handleSend = useCallback(async (text: string) => {
     if (!text.trim() || isAiTypingRef.current) return;
-
+    const gibberish = validatePromptText(text.trim());
+    if (gibberish) {
+      setMessages((prev) => [
+        ...prev,
+        { id: `e-${Date.now()}`, role: "assistant", content: gibberish, timestamp: Date.now() },
+      ]);
+      return;
+    }
     const userMsg: ChatMessage = {
       id: `u-${Date.now()}`,
       role: "user",

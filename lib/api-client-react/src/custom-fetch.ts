@@ -11,6 +11,102 @@ export type AuthTokenGetter = () => Promise<string | null> | string | null;
 const NO_BODY_STATUS = new Set([204, 205, 304]);
 const DEFAULT_JSON_ACCEPT = "application/json, application/problem+json";
 
+/* ═══════════════════════════════════════════════════
+   Prompt / user-text validation
+   Prevents wasting AI calls on keyboard-mash input like
+   "qqqqqfdjdfhh", "1232dmsnds", "#@!@#".
+   ═══════════════════════════════════════════════════ */
+
+const VOWELS = new Set(["a", "e", "i", "o", "u"]);
+
+const GIBBERISH_MESSAGE =
+  "Please enter a clear question or topic. Random characters like 'qqqq' or '#@!@' won't work — try something like 'Explain photosynthesis' or 'Solve for x'.";
+
+export function validatePromptText(text: string): string | null {
+  if (!text) return null;
+  const raw = text.trim();
+  if (raw.length < 3) return null;
+
+  const asciiLetters = raw.match(/[a-z]/gi);
+  const unicodeLetters = raw.match(/\p{L}/gu);
+  const digits = raw.match(/[0-9]/g);
+  const asciiCount = asciiLetters ? asciiLetters.length : 0;
+  const unicodeCount = unicodeLetters ? unicodeLetters.length : 0;
+  const digitCount = digits ? digits.length : 0;
+  const whitespaceCount = (raw.match(/\s/g) || []).length;
+  const symbolCount = raw.length - unicodeCount - digitCount - whitespaceCount;
+
+  // Symbols/emoji only, nothing that looks like writing -> gibberish ("#@!@#", "🔥🔥🔥")
+  if (unicodeCount === 0 && digitCount === 0) {
+    return GIBBERISH_MESSAGE;
+  }
+
+  // Non-Latin scripts (CJK, Cyrillic, Devanagari, ...) and short math runs
+  // like "2+2" have no ASCII letters, so the heuristics below don't apply.
+  if (asciiCount === 0) {
+    return null;
+  }
+
+  const letterArr = (asciiLetters || []).map((c) => c.toLowerCase());
+  const totalAlpha = letterArr.length;
+
+  // Repeated-character dominance: one letter > 40% of letters ("qqqqqfdjdfhh")
+  if (totalAlpha >= 5) {
+    const counts: Record<string, number> = {};
+    for (const c of letterArr) counts[c] = (counts[c] || 0) + 1;
+    const maxFreq = Math.max(...Object.values(counts));
+    if (maxFreq / totalAlpha > 0.4) {
+      return GIBBERISH_MESSAGE;
+    }
+  }
+
+  // Low vowel ratio among enough letters -> consonant mash ("dmsnds")
+  if (totalAlpha >= 5) {
+    const vowelCount = letterArr.filter((c) => VOWELS.has(c)).length;
+    if (vowelCount / totalAlpha < 0.1) {
+      return GIBBERISH_MESSAGE;
+    }
+  }
+
+  // Symbol/digit dominance with letters present -> "1232dmsnds"-style mash
+  if (totalAlpha >= 4) {
+    const nonLetterRatio = (symbolCount + digitCount) / raw.length;
+    if (nonLetterRatio > 0.55) {
+      return GIBBERISH_MESSAGE;
+    }
+  }
+
+  return null;
+}
+
+const TEXT_KEYS = new Set([
+  "topic",
+  "question",
+  "prompt",
+  "text",
+  "subject",
+  "message",
+  "content",
+  "input",
+  "query",
+  "statement",
+  "title",
+]);
+
+function validateRequestBody(url: string, body: unknown): string | null {
+  if (!body || typeof body !== "object") return null;
+  const obj = body as Record<string, unknown>;
+  for (const key of Object.keys(obj)) {
+    if (TEXT_KEYS.has(key.toLowerCase())) {
+      const msg = validatePromptText(String(obj[key] ?? ""));
+      if (msg) return msg;
+    }
+  }
+  return null;
+}
+
+export { GIBBERISH_MESSAGE };
+
 // ---------------------------------------------------------------------------
 // Module-level configuration
 // ---------------------------------------------------------------------------
@@ -359,6 +455,34 @@ export async function customFetch<T = unknown>(
   }
 
   const requestInfo = { method, url: resolveUrl(input) };
+
+  // Reject gibberish / inappropriate input for AI-tool endpoints before
+  // hitting the network, so users get immediate, clear feedback.
+  if (method === "POST" && init.body && typeof init.body === "string") {
+    const reqUrl = requestInfo.url;
+    const isAiTool =
+      reqUrl.includes("/api/ai-tools/") ||
+      reqUrl.includes("/api/test-conductor/") ||
+      reqUrl.includes("/api/debate-mentor");
+    if (isAiTool) {
+      let parsed: unknown = null;
+      try {
+        parsed = JSON.parse(init.body);
+      } catch {
+        parsed = null;
+      }
+      if (parsed) {
+        const msg = validateRequestBody(reqUrl, parsed);
+        if (msg) {
+          const e: Error & { status: number; name: string } = Object.assign(new Error(msg), {
+            name: "ValidationError",
+            status: 422,
+          });
+          throw e;
+        }
+      }
+    }
+  }
 
   const response = await fetch(input, { ...init, method, headers });
 
