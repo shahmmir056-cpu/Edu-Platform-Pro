@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useTransformText } from "@workspace/api-client-react";
 import { Wand2, Copy, Check, Type, RotateCcw } from "lucide-react";
 import { ToolHeader } from "@/components/ui/ToolHeader";
-import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
+import { LoadingState, ErrorState, isValidationError } from "@/components/ui/LoadingState";
 import { trackAction } from "@/features/life-os/tracker";
 import { cn } from "@/lib/utils";
 
@@ -52,6 +52,14 @@ export default function TextPlayground() {
 
   const handleSubmit = () => {
     transformText.mutate({ data: { text, mode, targetLanguage: mode === 'translate' ? targetLanguage : undefined } });
+  };
+
+  const handleRetry = () => {
+    if (isValidationError(transformText.error)) {
+      transformText.reset();
+    } else {
+      handleSubmit();
+    }
   };
 
   const handleCopy = () => {
@@ -153,7 +161,7 @@ export default function TextPlayground() {
             </div>
           ) : transformText.isError ? (
             <div className="absolute inset-0 flex items-center justify-center bg-white/[0.8] backdrop-blur-sm z-10">
-              <ErrorState onRetry={() => handleSubmit()} error={transformText.error ?? null} message="Couldn't transform that text. Please re-enter your input and try again." />
+              <ErrorState onRetry={handleRetry} error={transformText.error ?? null} message="Couldn't transform that text. Please re-enter your input and try again." />
             </div>
           ) : null}
 

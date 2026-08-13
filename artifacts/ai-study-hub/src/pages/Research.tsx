@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useGenerateResearch } from "@workspace/api-client-react";
 import { BookOpen, Search, Download } from "lucide-react";
 import { ToolHeader } from "@/components/ui/ToolHeader";
-import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
+import { LoadingState, ErrorState, isValidationError } from "@/components/ui/LoadingState";
 import { trackAction } from "@/features/life-os/tracker";
 
 type Depth = "overview" | "standard" | "deep";
@@ -27,6 +27,14 @@ export default function Research() {
   const reset = () => {
     generateResearch.reset();
     setTopic("");
+  };
+
+  const handleRetry = () => {
+    if (isValidationError(generateResearch.error)) {
+      generateResearch.reset();
+    } else {
+      handleSubmit();
+    }
   };
 
   const downloadReport = () => {
@@ -127,7 +135,7 @@ export default function Research() {
 
       {generateResearch.isError && (
         <ErrorState
-          onRetry={() => handleSubmit()}
+          onRetry={handleRetry}
           error={generateResearch.error ?? null}
           message="Failed to generate the research report. Please try modifying your topic."
         />

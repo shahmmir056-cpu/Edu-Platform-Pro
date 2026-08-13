@@ -111,6 +111,10 @@ export function LoadingState({
   );
 }
 
+export function isValidationError(error: unknown): error is { status?: number } {
+  return !!error && typeof error === "object" && (error as { status?: unknown }).status === 422;
+}
+
 export function ErrorState({
   title = "Something went wrong",
   message = "The AI encountered an error processing your request.",

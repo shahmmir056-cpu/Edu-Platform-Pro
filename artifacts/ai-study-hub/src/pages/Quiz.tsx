@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useGenerateQuiz } from "@workspace/api-client-react";
 import { HelpCircle, CheckCircle2, XCircle, RefreshCw, Trophy } from "lucide-react";
 import { ToolHeader } from "@/components/ui/ToolHeader";
-import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
+import { LoadingState, ErrorState, isValidationError } from "@/components/ui/LoadingState";
 import { trackAction } from "@/features/life-os/tracker";
 import { cn } from "@/lib/utils";
 
@@ -34,6 +34,14 @@ export default function Quiz() {
     setCurrentQuestionIdx(0);
     setSelectedAnswers({});
     setShowResults(false);
+  };
+
+  const handleRetry = () => {
+    if (isValidationError(generateQuiz.error)) {
+      generateQuiz.reset();
+    } else {
+      handleSubmit();
+    }
   };
 
   const handleAnswerSelect = (optionIdx: number) => {
@@ -141,7 +149,7 @@ export default function Quiz() {
       )}
 
       {generateQuiz.isError && (
-        <ErrorState onRetry={() => handleSubmit()} error={generateQuiz.error ?? null} message="Could not generate the quiz. Please reword your topic and try again." />
+        <ErrorState onRetry={handleRetry} error={generateQuiz.error ?? null} message="Could not generate the quiz. Please reword your topic and try again." />
       )}
 
       {quiz && !generateQuiz.isPending && !showResults && (

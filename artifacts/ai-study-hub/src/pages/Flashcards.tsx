@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useGenerateFlashcards } from "@workspace/api-client-react";
 import { Layers, ArrowRight, ArrowLeft, RotateCw } from "lucide-react";
 import { ToolHeader } from "@/components/ui/ToolHeader";
-import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
+import { LoadingState, ErrorState, isValidationError } from "@/components/ui/LoadingState";
 import { trackAction } from "@/features/life-os/tracker";
 import { cn } from "@/lib/utils";
 
@@ -21,6 +21,14 @@ export default function Flashcards() {
     trackAction("/flashcards", "deck-created", topic, 1, topic.trim(), `Deck with ${numCards} cards`);
     setCurrentCardIdx(0);
     setIsFlipped(false);
+  };
+
+  const handleRetry = () => {
+    if (isValidationError(generateFlashcards.error)) {
+      generateFlashcards.reset();
+    } else {
+      handleSubmit();
+    }
   };
 
   const nextCard = () => {
@@ -101,7 +109,7 @@ export default function Flashcards() {
       )}
 
       {generateFlashcards.isError && (
-        <ErrorState onRetry={() => handleSubmit()} error={generateFlashcards.error ?? null} message="Could not create flashcards. Please reword your topic and try again." />
+        <ErrorState onRetry={handleRetry} error={generateFlashcards.error ?? null} message="Could not create flashcards. Please reword your topic and try again." />
       )}
 
       {deck && !generateFlashcards.isPending && (

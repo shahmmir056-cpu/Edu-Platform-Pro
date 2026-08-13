@@ -18,7 +18,7 @@ import {
   Eraser,
 } from "lucide-react";
 import { ToolHeader } from "@/components/ui/ToolHeader";
-import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
+import { LoadingState, ErrorState, isValidationError } from "@/components/ui/LoadingState";
 import { CopyButton } from "@/components/math/shared";
 import GraphCalculator from "@/components/math/GraphCalculator";
 import EquationSolver from "@/components/math/EquationSolver";
@@ -257,6 +257,14 @@ export default function MathSolver() {
   const reset = () => {
     solveMath.reset();
     setProblem("");
+  };
+
+  const handleRetry = () => {
+    if (isValidationError(solveMath.error)) {
+      solveMath.reset();
+    } else {
+      handleSubmit();
+    }
   };
 
   const insertSymbol = (text: string) => {
@@ -537,7 +545,7 @@ export default function MathSolver() {
 
             {solveMath.isError && (
               <ErrorState
-                onRetry={() => handleSubmit()}
+                onRetry={handleRetry}
                 error={solveMath.error ?? null}
                 message="Couldn't solve that one. Try rephrasing the problem and try again."
               />

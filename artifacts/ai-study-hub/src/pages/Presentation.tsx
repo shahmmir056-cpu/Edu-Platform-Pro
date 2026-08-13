@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useGeneratePresentation } from "@workspace/api-client-react";
 import { MonitorPlay, Download, ChevronRight, ChevronLeft, LayoutTemplate } from "lucide-react";
 import { ToolHeader } from "@/components/ui/ToolHeader";
-import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
+import { LoadingState, ErrorState, isValidationError } from "@/components/ui/LoadingState";
 import { trackAction } from "@/features/life-os/tracker";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +20,14 @@ export default function Presentation() {
     e?.preventDefault();
     generatePres.mutate({ data: { topic, numSlides } });
     setCurrentSlide(0);
+  };
+
+  const handleRetry = () => {
+    if (isValidationError(generatePres.error)) {
+      generatePres.reset();
+    } else {
+      handleSubmit();
+    }
   };
 
   useEffect(() => {
@@ -103,7 +111,7 @@ export default function Presentation() {
       )}
 
       {generatePres.isError && (
-        <ErrorState onRetry={() => handleSubmit()} error={generatePres.error ?? null} message="Could not build the presentation. Please reword your topic and try again." />
+        <ErrorState onRetry={handleRetry} error={generatePres.error ?? null} message="Could not build the presentation. Please reword your topic and try again." />
       )}
 
       {presentation && !generatePres.isPending && (

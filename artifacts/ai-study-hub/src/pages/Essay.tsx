@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useGenerateEssay } from "@workspace/api-client-react";
 import { PenTool, FileText, Download, Layers } from "lucide-react";
 import { ToolHeader } from "@/components/ui/ToolHeader";
-import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
+import { LoadingState, ErrorState, isValidationError } from "@/components/ui/LoadingState";
 import { trackAction } from "@/features/life-os/tracker";
 
 type EssayType = "argumentative" | "narrative" | "expository" | "persuasive" | "descriptive" | "compare-contrast";
@@ -29,6 +29,14 @@ export default function Essay() {
   const reset = () => {
     generateEssay.reset();
     setTopic("");
+  };
+
+  const handleRetry = () => {
+    if (isValidationError(generateEssay.error)) {
+      generateEssay.reset();
+    } else {
+      handleSubmit();
+    }
   };
 
   return (
@@ -137,7 +145,7 @@ export default function Essay() {
 
       {generateEssay.isError && (
         <ErrorState
-          onRetry={() => handleSubmit()}
+          onRetry={handleRetry}
           error={generateEssay.error ?? null}
           message="Failed to generate the essay. Please adjust your prompt and try again."
         />

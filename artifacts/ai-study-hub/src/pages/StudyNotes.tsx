@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useGenerateStudyNotes } from "@workspace/api-client-react";
 import { ClipboardList, Download, Book } from "lucide-react";
 import { ToolHeader } from "@/components/ui/ToolHeader";
-import { LoadingState, ErrorState } from "@/components/ui/LoadingState";
+import { LoadingState, ErrorState, isValidationError } from "@/components/ui/LoadingState";
 import { trackAction } from "@/features/life-os/tracker";
 
 export default function StudyNotes() {
@@ -24,6 +24,14 @@ export default function StudyNotes() {
   const reset = () => {
     generateNotes.reset();
     setTopic("");
+  };
+
+  const handleRetry = () => {
+    if (isValidationError(generateNotes.error)) {
+      generateNotes.reset();
+    } else {
+      handleSubmit();
+    }
   };
 
   const downloadNotes = () => {
@@ -94,7 +102,7 @@ export default function StudyNotes() {
       )}
 
       {generateNotes.isError && (
-        <ErrorState onRetry={() => handleSubmit()} error={generateNotes.error ?? null} message="Could not generate study notes. Please reword your topic and try again." />
+        <ErrorState onRetry={handleRetry} error={generateNotes.error ?? null} message="Could not generate study notes. Please reword your topic and try again." />
       )}
 
       {notes && !generateNotes.isPending && (
