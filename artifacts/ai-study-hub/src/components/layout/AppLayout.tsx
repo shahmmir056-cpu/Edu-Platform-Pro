@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import { useLocation } from "wouter";
 import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { cn } from "@/lib/utils";
 import { useSimFullscreen } from "@/features/simulations/simFullscreen";
@@ -38,7 +37,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
       >
         {children}
       </main>
-      {!isAppPage && !isSimFullscreen && !isLabPage && <Footer />}
       {!isAppPage && !isSimFullscreen && !isLabPage && <BottomNav />}
     </div>
   );
