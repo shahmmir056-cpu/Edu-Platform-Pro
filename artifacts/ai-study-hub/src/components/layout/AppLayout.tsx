@@ -26,7 +26,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       >
         Skip to content
       </a>
-      {!isAppPage && !isSimFullscreen && <Header />}
+      {!isAppPage && !isSimFullscreen && !isDGBooksPage && <Header />}
       <main
         id="main-content"
         className={cn(
