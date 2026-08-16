@@ -49,13 +49,14 @@ const LIST = "flex flex-col gap-2.5 list-none m-0 p-0";
 export function Footer() {
   return (
     <footer
-      className="relative overflow-hidden"
+      className="relative overflow-hidden text-left"
       style={{
         background: "rgba(255, 255, 255, 0.4)",
         backdropFilter: "blur(20px) saturate(180%)",
         WebkitBackdropFilter: "blur(20px) saturate(180%)",
         color: "#2D2D2D",
         borderTop: "1px solid rgba(255,255,255,0.5)",
+        textAlign: "left",
       }}
     >
       <div
@@ -79,7 +80,7 @@ export function Footer() {
 
           {/* Brand */}
           <div className={COL}>
-            <h4 className={`${HEADING} invisible`}>&nbsp;</h4>
+            <h4 className={`${HEADING} invisible`} style={{ textAlign: "left" }}>&nbsp;</h4>
             <Link href="/" className="flex items-center gap-3 mb-4 group">
               <div
                 className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-105 shrink-0"
@@ -134,9 +135,9 @@ export function Footer() {
           </div>
 
           {/* Tools */}
-          <div className={COL}>
-            <h4 className={HEADING} style={{ color: "#FF9F4C" }}>Tools</h4>
-            <ul className={LIST}>
+          <div className={COL} style={{ textAlign: "left" }}>
+            <h4 className={HEADING} style={{ color: "#FF9F4C", textAlign: "left" }}>Tools</h4>
+            <ul className={LIST} style={{ textAlign: "left" }}>
               {TOOL_LINKS.map((l) => (
                 <li key={l.path}>
                   <Link
@@ -156,9 +157,9 @@ export function Footer() {
           </div>
 
           {/* Company */}
-          <div className={COL}>
-            <h4 className={HEADING} style={{ color: "#FFD4A8" }}>Company</h4>
-            <ul className={LIST}>
+          <div className={COL} style={{ textAlign: "left" }}>
+            <h4 className={HEADING} style={{ color: "#FFD4A8", textAlign: "left" }}>Company</h4>
+            <ul className={LIST} style={{ textAlign: "left" }}>
               {COMPANY_LINKS.map((l) => (
                 <li key={l.path}>
                   <Link
@@ -178,9 +179,9 @@ export function Footer() {
           </div>
 
           {/* Contact */}
-          <div className={COL}>
-            <h4 className={HEADING} style={{ color: "#E8852E" }}>Get in Touch</h4>
-            <ul className={LIST} style={{ color: "#6B6B6B" }}>
+          <div className={COL} style={{ textAlign: "left" }}>
+            <h4 className={HEADING} style={{ color: "#E8852E", textAlign: "left" }}>Get in Touch</h4>
+            <ul className={LIST} style={{ color: "#6B6B6B", textAlign: "left" }}>
               <li className="flex items-start gap-2.5 text-sm">
                 <Mail size={15} className="mt-0.5 shrink-0" style={{ color: "#FF9F4C" }} />
                 <span>hello@neuralsync.ai</span>
