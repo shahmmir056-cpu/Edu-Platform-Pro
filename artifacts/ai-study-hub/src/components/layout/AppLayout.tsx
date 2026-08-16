@@ -17,7 +17,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className={cn("flex w-full flex-col", isAppPage ? "h-dvh overflow-hidden" : "min-h-[100dvh]")}>
-      {/* Liquid Glass animated background — hidden on DG Books */}
       {!isDGBooksPage && <div className="lg-bg" />}
 
       <a
