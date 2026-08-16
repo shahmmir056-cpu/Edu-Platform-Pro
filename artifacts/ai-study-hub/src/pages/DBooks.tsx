@@ -27,6 +27,7 @@ export default function DBooks() {
       {/* Floating water capsule nav over the iframe */}
       <header className="fixed top-4 left-1/2 z-50 flex items-center gap-0.5 water-nav-bar"
         style={{
+          position: "fixed",
           transform: "translateX(-50%)",
           width: "min(94vw, 1100px)",
           padding: "7px 12px",
