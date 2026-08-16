@@ -8,6 +8,7 @@ import {
   ChevronLeft, ChevronRight, Star, Quote, MessageSquareHeart, CalendarClock,
 } from "lucide-react";
 import MobileHome from "./MobileHome";
+import { Footer } from "@/components/layout/Footer";
 
 const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
@@ -718,6 +719,7 @@ export default function Home() {
         </motion.div>
       </section>
     </div>
+    <Footer />
     </>
   );
 }

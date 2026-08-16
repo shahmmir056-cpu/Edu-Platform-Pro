@@ -16,7 +16,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const isSimFullscreen = useSimFullscreen();
 
   return (
-    <div className={cn("flex w-full flex-col", isAppPage ? "h-dvh overflow-hidden" : "min-h-[100dvh]")}>
+    <div className={cn("flex w-full flex-col", isAppPage || isDBooksPage ? "h-dvh overflow-hidden" : "min-h-[100dvh]")}>
       {!isDBooksPage && <div className="lg-bg" />}
 
       <a
@@ -37,7 +37,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       >
         {children}
       </main>
-      {!isAppPage && !isSimFullscreen && !isLabPage && <BottomNav />}
+      {!isAppPage && !isSimFullscreen && !isLabPage && !isDBooksPage && <BottomNav />}
     </div>
   );
 }
