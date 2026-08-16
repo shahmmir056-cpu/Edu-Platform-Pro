@@ -11,13 +11,14 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const isLabPage = location.startsWith("/virtual-lab");
   const isDebatePage = location.startsWith("/debate-mentor");
   const isLifeOsPage = location.startsWith("/life-os");
+  const isDGBooksPage = location.startsWith("/dg-books");
   const isAppPage = isLogicPage || isDebatePage || isLifeOsPage;
   const isSimFullscreen = useSimFullscreen();
 
   return (
     <div className={cn("flex w-full flex-col", isAppPage ? "h-dvh overflow-hidden" : "min-h-[100dvh]")}>
-      {/* Liquid Glass animated background */}
-      <div className="lg-bg" />
+      {/* Liquid Glass animated background — hidden on DG Books */}
+      {!isDGBooksPage && <div className="lg-bg" />}
 
       <a
         href="#main-content"
@@ -30,7 +31,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
         id="main-content"
         className={cn(
           "flex-1 min-w-0 max-w-full overflow-x-hidden relative z-10",
-          !isAppPage && !isLabPage && "pt-20 pb-20 lg:pb-0",
+          !isAppPage && !isLabPage && !isDGBooksPage && "pt-20 pb-20 lg:pb-0",
           isAppPage && "overflow-hidden",
           isLabPage && "pt-20"
         )}
