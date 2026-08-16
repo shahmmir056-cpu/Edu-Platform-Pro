@@ -11,6 +11,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const isLabPage = location.startsWith("/virtual-lab");
   const isDebatePage = location.startsWith("/debate-mentor");
   const isLifeOsPage = location.startsWith("/life-os");
+  const isDGBooksPage = location.startsWith("/dg-books");
   const isAppPage = isLogicPage || isDebatePage || isLifeOsPage;
   const isSimFullscreen = useSimFullscreen();
 
@@ -25,19 +26,19 @@ export function AppLayout({ children }: { children: ReactNode }) {
       >
         Skip to content
       </a>
-      {!isAppPage && !isSimFullscreen && <Header />}
+      {!isAppPage && !isSimFullscreen && !isDGBooksPage && <Header />}
       <main
         id="main-content"
         className={cn(
           "flex-1 min-w-0 max-w-full overflow-x-hidden relative z-10",
-          !isAppPage && !isLabPage && "pt-20 pb-20 lg:pb-0",
+          !isAppPage && !isLabPage && !isDGBooksPage && "pt-20 pb-20 lg:pb-0",
           isAppPage && "overflow-hidden",
           isLabPage && "pt-20"
         )}
       >
         {children}
       </main>
-      {!isAppPage && !isSimFullscreen && !isLabPage && <BottomNav />}
+      {!isAppPage && !isSimFullscreen && !isLabPage && !isDGBooksPage && <BottomNav />}
     </div>
   );
 }
