@@ -55,7 +55,7 @@ const NAV_LINKS = [
   { name: "Math Solver", path: "/math-solver", icon: BookOpen },
   { name: "Virtual Lab", path: "/virtual-lab", icon: FlaskConical },
   { name: "AI Debate", path: "/debate-mentor", icon: Brain },
-  { name: "DG Books", path: "/dg-books", icon: BookOpen },
+  { name: "D.books", path: "/d-books", icon: BookOpen },
   { name: "Logic", path: "/logic", icon: Cpu },
   { name: "Our Vision", path: "/about", icon: Info },
   { name: "Feedback", path: "/contact", icon: MessageCircle },

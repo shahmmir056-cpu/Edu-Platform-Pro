@@ -11,13 +11,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const isLabPage = location.startsWith("/virtual-lab");
   const isDebatePage = location.startsWith("/debate-mentor");
   const isLifeOsPage = location.startsWith("/life-os");
-  const isDGBooksPage = location.startsWith("/dg-books");
+  const isDBooksPage = location.startsWith("/d-books");
   const isAppPage = isLogicPage || isDebatePage || isLifeOsPage;
   const isSimFullscreen = useSimFullscreen();
 
   return (
     <div className={cn("flex w-full flex-col", isAppPage ? "h-dvh overflow-hidden" : "min-h-[100dvh]")}>
-      {!isDGBooksPage && <div className="lg-bg" />}
+      {!isDBooksPage && <div className="lg-bg" />}
 
       <a
         href="#main-content"
@@ -25,12 +25,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
       >
         Skip to content
       </a>
-      {!isAppPage && !isSimFullscreen && !isDGBooksPage && <Header />}
+      {!isAppPage && !isSimFullscreen && !isDBooksPage && <Header />}
       <main
         id="main-content"
         className={cn(
           "flex-1 min-w-0 max-w-full overflow-x-hidden relative z-10",
-          !isAppPage && !isLabPage && !isDGBooksPage && "pt-20 pb-20 lg:pb-0",
+          !isAppPage && !isLabPage && !isDBooksPage && "pt-20 pb-20 lg:pb-0",
           isAppPage && "overflow-hidden",
           isLabPage && "pt-20"
         )}

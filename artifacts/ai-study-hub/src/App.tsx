@@ -32,7 +32,7 @@ const SimulationsV2Page = lazy(() => import('@/features/simulations/SimulationsV
 const LifeOsPage = lazy(() => import('@/features/life-os/LifeOsPage'));
 const About = lazy(() => import('@/pages/About'));
 const Contact = lazy(() => import('@/pages/Contact'));
-const DGBooks = lazy(() => import('@/pages/DGBooks'));
+const DBooks = lazy(() => import('@/pages/DBooks'));
 const NotFound = lazy(() => import('@/pages/not-found'));
 
 const queryClient = new QueryClient({
@@ -70,7 +70,7 @@ function Router() {
               <Route path="/life-os" component={LifeOsPage} />
               <Route path="/about" component={About} />
               <Route path="/contact" component={Contact} />
-              <Route path="/dg-books" component={DGBooks} />
+              <Route path="/d-books" component={DBooks} />
               <Route component={NotFound} />
             </Switch>
           </Suspense>
