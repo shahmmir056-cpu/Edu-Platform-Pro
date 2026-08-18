@@ -295,7 +295,7 @@ function Hub({ state, setState }: { state: LifeOsState; setState: React.Dispatch
 
         <div className="space-y-12">
           <section>
-            <SectionTitle eyebrow="Step 1 — Plan" title="Your Study Timetable" desc="Create your daily timetable interactively, or let the AI plan your study blocks around school, meals and travel." />
+            <SectionTitle eyebrow="Step 1 — Plan" title="O'Clock" desc="Create your daily timetable interactively, or let the AI plan your study blocks around school, meals and travel." />
             <Timetable state={state} onStateChange={(s) => setState(s)} onRegenerate={refreshRoutine} />
           </section>
 

@@ -44,7 +44,7 @@ export function Timetable({ state, onStateChange, onRegenerate }: { state: LifeO
       <Glass strong glow className="lg-scroll-y">
         <PanelHeader
           icon={<CalendarClock size={15} />}
-          title="Today's Timetable"
+          title="O'Clock"
           right={
             <div className="flex items-center gap-2">
               <button
