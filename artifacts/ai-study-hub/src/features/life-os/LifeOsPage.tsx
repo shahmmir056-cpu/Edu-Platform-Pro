@@ -305,7 +305,7 @@ function Hub({ state, setState }: { state: LifeOsState; setState: React.Dispatch
           </section>
 
           <section>
-            <SectionTitle eyebrow="Step 3 — Report" title="Daily Report — PDF + Email" desc="Every evening, a professional PDF report of your day is generated automatically — covering your timetable, every tool you used, what you searched and the results you got." />
+            <SectionTitle eyebrow="Step 3 — Report" title="PDF + Email" desc="Every evening, a professional PDF report of your day is generated automatically — covering your timetable, every tool you used, what you searched and the results you got." />
             <EmailReport state={state} onStateChange={(s) => setState(s)} />
           </section>
         </div>

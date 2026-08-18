@@ -98,7 +98,7 @@ export function EmailReport({ state, onStateChange }: { state: LifeOsState; onSt
 
   return (
     <Glass strong glow className="lg-scroll-y">
-      <PanelHeader icon={<FileDown size={15} />} title="Daily Report — PDF + Email" right={
+      <PanelHeader icon={<FileDown size={15} />} title="PDF + Email" right={
         cfg.enabled && email ? (
           <span className="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full" style={{ background: "rgba(78,156,111,0.14)", border: `1px solid ${t.inputBorder}`, color: "#4E9C6F" }}>
             <Bell size={11} /> Auto at {cfg.time}
