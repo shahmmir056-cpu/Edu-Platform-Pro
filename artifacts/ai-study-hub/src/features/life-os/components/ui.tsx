@@ -399,25 +399,96 @@ function pad2(n: number): string {
 
 export function TimeInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const { t } = useTheme();
-  const [h = 0, m = 0] = String(value || "").split(":").map(Number);
-  const set = (hh: number, mm: number) => onChange(`${pad2(hh)}:${pad2(mm)}`);
-  const hours = Array.from({ length: 24 }, (_, i) => i);
-  const minutes = Array.from({ length: 60 }, (_, i) => i);
-  const selectCls = cn("cursor-pointer text-sm outline-none rounded-lg px-2 py-2 appearance-none", "flex-1 min-w-0");
-  const selectStyle = { background: t.inputBg, border: `1.5px solid ${t.inputBorder}`, color: t.text };
+  const [h24 = 0, m = 0] = String(value || "00:00").split(":").map(Number);
+  const period = h24 >= 12 ? "PM" : "AM";
+  const h12 = h24 % 12 || 12;
+
+  const [hourStr, setHourStr] = useState(String(h12));
+  const [minStr, setMinStr] = useState(pad2(m));
+  const [ampm, setAmpm] = useState<"AM" | "PM">(period);
+
+  const commit = (hh12: string, mm: string, ap: "AM" | "PM") => {
+    let num = parseInt(hh12, 10);
+    if (isNaN(num) || num < 1 || num > 12) num = 12;
+    let mins = parseInt(mm, 10);
+    if (isNaN(mins) || mins < 0 || mins > 59) mins = 0;
+    let h24 = num % 12;
+    if (ap === "PM") h24 += 12;
+    onChange(`${pad2(h24)}:${pad2(mins)}`);
+  };
+
+  const inputCls = cn("cursor-text text-sm outline-none rounded-lg px-2 py-2 text-center flex-1 min-w-0 font-mono");
+  const inputStyle = { background: t.inputBg, border: `1.5px solid ${t.inputBorder}`, color: t.text };
+  const btnCls = "px-3 py-2 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer select-none";
+
   return (
     <div className="flex items-stretch gap-1.5 w-full">
-      <select value={h} onChange={(e) => set(Number(e.target.value), m)} aria-label="Hour" className={selectCls} style={selectStyle}>
-        {hours.map((i) => (
-          <option key={i} value={i} style={{ background: t.bg, color: t.text }}>{pad2(i)}</option>
-        ))}
-      </select>
+      <input
+        type="text"
+        inputMode="numeric"
+        maxLength={2}
+        value={hourStr}
+        onChange={(e) => {
+          const v = e.target.value.replace(/\D/g, "");
+          setHourStr(v);
+          if (v.length === 1 && parseInt(v, 10) >= 1 && parseInt(v, 10) <= 9) {
+            commit(v, minStr, ampm);
+          }
+          if (v.length === 2) {
+            commit(v, minStr, ampm);
+          }
+        }}
+        onBlur={() => {
+          let num = parseInt(hourStr, 10);
+          if (isNaN(num) || num < 1 || num > 12) num = 12;
+          setHourStr(String(num));
+          commit(String(num), minStr, ampm);
+        }}
+        aria-label="Hour"
+        className={inputCls}
+        style={inputStyle}
+        placeholder="hh"
+      />
       <span className="flex items-center font-mono text-sm" style={{ color: t.muted }}>:</span>
-      <select value={m} onChange={(e) => set(h, Number(e.target.value))} aria-label="Minute" className={selectCls} style={selectStyle}>
-        {minutes.map((i) => (
-          <option key={i} value={i} style={{ background: t.bg, color: t.text }}>{pad2(i)}</option>
-        ))}
-      </select>
+      <input
+        type="text"
+        inputMode="numeric"
+        maxLength={2}
+        value={minStr}
+        onChange={(e) => {
+          const v = e.target.value.replace(/\D/g, "");
+          setMinStr(v);
+          if (v.length === 2) {
+            commit(hourStr, v, ampm);
+          }
+        }}
+        onBlur={() => {
+          let mins = parseInt(minStr, 10);
+          if (isNaN(mins) || mins < 0 || mins > 59) mins = 0;
+          setMinStr(pad2(mins));
+          commit(hourStr, pad2(mins), ampm);
+        }}
+        aria-label="Minute"
+        className={inputCls}
+        style={inputStyle}
+        placeholder="mm"
+      />
+      <button
+        type="button"
+        onClick={() => {
+          const next = ampm === "AM" ? "PM" : "AM";
+          setAmpm(next);
+          commit(hourStr, minStr, next);
+        }}
+        className={btnCls}
+        style={{
+          background: ampm === "PM" ? "rgba(255,159,76,0.18)" : t.inputBg,
+          border: `1.5px solid ${ampm === "PM" ? t.primary : t.inputBorder}`,
+          color: ampm === "PM" ? t.primary : t.muted,
+        }}
+      >
+        {ampm}
+      </button>
     </div>
   );
 }

@@ -113,9 +113,11 @@ export function Timetable({ state, onStateChange, onRegenerate }: { state: LifeO
 
 function fmtClock(min: number): string {
   const m = ((min % 1440) + 1440) % 1440;
-  const h = Math.floor(m / 60);
+  const h24 = Math.floor(m / 60);
   const mm = m % 60;
-  return `${String(h).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+  const ampm = h24 >= 12 ? "PM" : "AM";
+  const h12 = h24 % 12 || 12;
+  return `${h12}:${String(mm).padStart(2, "0")} ${ampm}`;
 }
 
 function PlanRow({ block, onMark }: { block: RoutineBlock; onMark: (id: string, status: "done" | "skipped") => void }) {
