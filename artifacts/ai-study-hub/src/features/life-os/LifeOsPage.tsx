@@ -16,6 +16,8 @@ import { Onboarding } from "./components/Onboarding";
 import { Timetable } from "./components/Timetable";
 import { UsageAnalysis } from "./components/UsageAnalysis";
 import { EmailReport } from "./components/EmailReport";
+import { CoachChat } from "./components/CoachChat";
+import { WeeklyEvolution } from "./components/WeeklyReport";
 
 function Logo() {
   const { t } = useTheme();
@@ -305,7 +307,17 @@ function Hub({ state, setState }: { state: LifeOsState; setState: React.Dispatch
           </section>
 
           <section>
-            <SectionTitle eyebrow="Step 3 — Report" title="PDF + Email" desc="Every evening, a professional PDF report of your day is generated automatically — covering your timetable, every tool you used, what you searched and the results you got." />
+            <SectionTitle eyebrow="Step 3 — Evolve" title="Weekly Evolution" desc="See your 7-day completion trends, focus scores, study time, and get AI insights on where to improve next week." />
+            <WeeklyEvolution state={state} onStateChange={(s) => setState(s)} />
+          </section>
+
+          <section>
+            <SectionTitle eyebrow="Step 4 — Mentor" title="AI Coach Chat" desc="Chat with Sage, your AI study mentor. Get strategic advice on focus, stress, exams, and your daily routine." />
+            <CoachChat state={state} onStateChange={(s) => setState(s)} />
+          </section>
+
+          <section>
+            <SectionTitle eyebrow="Step 5 — Report" title="PDF + Email" desc="Every evening, a professional PDF report of your day is generated automatically — covering your timetable, every tool you used, what you searched and the results you got." />
             <EmailReport state={state} onStateChange={(s) => setState(s)} />
           </section>
         </div>
