@@ -4,7 +4,7 @@ import { DEFAULT_GAMIFICATION, todayKey } from "./engine";
 const KEY = "neural-sync-life-os-v1";
 
 /** Default recipient for the daily report and study-time reminder emails. */
-export const DEFAULT_REPORT_EMAIL = "shahmmir056@gmail.com";
+export const DEFAULT_REPORT_EMAIL = "";
 
 export const DEFAULT_STATE: LifeOsState = {
   profile: null,

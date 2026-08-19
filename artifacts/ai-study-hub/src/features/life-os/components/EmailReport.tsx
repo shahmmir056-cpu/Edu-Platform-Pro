@@ -117,7 +117,7 @@ export function EmailReport({ state, onStateChange }: { state: LifeOsState; onSt
             type="email"
             value={cfg.email}
             onChange={(e) => update({ email: e.target.value })}
-            placeholder="shahmmir056@gmail.com"
+            placeholder="your-email@example.com"
             inputMode="email"
             className="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none transition-all focus:ring-2"
             style={{ background: t.inputBg, border: `1.5px solid ${t.inputBorder}`, color: t.text }}
