@@ -37,6 +37,7 @@ export const TOOLS: Record<string, ToolMeta> = {
   "/simulations": { name: "Biology Simulations", icon: "🧫", study: true, subjects: ["bio", "biology", "science"] },
   "/debate-mentor": { name: "AI Debate", icon: "🗣", study: true, subjects: ["english", "debate", "social"] },
   "/research": { name: "Deep Research", icon: "🔎", study: true, subjects: [] },
+  "/d-books": { name: "D.books", icon: "📚", study: true, subjects: [] },
   "/life-os": { name: "Life OS", icon: "🧭", study: false, subjects: [] },
   "/": { name: "Home", icon: "🏠", study: false, subjects: [] },
 };
