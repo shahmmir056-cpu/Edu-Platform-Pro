@@ -270,7 +270,7 @@ function Hub({ state, setState }: { state: LifeOsState; setState: React.Dispatch
       {/* content */}
       <main className="relative z-10 flex-1 overflow-y-auto lg-scroll max-w-5xl w-full mx-auto px-4 md:px-6 py-8">
         {/* greeting */}
-        <div className="mb-8">
+        <div className="mb-8 text-center">
           <div className="text-[10px] font-bold uppercase tracking-[0.22em]" style={{ color: t.muted }}>{greeting}</div>
           <h1 className="text-2xl md:text-3xl font-serif font-semibold tracking-tight mt-0.5" style={{ color: t.text }}>
             {profile.name}

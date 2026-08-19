@@ -159,19 +159,20 @@ function tint(hex: string, alpha: number): string {
 export function SectionTitle({ eyebrow, title, desc }: { eyebrow?: string; title: string; desc?: string }) {
   const { t } = useTheme();
   return (
-    <div className="mb-6">
+    <div className="mb-6 text-center">
       {eyebrow && (
-        <div className="flex items-center gap-2 mb-1.5">
+        <div className="flex items-center justify-center gap-2 mb-1.5">
           <span className="w-6 h-px" style={{ background: tint(t.primary, 0.5) }} />
           <span className="text-[11px] font-bold uppercase tracking-[0.2em]" style={{ color: t.primaryDeep }}>
             {eyebrow}
           </span>
+          <span className="w-6 h-px" style={{ background: tint(t.primary, 0.5) }} />
         </div>
       )}
       <h2
         className="text-2xl md:text-3xl font-serif font-medium tracking-tight mb-1"
         style={{
-          textAlign: "left",
+          textAlign: "center",
           background: `linear-gradient(120deg, ${t.primaryDeep}, ${t.primary})`,
           WebkitBackgroundClip: "text",
           backgroundClip: "text",
@@ -181,7 +182,7 @@ export function SectionTitle({ eyebrow, title, desc }: { eyebrow?: string; title
         {title}
       </h2>
       {desc && (
-        <p className="text-sm max-w-2xl" style={{ color: t.muted }}>
+        <p className="text-sm max-w-2xl mx-auto" style={{ color: t.muted }}>
           {desc}
         </p>
       )}
