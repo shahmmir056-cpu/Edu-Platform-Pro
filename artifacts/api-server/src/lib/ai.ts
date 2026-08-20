@@ -73,6 +73,23 @@ function sleep(ms: number): Promise<void> {
 
 type ChatMessage = { role: string; content: string };
 
+function tryParseJson(text: string): any | null {
+  // 1. Try direct parse
+  try { return JSON.parse(text); } catch {}
+  // 2. Strip markdown code fences ```json ... ``` or ``` ... ```
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fenced) {
+    try { return JSON.parse(fenced[1].trim()); } catch {}
+  }
+  // 3. Find first { to last }
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start !== -1 && end > start) {
+    try { return JSON.parse(text.slice(start, end + 1)); } catch {}
+  }
+  return null;
+}
+
 export async function generateJson<T>(params: {
   system: string;
   user: string;
@@ -120,18 +137,18 @@ export async function generateJson<T>(params: {
 
       const content: string = data.choices?.[0]?.message?.content ?? "";
 
-      try {
-        return JSON.parse(content) as T;
-      } catch {
-        logger.warn({ attempt }, "Non-JSON response, asking model to retry");
-        messages.push({ role: "assistant", content });
-        messages.push({
-          role: "user",
-          content:
-            "Your reply was not valid JSON. Reply with ONLY a single valid JSON object. " +
-            "No markdown fences, no commentary. Every string value must use \\n for newlines.",
-        });
-      }
+      const parsed = tryParseJson(content);
+      if (parsed !== null) return parsed as T;
+
+      logger.warn({ attempt, snippet: content.slice(0, 200) }, "Non-JSON response, asking model to retry");
+      messages.push({ role: "assistant", content });
+      messages.push({
+        role: "user",
+        content:
+          "Your reply was not valid JSON. Reply with ONLY a single valid JSON object. " +
+          "No markdown fences, no commentary, no explanation. Every string value must use \\n for newlines. " +
+          "Start your reply with { and end with }.",
+      });
     } catch (err) {
       lastErr = err;
       logger.warn({ attempt, err }, "Groq request failed");
