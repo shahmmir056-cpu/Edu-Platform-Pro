@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useLocation } from "wouter";
 import { GraduationCap, Home, CalendarClock, FlaskConical, Brain, BookOpen, Cpu, Info, MessageCircle, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -15,29 +15,90 @@ const NAV_LINKS = [
   { name: "Feedback", path: "/contact", icon: MessageCircle },
 ];
 
+const STBB_ORIGIN = "https://stbb-live-production.up.railway.app";
+
 export default function DBooks() {
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [showNav, setShowNav] = useState(true);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const hasNavigatedRef = useRef(false);
 
   useEffect(() => {
     setMobileOpen(false);
   }, [location]);
 
+  // Listen for postMessage from the STBB iframe to detect navigation
+  useEffect(() => {
+    const onMessage = (e: MessageEvent) => {
+      if (e.origin !== STBB_ORIGIN) return;
+      const data = e.data;
+      if (typeof data === "string") {
+        try {
+          const parsed = JSON.parse(data);
+          if (parsed.type === "navigate" || parsed.type === "route-change" || parsed.type === "page-change") {
+            const path = parsed.path ?? parsed.url ?? "";
+            if (path === "/" || path === "") {
+              setShowNav(true);
+              hasNavigatedRef.current = false;
+            } else {
+              setShowNav(false);
+              hasNavigatedRef.current = true;
+            }
+          }
+        } catch {
+          // plain string message — treat as navigation indicator
+          if (data === "/" || data === "home" || data === "landing") {
+            setShowNav(true);
+            hasNavigatedRef.current = false;
+          } else {
+            setShowNav(false);
+            hasNavigatedRef.current = true;
+          }
+        }
+      }
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, []);
+
+  // Fallback: detect iframe clicks to hide nav when no postMessage support.
+  // The iframe will fire focus/click events we can observe.
+  const onIframeClick = useCallback(() => {
+    if (!hasNavigatedRef.current) {
+      // First click likely navigates away from landing
+      setShowNav(false);
+      hasNavigatedRef.current = true;
+    }
+  }, []);
+
+  // Allow toggling nav back by double-tapping the Neural Sync logo on mobile,
+  // or via a small transparent button in the corner on desktop.
+  const toggleNav = useCallback(() => {
+    setShowNav((v) => !v);
+  }, []);
+
   return (
-    <div className="relative w-full h-dvh overflow-hidden">
+    <div className="relative w-full h-dvh overflow-hidden" style={{ padding: 0, margin: 0 }}>
       <iframe
+        ref={iframeRef}
         src="https://stbb-live-production.up.railway.app"
         title="D.books"
         className="block w-full h-full border-0 bg-white"
+        style={{ margin: 0, padding: 0, width: "100%", height: "100%" }}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        onClick={onIframeClick}
       />
 
       {/* ═══ DESKTOP: Floating capsule nav ═══ */}
       <header
-        className="fixed top-4 left-1/2 z-50 hidden lg:flex items-center gap-0.5 water-nav-bar"
+        className={cn(
+          "fixed top-4 left-1/2 z-50 hidden lg:flex items-center gap-0.5 water-nav-bar transition-all duration-500",
+          showNav ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-4 pointer-events-none"
+        )}
         style={{
           position: "fixed",
-          transform: "translateX(-50%)",
+          transform: showNav ? "translateX(-50%)" : "translateX(-50%) translateY(-16px)",
           width: "min(94vw, 1100px)",
           padding: "7px 12px",
           borderRadius: "999px",
@@ -79,7 +140,10 @@ export default function DBooks() {
 
       {/* ═══ MOBILE: Floating capsule bar + hamburger ═══ */}
       <header
-        className="fixed top-4 left-2 right-8 z-50 lg:hidden flex items-center justify-between water-nav-bar"
+        className={cn(
+          "fixed top-4 left-2 right-8 z-50 lg:hidden flex items-center justify-between water-nav-bar transition-all duration-500",
+          showNav ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-4 pointer-events-none"
+        )}
         style={{
           position: "fixed",
           padding: "8px 10px 8px 12px",
@@ -158,6 +222,29 @@ export default function DBooks() {
           </SheetContent>
         </Sheet>
       </header>
+
+      {/* ═══ Toggle button — shows when nav is hidden so user can bring it back ═══ */}
+      {!showNav && (
+        <button
+          onClick={toggleNav}
+          className={cn(
+            "fixed z-50 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110",
+            "lg:top-4 lg:right-4 top-4 right-4"
+          )}
+          style={{
+            position: "fixed",
+            background: "rgba(255,255,255,0.85)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            border: "1.5px solid rgba(255,159,76,0.3)",
+            boxShadow: "0 2px 12px rgba(255,159,76,0.15)",
+            color: "#FF9F4C",
+          }}
+          aria-label="Show navigation"
+        >
+          <GraduationCap size={18} />
+        </button>
+      )}
     </div>
   );
 }
