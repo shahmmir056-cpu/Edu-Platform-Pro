@@ -10,7 +10,7 @@ export class AiNotConfiguredError extends Error {
 
 const GROQ_HOST = "api.groq.com";
 const GROQ_PATH = "/openai/v1/chat/completions";
-const GROQ_MODEL = "qwen/qwen3.6-27b";
+const GROQ_MODEL = "openai/gpt-oss-120b";
 const MAX_RETRIES = 3;
 
 function httpsPost(
@@ -74,18 +74,20 @@ function sleep(ms: number): Promise<void> {
 type ChatMessage = { role: string; content: string };
 
 function tryParseJson(text: string): any | null {
+  // Strip <think> ...  tags (some models emit thinking in content)
+  let cleaned = text.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
   // 1. Try direct parse
-  try { return JSON.parse(text); } catch {}
+  try { return JSON.parse(cleaned); } catch {}
   // 2. Strip markdown code fences ```json ... ``` or ``` ... ```
-  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const fenced = cleaned.match(/```(?:json)?\s*([\s\S]*?)```/);
   if (fenced) {
     try { return JSON.parse(fenced[1].trim()); } catch {}
   }
   // 3. Find first { to last }
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
+  const start = cleaned.indexOf("{");
+  const end = cleaned.lastIndexOf("}");
   if (start !== -1 && end > start) {
-    try { return JSON.parse(text.slice(start, end + 1)); } catch {}
+    try { return JSON.parse(cleaned.slice(start, end + 1)); } catch {}
   }
   return null;
 }

@@ -5,7 +5,7 @@ const router = Router();
 
 const GROQ_HOST = "api.groq.com";
 const GROQ_PATH = "/openai/v1/chat/completions";
-const GROQ_MODEL = "qwen/qwen3.6-27b";
+const GROQ_MODEL = "openai/gpt-oss-120b";
 
 function httpsPost(body: string): Promise<any> {
   return new Promise((resolve, reject) => {
@@ -131,7 +131,7 @@ router.post("/debate-mentor/chat", async (req, res) => {
 
     const body = JSON.stringify({
       model: GROQ_MODEL,
-      max_tokens: 500,
+      max_tokens: 4000,
       messages: allMessages,
       temperature: 0.8,
       top_p: 0.9,
