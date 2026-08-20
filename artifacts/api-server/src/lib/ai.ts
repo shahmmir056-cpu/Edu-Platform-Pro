@@ -10,7 +10,7 @@ export class AiNotConfiguredError extends Error {
 
 const GROQ_HOST = "api.groq.com";
 const GROQ_PATH = "/openai/v1/chat/completions";
-const GROQ_MODEL = "openai/gpt-oss-120b";
+const GROQ_MODEL = "qwen/qwen3.6-27b";
 const MAX_RETRIES = 3;
 
 function httpsPost(
