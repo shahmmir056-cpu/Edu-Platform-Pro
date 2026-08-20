@@ -63,14 +63,11 @@ router.post(
   aiRoute(async (req, res) => {
     const input = GenerateEssayBody.parse(req.body);
     const result = await generateJson<unknown>({
-      maxTokens: Math.min(4000, Math.round(input.wordCount * 3) + 800),
+      maxTokens: 4000,
       system:
-        "You are an excellent student writer. Write polished, well-structured essays that a teacher would " +
-        "consider genuinely strong work -- clear thesis, logical flow, varied sentence structure, no filler. " +
-        'Respond ONLY with a single valid JSON object: {"title": string, "outline": string[], "body": string, "wordCount": number}. ' +
-        "The body must be a properly quoted JSON string containing the full essay as plain text, with paragraphs separated by \\n\\n " +
-        "escape sequences (no literal unescaped line breaks, no markdown headers). " +
-        "wordCount must be the actual word count of body.",
+        "You are an excellent student writer. Write a clear, well-structured essay. " +
+        'Return ONLY a JSON object: {"title": string, "outline": string[], "body": string, "wordCount": number}. ' +
+        "body is the full essay as plain text with paragraphs separated by \\n\\n. wordCount is the actual word count.",
       user: `Topic: "${input.topic}"\nEssay type: ${input.essayType}\nTarget length: ${input.wordCount} words${input.tone ? `\nTone: ${input.tone}` : ""}\nProvide a 4-7 point outline, then the full essay body matching the target length as closely as possible.`,
     });
     res.json(GenerateEssayResponse.parse(result));
