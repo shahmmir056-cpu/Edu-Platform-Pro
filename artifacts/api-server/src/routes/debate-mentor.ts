@@ -131,7 +131,7 @@ router.post("/debate-mentor/chat", async (req, res) => {
 
     const body = JSON.stringify({
       model: GROQ_MODEL,
-      max_tokens: 4000,
+      max_tokens: 2000,
       messages: allMessages,
       temperature: 0.8,
       top_p: 0.9,

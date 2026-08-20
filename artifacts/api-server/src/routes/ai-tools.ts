@@ -44,7 +44,7 @@ router.post(
     const depth = input.depth ?? "standard";
     const sectionCount = depth === "overview" ? 3 : depth === "deep" ? 6 : 4;
     const result = await generateJson<unknown>({
-      maxTokens: depth === "deep" ? 16000 : 10000,
+      maxTokens: depth === "deep" ? 6000 : 4000,
       system:
         "You are a meticulous research assistant helping a student build a well-sourced study report. " +
         "Write in clear, confident prose, organized into sections. You cannot browse the web, so synthesize " +
@@ -63,7 +63,7 @@ router.post(
   aiRoute(async (req, res) => {
     const input = GenerateEssayBody.parse(req.body);
     const result = await generateJson<unknown>({
-      maxTokens: Math.min(16000, Math.round(input.wordCount * 4) + 2000),
+      maxTokens: Math.min(4000, Math.round(input.wordCount * 3) + 800),
       system:
         "You are an excellent student writer. Write polished, well-structured essays that a teacher would " +
         "consider genuinely strong work -- clear thesis, logical flow, varied sentence structure, no filler. " +
@@ -82,7 +82,7 @@ router.post(
   aiRoute(async (req, res) => {
     const input = GenerateQuizBody.parse(req.body);
     const result = await generateJson<unknown>({
-      maxTokens: 8000,
+      maxTokens: 4000,
       system:
         "You are a subject-matter expert writing a fair, well-calibrated multiple-choice quiz for a student. " +
         "Each question must have exactly 4 options, exactly one correct, with plausible distractors and a short " +
@@ -114,7 +114,7 @@ router.post(
   aiRoute(async (req, res) => {
     const input = GenerateStudyNotesBody.parse(req.body);
     const result = await generateJson<unknown>({
-      maxTokens: 8000,
+      maxTokens: 4000,
       system:
         "You create clear, well-organized study notes a student could use to review for an exam. " +
         'Respond ONLY with a single valid JSON object: {"title": string, "sections": [{"heading": string, "bullets": string[]}], ' +
@@ -130,7 +130,7 @@ router.post(
   aiRoute(async (req, res) => {
     const input = GeneratePresentationBody.parse(req.body);
     const result = await generateJson<unknown>({
-      maxTokens: 8000,
+      maxTokens: 4000,
       system:
         "You are an expert presentation designer. Create a slide-by-slide outline: concise on-slide bullets " +
         "(never full paragraphs) plus detailed speaker notes for what to actually say. " +
@@ -146,7 +146,7 @@ router.post(
   aiRoute(async (req, res) => {
     const input = SolveMathBody.parse(req.body);
     const result = await generateJson<unknown>({
-      maxTokens: 8000,
+      maxTokens: 4000,
       system:
         "You are a patient, precise math tutor. Solve the given problem by breaking it into small, clearly " +
         "explained steps a student can follow -- never skip algebraic manipulations. Use plain text for math " +
@@ -172,7 +172,7 @@ router.post(
       "fix-grammar": "Fix all grammar, spelling, and punctuation errors without changing the meaning or style.",
     };
     const result = await generateJson<unknown>({
-      maxTokens: 8000,
+      maxTokens: 4000,
       system:
         `You are a precise text-editing assistant. ${modeInstructions[input.mode]} ` +
         'Respond ONLY with a single valid JSON object: {"result": string} containing the transformed text, nothing else.',
