@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  GraduationCap, LogOut, Sun, Moon, Home, Clock, Flame, Bot, BookOpen, ExternalLink,
+  GraduationCap, LogOut, Home, Clock, Flame, Bot, BookOpen, ExternalLink,
 } from "lucide-react";
 import type { LifeOsState } from "./types";
 import { ACTIVITY_KEY, STATE_KEY, freshState, loadState, saveState } from "./storage";
@@ -40,7 +40,7 @@ function Logo() {
 }
 
 function Hub({ state, setState }: { state: LifeOsState; setState: React.Dispatch<React.SetStateAction<LifeOsState>> }) {
-  const { t, theme, toggleTheme } = useTheme();
+  const { t, theme } = useTheme();
   const profile = state.profile!;
   const stateRef = useRef(state);
   stateRef.current = state;
@@ -239,14 +239,6 @@ function Hub({ state, setState }: { state: LifeOsState; setState: React.Dispatch
           >
             <Flame size={13} /> {state.gamification.streak}d streak
           </span>
-          <button
-            onClick={toggleTheme}
-            className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-105"
-            style={{ background: t.inputBg, border: `1px solid ${t.inputBorder}`, color: t.text }}
-            aria-label="Toggle theme"
-          >
-            {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-          </button>
           <Link
             href="/"
             className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-105"
