@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { motion, useMotionValue, useTransform, useScroll, useSpring } from "framer-motion";
 import {
   BookOpen, PenTool, HelpCircle, Layers, ClipboardList,
-  ArrowRight, Sigma, FlaskConical, Shield, Check, Sparkles,
+  ArrowRight, Sigma, FlaskConical, Shield,
   Gamepad2, ClipboardCheck, Zap, Brain, Eye, Lightbulb, Cpu, Rocket,
   ChevronLeft, ChevronRight, Star, Quote, MessageSquareHeart, CalendarClock,
 } from "lucide-react";
@@ -404,21 +404,7 @@ export default function Home() {
               </motion.div>
 
               {/* Trust row */}
-              <motion.div className="flex flex-wrap items-center justify-center gap-6 mt-10 pt-6"
-                style={{ borderTop: "1px solid rgba(45,45,45,0.06)" }}
-                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 2.8 }}>
-                {[
-                  { icon: Shield, text: "100% Free", color: C.orange },
-                  { icon: Sparkles, text: "AI-Powered", color: C.sky },
-                  { icon: Check, text: "No Sign-up", color: C.cyan },
-                ].map((item, i) => (
-                  <motion.div key={item.text} className="flex items-center gap-2"
-                    initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 3.0 + i * 0.12 }}>
-                    <item.icon size={12} style={{ color: item.color }} />
-                    <span className="text-[10px] font-medium tracking-wide uppercase" style={{ color: "#9A9A9A" }}>{item.text}</span>
-                  </motion.div>
-                ))}
-              </motion.div>
+
             </motion.div>
 
 
