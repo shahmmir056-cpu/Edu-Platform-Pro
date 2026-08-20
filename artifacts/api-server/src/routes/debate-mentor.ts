@@ -162,7 +162,6 @@ router.post("/debate-mentor/score", async (req, res) => {
       model: GROQ_MODEL,
       max_tokens: 800,
       messages: [{ role: "user", content: scorePrompt }],
-      response_format: { type: "json_object" },
       temperature: 0.3,
     });
 

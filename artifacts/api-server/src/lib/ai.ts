@@ -94,7 +94,6 @@ export async function generateJson<T>(params: {
       model: GROQ_MODEL,
       max_tokens: maxTokens,
       messages,
-      response_format: { type: "json_object" },
     });
 
     try {
