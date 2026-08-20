@@ -136,6 +136,11 @@ export async function generateJson<T>(params: {
       }
 
       const content: string = data.choices?.[0]?.message?.content ?? "";
+      const finishReason: string = data.choices?.[0]?.finish_reason ?? "unknown";
+
+      if (!content) {
+        logger.warn({ attempt, finishReason, fullResponse: JSON.stringify(data).slice(0, 500) }, "Empty content from Groq");
+      }
 
       const parsed = tryParseJson(content);
       if (parsed !== null) return parsed as T;
