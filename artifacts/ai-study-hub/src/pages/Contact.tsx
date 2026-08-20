@@ -46,7 +46,7 @@ export default function Feedback() {
 
     setSending(true);
     try {
-      const API_BASE = import.meta.env.VITE_API_URL || "https://acceptable-charm-production-2ace.up.railway.app";
+      const API_BASE = import.meta.env.VITE_API_URL || "";
       const res = await fetch(`${API_BASE}/api/feedback`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

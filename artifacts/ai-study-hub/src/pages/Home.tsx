@@ -50,7 +50,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   general: "General",
 };
 
-const API_BASE = import.meta.env.VITE_API_URL || "https://acceptable-charm-production-2ace.up.railway.app";
+const API_BASE = import.meta.env.VITE_API_URL || "";
 
 function FeedbackSection() {
   const [entries, setEntries] = useState<FeedbackEntry[]>([]);

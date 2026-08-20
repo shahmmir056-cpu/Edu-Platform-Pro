@@ -101,7 +101,7 @@ const MOBILE_CATEGORY_LABELS: Record<string, string> = {
   general: "General",
 };
 
-const MOBILE_API_BASE = import.meta.env.VITE_API_URL || "https://acceptable-charm-production-2ace.up.railway.app";
+const MOBILE_API_BASE = import.meta.env.VITE_API_URL || "";
 
 function MobileFeedbackSection() {
   const [entries, setEntries] = useState<FeedbackEntry[]>([]);
