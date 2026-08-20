@@ -35,14 +35,30 @@ function isGibberish(text: string): boolean {
   const alphaOnly = trimmed.replace(/[^a-zA-Z]/g, "");
   if (alphaOnly.length < 2) return true;
   const alphaRatio = alphaOnly.length / trimmed.length;
-  if (alphaRatio < 0.5) return true;
+  if (alphaRatio < 0.4) return true;
   const lower = alphaOnly.toLowerCase();
   const vowels = lower.replace(/[^aeiou]/g, "").length;
   const vowelRatio = vowels / alphaOnly.length;
-  if (vowelRatio < 0.05 || vowelRatio > 0.85) return true;
+  if (vowelRatio < 0.05) return true;
+  if (trimmed.length <= 4 && vowelRatio > 0.85) {
+    const consonants = alphaOnly.replace(/[aeiouAEIOU]/g, "");
+    if (consonants.length === 0) return false;
+  }
+  if (vowelRatio > 0.95) return true;
+  const consonantClusters = lower.match(/[^aeiou]{5,}/g);
+  if (consonantClusters && consonantClusters.length > 0) return true;
   const words = trimmed.split(/\s+/);
   const longWords = words.filter((w) => w.replace(/[^a-zA-Z]/g, "").length >= 4);
-  if (words.length >= 2 && longWords.length === 0) return true;
+  if (words.length >= 3 && longWords.length === 0) return true;
+  const keyboardRows = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
+  const lowerTrimmed = trimmed.toLowerCase().replace(/[^a-z]/g, "");
+  if (lowerTrimmed.length >= 4) {
+    for (const row of keyboardRows) {
+      for (let i = 0; i <= row.length - 4; i++) {
+        if (lowerTrimmed.includes(row.substring(i, i + 4))) return true;
+      }
+    }
+  }
   return false;
 }
 
