@@ -260,45 +260,55 @@ export default function Home() {
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none z-0"
           style={{ background: "radial-gradient(circle, rgba(255,159,76,0.08) 0%, rgba(255,212,168,0.04) 40%, transparent 70%)" }} />
 
+        {/* Pulsing glow ring */}
+        <motion.div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full pointer-events-none z-0"
+          style={{ border: "1px solid rgba(255,159,76,0.06)" }}
+          animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.15, 0.4] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} />
+        <motion.div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full pointer-events-none z-0"
+          style={{ border: "1px solid rgba(255,159,76,0.04)" }}
+          animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.08, 0.3] }}
+          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }} />
+
         {/* Subtle grid pattern */}
         <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.03]"
           style={{ backgroundImage: "linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
 
-        {/* Decorative dots — top-left cluster */}
-        <div className="absolute top-12 left-8 z-[1] w-[60px] h-[120px] opacity-30 pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
-        <div className="absolute top-16 left-[88px] z-[1] w-[40px] h-[80px] opacity-20 pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "16px 16px" }} />
-        <div className="absolute top-32 left-6 z-[1] w-[30px] h-[60px] opacity-15 pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "10px 10px" }} />
+        {/* Floating glass feature cards — left */}
+        {[
+          { label: "AI Tutor", icon: Brain, top: "18%", left: "6%", delay: 2.6 },
+          { label: "Virtual Labs", icon: FlaskConical, top: "55%", left: "3%", delay: 3.0 },
+        ].map(({ label, icon: Icon, top, left, delay }, i) => (
+          <motion.div key={i}
+            className="absolute z-[2] hidden lg:flex items-center gap-2.5 px-4 py-2.5 rounded-xl pointer-events-none"
+            style={{ top, left, background: "rgba(255,255,255,0.55)", backdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.7)", boxShadow: "0 8px 32px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.6)" }}
+            initial={{ opacity: 0, x: -20, y: 10 }} animate={{ opacity: 1, x: 0, y: [0, -6, 0] }}
+            transition={{ opacity: { duration: 0.6, delay }, y: { duration: 4 + i, repeat: Infinity, ease: "easeInOut", delay } }}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+              style={{ background: "rgba(255,159,76,0.1)", color: "#FF9F4C" }}>
+              <Icon size={15} />
+            </div>
+            <span className="text-[11px] font-bold tracking-wide" style={{ color: "#5A5A5A" }}>{label}</span>
+          </motion.div>
+        ))}
 
-        {/* Decorative dots — top-right cluster */}
-        <div className="absolute top-16 right-8 z-[1] w-[60px] h-[120px] opacity-30 pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
-        <div className="absolute top-8 right-[88px] z-[1] w-[40px] h-[80px] opacity-20 pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "16px 16px" }} />
-        <div className="absolute top-24 right-6 z-[1] w-[50px] h-[50px] opacity-15 pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "10px 10px" }} />
-
-        {/* Decorative dots — middle-left */}
-        <div className="absolute top-1/2 left-10 z-[1] w-[70px] h-[90px] opacity-[0.08] pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(circle, #000 1.5px, transparent 1.5px)", backgroundSize: "20px 20px" }} />
-
-        {/* Decorative dots — middle-right */}
-        <div className="absolute top-[45%] right-12 z-[1] w-[80px] h-[100px] opacity-[0.08] pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(circle, #000 1.5px, transparent 1.5px)", backgroundSize: "22px 22px" }} />
-
-        {/* Decorative dots — bottom-left */}
-        <div className="absolute bottom-20 left-12 z-[1] w-[50px] h-[80px] opacity-20 pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "14px 14px" }} />
-        <div className="absolute bottom-32 left-[100px] z-[1] w-[35px] h-[50px] opacity-15 pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "11px 11px" }} />
-
-        {/* Decorative dots — bottom-right */}
-        <div className="absolute bottom-24 right-10 z-[1] w-[55px] h-[90px] opacity-20 pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)", backgroundSize: "14px 14px" }} />
-        <div className="absolute bottom-36 right-[110px] z-[1] w-[40px] h-[60px] opacity-15 pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
+        {/* Floating glass feature cards — right */}
+        {[
+          { label: "Smart Notes", icon: PenTool, top: "22%", right: "5%", delay: 2.8 },
+          { label: "Exam Prep", icon: ClipboardCheck, top: "60%", right: "3%", delay: 3.2 },
+        ].map(({ label, icon: Icon, top, right, delay }, i) => (
+          <motion.div key={i}
+            className="absolute z-[2] hidden lg:flex items-center gap-2.5 px-4 py-2.5 rounded-xl pointer-events-none"
+            style={{ top, right, background: "rgba(255,255,255,0.55)", backdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.7)", boxShadow: "0 8px 32px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.6)" }}
+            initial={{ opacity: 0, x: 20, y: 10 }} animate={{ opacity: 1, x: 0, y: [0, -6, 0] }}
+            transition={{ opacity: { duration: 0.6, delay }, y: { duration: 4.5 + i, repeat: Infinity, ease: "easeInOut", delay } }}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+              style={{ background: "rgba(255,159,76,0.1)", color: "#FF9F4C" }}>
+              <Icon size={15} />
+            </div>
+            <span className="text-[11px] font-bold tracking-wide" style={{ color: "#5A5A5A" }}>{label}</span>
+          </motion.div>
+        ))}
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 flex-1 flex items-center">
           <div className="w-full max-w-3xl mx-auto pt-24 pb-16 text-center">
@@ -403,10 +413,30 @@ export default function Home() {
                 </Link>
               </motion.div>
 
-              {/* Trust row */}
+              {/* Animated stat counters */}
+              <motion.div className="flex flex-wrap items-center justify-center gap-8 mt-12"
+                initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 2.6 }}>
+                {[
+                  { value: "50+", label: "AI Tools", icon: Zap },
+                  { value: "100%", label: "Free Forever", icon: Shield },
+                  { value: "0", label: "Sign-ups", icon: Brain },
+                ].map(({ value, label, icon: Icon }, i) => (
+                  <motion.div key={label} className="flex items-center gap-3"
+                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 2.8 + i * 0.12 }}>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                      style={{ background: "rgba(255,159,76,0.08)", border: "1px solid rgba(255,159,76,0.1)" }}>
+                      <Icon size={16} style={{ color: "#FF9F4C" }} />
+                    </div>
+                    <div>
+                      <div className="text-lg font-serif font-bold leading-none" style={{ color: "#1A1A1A" }}>{value}</div>
+                      <div className="text-[10px] font-semibold uppercase tracking-wider mt-0.5" style={{ color: "#9A9A9A" }}>{label}</div>
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
 
             </motion.div>
-
 
           </div>
         </div>
