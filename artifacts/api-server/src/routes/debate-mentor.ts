@@ -5,7 +5,7 @@ const router = Router();
 
 const GROQ_HOST = "api.groq.com";
 const GROQ_PATH = "/openai/v1/chat/completions";
-const GROQ_MODEL = "llama-3.3-70b-versatile";
+const GROQ_MODEL = "openai/gpt-oss-120b";
 
 function httpsPost(body: string): Promise<any> {
   return new Promise((resolve, reject) => {
