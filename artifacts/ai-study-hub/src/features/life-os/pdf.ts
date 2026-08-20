@@ -110,7 +110,7 @@ function drawFooter(doc: jsPDF): void {
     doc.setFontSize(7.5);
     doc.setTextColor(...MUTED);
     doc.text(
-      `StudyOS Daily Progress Report — generated ${new Date().toLocaleString()}`,
+      `StudyOS — generated ${new Date().toLocaleString()}`,
       M,
       292
     );
@@ -136,9 +136,6 @@ export function downloadDailyReportPdf(state: LifeOsState): void {
   doc.setFontSize(15);
   doc.setTextColor(255, 255, 255);
   doc.text("STUDYOS", M, 13);
-  doc.setFontSize(9.5);
-  doc.setFont("helvetica", "normal");
-  doc.text("Daily Progress Report", 34, 13);
   doc.setFontSize(8);
   doc.setTextColor(255, 235, 214);
   doc.text(dateLabel(), W + M, 13, { align: "right" });
