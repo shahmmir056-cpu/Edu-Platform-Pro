@@ -22,6 +22,36 @@ import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 
+class InputValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "InputValidationError";
+  }
+}
+
+function isGibberish(text: string): boolean {
+  const trimmed = text.trim();
+  if (trimmed.length < 2) return true;
+  const alphaOnly = trimmed.replace(/[^a-zA-Z]/g, "");
+  if (alphaOnly.length < 2) return true;
+  const alphaRatio = alphaOnly.length / trimmed.length;
+  if (alphaRatio < 0.5) return true;
+  const lower = alphaOnly.toLowerCase();
+  const vowels = lower.replace(/[^aeiou]/g, "").length;
+  const vowelRatio = vowels / alphaOnly.length;
+  if (vowelRatio < 0.05 || vowelRatio > 0.85) return true;
+  const words = trimmed.split(/\s+/);
+  const longWords = words.filter((w) => w.replace(/[^a-zA-Z]/g, "").length >= 4);
+  if (words.length >= 2 && longWords.length === 0) return true;
+  return false;
+}
+
+function validateTextInput(value: string, fieldName: string): void {
+  if (isGibberish(value)) {
+    throw new InputValidationError(`Please enter a valid ${fieldName}. Your input appears to be gibberish or random characters.`);
+  }
+}
+
 function aiRoute(handler: (req: Request, res: Response) => Promise<void>) {
   return async (req: Request, res: Response) => {
     try {
@@ -29,6 +59,10 @@ function aiRoute(handler: (req: Request, res: Response) => Promise<void>) {
     } catch (err) {
       if (err instanceof AiNotConfiguredError) {
         res.status(503).json({ error: err.message, code: "AI_NOT_CONFIGURED" });
+        return;
+      }
+      if (err instanceof InputValidationError) {
+        res.status(400).json({ error: err.message, code: "INVALID_INPUT" });
         return;
       }
       logger.error({ err }, "AI tool request failed");
@@ -41,6 +75,7 @@ router.post(
   "/ai-tools/research",
   aiRoute(async (req, res) => {
     const input = GenerateResearchBody.parse(req.body);
+    validateTextInput(input.topic, "research topic");
     const depth = input.depth ?? "standard";
     const sectionCount = depth === "overview" ? 3 : depth === "deep" ? 6 : 4;
     const result = await generateJson<unknown>({
@@ -62,6 +97,7 @@ router.post(
   "/ai-tools/essay",
   aiRoute(async (req, res) => {
     const input = GenerateEssayBody.parse(req.body);
+    validateTextInput(input.topic, "essay topic");
     const result = await generateJson<unknown>({
       maxTokens: 4000,
       system:
@@ -78,6 +114,7 @@ router.post(
   "/ai-tools/quiz",
   aiRoute(async (req, res) => {
     const input = GenerateQuizBody.parse(req.body);
+    validateTextInput(input.topic, "quiz topic");
     const result = await generateJson<unknown>({
       maxTokens: 4000,
       system:
@@ -95,6 +132,7 @@ router.post(
   "/ai-tools/flashcards",
   aiRoute(async (req, res) => {
     const input = GenerateFlashcardsBody.parse(req.body);
+    validateTextInput(input.topic, "flashcard topic");
     const result = await generateJson<unknown>({
       maxTokens: 6000,
       system:
@@ -110,6 +148,7 @@ router.post(
   "/ai-tools/study-notes",
   aiRoute(async (req, res) => {
     const input = GenerateStudyNotesBody.parse(req.body);
+    validateTextInput(input.topic, "study notes topic");
     const result = await generateJson<unknown>({
       maxTokens: 4000,
       system:
@@ -126,6 +165,7 @@ router.post(
   "/ai-tools/presentation",
   aiRoute(async (req, res) => {
     const input = GeneratePresentationBody.parse(req.body);
+    validateTextInput(input.topic, "presentation topic");
     const result = await generateJson<unknown>({
       maxTokens: 4000,
       system:
@@ -142,6 +182,7 @@ router.post(
   "/ai-tools/math-solver",
   aiRoute(async (req, res) => {
     const input = SolveMathBody.parse(req.body);
+    validateTextInput(input.problem, "math problem");
     const result = await generateJson<unknown>({
       maxTokens: 4000,
       system:
@@ -160,6 +201,7 @@ router.post(
   "/ai-tools/text-playground",
   aiRoute(async (req, res) => {
     const input = TransformTextBody.parse(req.body);
+    validateTextInput(input.text, "text input");
     const modeInstructions: Record<string, string> = {
       summarize: "Summarize the text concisely while preserving all key points.",
       expand: "Expand the text with more detail, examples, and explanation while keeping the original meaning.",
