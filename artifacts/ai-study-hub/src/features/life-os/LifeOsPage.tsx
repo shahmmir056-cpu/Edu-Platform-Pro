@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  GraduationCap, LogOut, Home, Clock, Flame, Bot, BookOpen, ExternalLink,
+  GraduationCap, LogOut, Home, Clock, Flame, Bot,
 } from "lucide-react";
 import type { LifeOsState } from "./types";
 import { ACTIVITY_KEY, STATE_KEY, freshState, loadState, saveState } from "./storage";
@@ -299,43 +299,6 @@ function Hub({ state, setState }: { state: LifeOsState; setState: React.Dispatch
           <section>
             <SectionTitle eyebrow="Step 3 — Report" title="PDF + Email" desc="Every evening, a professional PDF report of your day is generated automatically — covering your timetable, every tool you used, what you searched and the results you got." />
             <EmailReport state={state} onStateChange={(s) => setState(s)} />
-          </section>
-
-          <section>
-            <SectionTitle eyebrow="Step 4 — Library" title="D.books" desc="Access your digital library of study materials, notes, and textbooks — all in one place." />
-            <div
-              className="rounded-2xl p-5 text-center"
-              style={{ background: t.inputBg, border: `1.5px solid ${t.inputBorder}` }}
-            >
-              <div
-                className="mx-auto w-14 h-14 rounded-2xl flex items-center justify-center mb-4"
-                style={{ background: `linear-gradient(135deg, ${t.primary}20, ${t.peach}20)`, border: `1.5px solid ${t.primary}30` }}
-              >
-                <BookOpen size={24} style={{ color: t.primary }} />
-              </div>
-              <h3 className="text-lg font-serif font-semibold mb-1" style={{ color: t.text }}>D.books Digital Library</h3>
-              <p className="text-xs mb-4 max-w-md mx-auto" style={{ color: t.muted }}>
-                Browse your complete collection of study materials, notes, and textbooks. Open D.books to read, annotate, and organize your resources.
-              </p>
-              <div className="flex items-center justify-center gap-3">
-                <a
-                  href="/d-books"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 hover:-translate-y-0.5"
-                  style={{ background: t.primary, color: "#fff" }}
-                >
-                  <BookOpen size={15} /> Open D.books
-                </a>
-                <a
-                  href="https://stbb-live-production.up.railway.app"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 hover:-translate-y-0.5"
-                  style={{ background: t.inputBg, border: `1.5px solid ${t.inputBorder}`, color: t.text }}
-                >
-                  <ExternalLink size={15} /> Open Direct
-                </a>
-              </div>
-            </div>
           </section>
         </div>
       </main>
