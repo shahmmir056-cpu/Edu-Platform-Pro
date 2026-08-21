@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, Component, type ReactNode } from 'react';
 import { Route, Switch, Router as WouterRouter, useLocation } from 'wouter';
 
 // Layout
@@ -11,6 +11,23 @@ import { PageTransition } from '@/components/layout/PageTransition';
 
 // Global Life OS activity tracker (records real time in every tool)
 import { RouteTracker } from '@/features/life-os/tracker';
+
+class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4 p-8 text-center">
+          <p className="text-lg font-semibold" style={{ color: "#2D2D2D" }}>Something went wrong</p>
+          <p className="text-sm" style={{ color: "#6B6B6B" }}>Try refreshing the page.</p>
+          <button onClick={() => { this.setState({ hasError: false }); window.location.reload(); }} className="px-4 py-2 rounded-xl font-bold text-white" style={{ background: "linear-gradient(135deg, #FF9F4C, #FFD4A8)" }}>Reload</button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 // Pages (lazy-loaded for code-splitting)
 const Home = lazy(() => import('@/pages/Home'));
@@ -48,9 +65,10 @@ function Router() {
   const [location] = useLocation();
   return (
     <AppLayout>
-      <PageTransition key={location}>
-        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
-          <Switch>
+        <PageTransition key={location}>
+          <ErrorBoundary>
+            <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+              <Switch>
               <Route path="/" component={Home} />
               <Route path="/research" component={Research} />
               <Route path="/essay" component={Essay} />
@@ -74,7 +92,8 @@ function Router() {
               <Route component={NotFound} />
             </Switch>
           </Suspense>
-        </PageTransition>
+        </ErrorBoundary>
+      </PageTransition>
     </AppLayout>
   );
 }

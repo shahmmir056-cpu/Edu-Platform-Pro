@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSolveMath } from "@workspace/api-client-react";
 import {
@@ -20,14 +20,15 @@ import {
 import { ToolHeader } from "@/components/ui/ToolHeader";
 import { LoadingState, ErrorState, isValidationError } from "@/components/ui/LoadingState";
 import { CopyButton } from "@/components/math/shared";
-import GraphCalculator from "@/components/math/GraphCalculator";
-import EquationSolver from "@/components/math/EquationSolver";
-import ScientificCalculator from "@/components/math/ScientificCalculator";
-import StatisticsAnalyzer from "@/components/math/StatisticsAnalyzer";
-import MatrixCalculator from "@/components/math/MatrixCalculator";
-import FormulaReference from "@/components/math/FormulaReference";
 import { trackAction } from "@/features/life-os/tracker";
 import { cn } from "@/lib/utils";
+
+const GraphCalculator = lazy(() => import("@/components/math/GraphCalculator"));
+const EquationSolver = lazy(() => import("@/components/math/EquationSolver"));
+const ScientificCalculator = lazy(() => import("@/components/math/ScientificCalculator"));
+const StatisticsAnalyzer = lazy(() => import("@/components/math/StatisticsAnalyzer"));
+const MatrixCalculator = lazy(() => import("@/components/math/MatrixCalculator"));
+const FormulaReference = lazy(() => import("@/components/math/FormulaReference"));
 
 const EXAMPLES = [
   "Solve for x: 3x + 7 = 22",
@@ -406,12 +407,14 @@ export default function MathSolver() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            {tab === "graph" && <GraphCalculator />}
-            {tab === "equations" && <EquationSolver />}
-            {tab === "calc" && <ScientificCalculator />}
-            {tab === "stats" && <StatisticsAnalyzer />}
-            {tab === "matrix" && <MatrixCalculator />}
-            {tab === "formulas" && <FormulaReference />}
+            <Suspense fallback={<div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
+              {tab === "graph" && <GraphCalculator />}
+              {tab === "equations" && <EquationSolver />}
+              {tab === "calc" && <ScientificCalculator />}
+              {tab === "stats" && <StatisticsAnalyzer />}
+              {tab === "matrix" && <MatrixCalculator />}
+              {tab === "formulas" && <FormulaReference />}
+            </Suspense>
           </motion.div>
         )}
 

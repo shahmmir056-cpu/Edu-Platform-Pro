@@ -465,7 +465,7 @@ export default function Home() {
             <div className="relative">
               <div className="grid grid-cols-5 gap-4">
                 <div className="col-span-3 relative overflow-hidden rounded-2xl" style={{ border: "1px solid rgba(45,45,45,0.04)", boxShadow: "0 4px 24px rgba(0,0,0,0.02)" }}>
-                  <motion.img src="https://images.unsplash.com/photo-1509062526246-a8fbbc2e7c5a?w=800&q=85" alt="Student"
+                  <motion.img src="https://images.unsplash.com/photo-1509062526246-a8fbbc2e7c5a?w=800&q=85&fit=crop" alt="Student"
                     className="rounded-2xl object-cover h-80 w-full" loading="lazy"
                     style={{ scale: visionImgScale, y: visionImgParallax }}
                     whileHover={{ scale: 1.06 }} transition={{ duration: 0.8 }} />
@@ -473,12 +473,12 @@ export default function Home() {
                 </div>
                 <div className="col-span-2 flex flex-col gap-4">
                   <div className="relative overflow-hidden rounded-2xl flex-1" style={{ border: "1px solid rgba(45,45,45,0.04)" }}>
-                    <motion.img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&q=85" alt="Science"
+                    <motion.img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&q=85&fit=crop" alt="Science"
                       className="rounded-2xl object-cover h-full w-full" loading="lazy"
                       whileHover={{ scale: 1.08 }} transition={{ duration: 0.8 }} />
                   </div>
                   <div className="relative overflow-hidden rounded-2xl flex-1" style={{ border: "1px solid rgba(45,45,45,0.04)" }}>
-                    <motion.img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=85" alt="AI"
+                    <motion.img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=85&fit=crop" alt="AI"
                       className="rounded-2xl object-cover h-full w-full" loading="lazy"
                       whileHover={{ scale: 1.08 }} transition={{ duration: 0.8 }} />
                   </div>

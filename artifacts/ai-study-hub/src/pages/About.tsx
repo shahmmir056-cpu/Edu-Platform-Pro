@@ -87,9 +87,9 @@ export default function About() {
       <section className="px-4 sm:px-6 -mt-8 md:-mt-12 relative z-20">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
-            { src: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=800&q=85", alt: "Student exploring interactive learning on a tablet", span: "md:col-span-2 md:row-span-2", height: "h-64 md:h-full" },
-            { src: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&q=85", alt: "Colorful science lab equipment for virtual experiments", span: "", height: "h-64" },
-            { src: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=85", alt: "Logic circuits and AI-powered learning", span: "", height: "h-64" },
+            { src: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=800&q=85&fit=crop", alt: "Student exploring interactive learning on a tablet", span: "md:col-span-2 md:row-span-2", height: "h-64 md:h-full" },
+            { src: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&q=85&fit=crop", alt: "Colorful science lab equipment for virtual experiments", span: "", height: "h-64" },
+            { src: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=85&fit=crop", alt: "Logic circuits and AI-powered learning", span: "", height: "h-64" },
           ].map((img, i) => (
             <motion.div
               key={img.src}
@@ -100,7 +100,7 @@ export default function About() {
               className={`relative overflow-hidden rounded-2xl ${img.span}`}
               style={{ border: "1.5px solid rgba(255,255,255,0.72)", boxShadow: "inset 0 0 20px rgba(255,159,76,0.03), 0 4px 16px rgba(0,0,0,0.04)" }}
             >
-              <img src={img.src} alt={img.alt} className={`w-full ${img.height} object-cover hover:scale-105 transition-transform duration-700`} />
+              <img src={img.src} alt={img.alt} loading="lazy" decoding="async" className={`w-full ${img.height} object-cover hover:scale-105 transition-transform duration-700`} />
               <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
             </motion.div>
           ))}
@@ -177,7 +177,7 @@ export default function About() {
             className="relative overflow-hidden rounded-2xl"
             style={{ border: "1.5px solid rgba(255,255,255,0.72)", boxShadow: "inset 0 0 20px rgba(255,159,76,0.03), 0 4px 16px rgba(0,0,0,0.04)" }}
           >
-            <img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=85" alt="AI-powered tutor helping a student" className="w-full h-80 object-cover hover:scale-105 transition-transform duration-700" />
+            <img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=85&fit=crop" alt="AI-powered tutor helping a student" loading="lazy" decoding="async" className="w-full h-80 object-cover hover:scale-105 transition-transform duration-700" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/15 to-transparent pointer-events-none" />
             <div className="absolute bottom-4 left-4 right-4">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold" style={{ background: "rgba(255,255,255,0.8)", border: "1.5px solid rgba(255,255,255,0.72)", color: "#FF9F4C", backdropFilter: "blur(8px)" }}>
@@ -194,7 +194,7 @@ export default function About() {
             className="relative overflow-hidden rounded-2xl"
             style={{ border: "1.5px solid rgba(255,255,255,0.72)", boxShadow: "inset 0 0 20px rgba(255,159,76,0.03), 0 4px 16px rgba(0,0,0,0.04)" }}
           >
-            <img src="https://images.unsplash.com/photo-1509062526246-a8fbbc2e7c5a?w=800&q=85" alt="Students conducting research experiments" className="w-full h-80 object-cover hover:scale-105 transition-transform duration-700" />
+            <img src="https://images.unsplash.com/photo-1509062526246-a8fbbc2e7c5a?w=800&q=85&fit=crop" alt="Students conducting research experiments" loading="lazy" decoding="async" className="w-full h-80 object-cover hover:scale-105 transition-transform duration-700" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/15 to-transparent pointer-events-none" />
             <div className="absolute bottom-4 left-4 right-4">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold" style={{ background: "rgba(255,255,255,0.8)", border: "1.5px solid rgba(255,255,255,0.72)", color: "#FF9F4C", backdropFilter: "blur(8px)" }}>
@@ -217,7 +217,7 @@ export default function About() {
             className="relative overflow-hidden rounded-2xl"
             style={{ border: "1.5px solid rgba(255,255,255,0.72)", boxShadow: "inset 0 0 20px rgba(255,159,76,0.03), 0 4px 16px rgba(0,0,0,0.04)" }}
           >
-            <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=85" alt="AI Debate Mentor — interactive voice-powered debate practice" className="w-full h-80 md:h-96 object-cover hover:scale-105 transition-transform duration-700" />
+            <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=85&fit=crop" alt="AI Debate Mentor — interactive voice-powered debate practice" loading="lazy" decoding="async" className="w-full h-80 md:h-96 object-cover hover:scale-105 transition-transform duration-700" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/15 to-transparent pointer-events-none" />
             <div className="absolute bottom-4 left-4 right-4 flex items-center gap-3">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold" style={{ background: "rgba(255,255,255,0.85)", border: "1.5px solid rgba(255,255,255,0.72)", color: "#FF9F4C", backdropFilter: "blur(8px)" }}>
