@@ -2,11 +2,14 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { writeFile, readFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 
-const DATA_DIR = path.resolve(import.meta.dirname ?? process.cwd(), "../../data");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const DATA_DIR = process.env.FEEDBACK_DIR || path.resolve(__dirname, "../../data");
 const FEEDBACK_FILE = path.join(DATA_DIR, "feedback.json");
 
 interface FeedbackEntry {
@@ -74,6 +77,8 @@ router.post("/feedback", async (req: Request, res: Response) => {
       createdAt: new Date().toISOString(),
     };
 
+    logger.info({ id: entry.id, category, rating, dataDir: DATA_DIR }, "Saving feedback");
+
     const all = await readFeedback();
     all.push(entry);
     await writeFeedback(all);
@@ -81,7 +86,7 @@ router.post("/feedback", async (req: Request, res: Response) => {
     logger.info({ id: entry.id, category, rating }, "Feedback submitted");
     res.json({ success: true, id: entry.id });
   } catch (err) {
-    logger.error({ err }, "Failed to save feedback");
+    logger.error({ err, dataDir: DATA_DIR }, "Failed to save feedback");
     res.status(500).json({ error: "Failed to save feedback. Please try again." });
   }
 });
