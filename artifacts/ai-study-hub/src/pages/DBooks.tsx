@@ -72,12 +72,6 @@ export default function DBooks() {
     }
   }, []);
 
-  // Allow toggling nav back by double-tapping the Neural Sync logo on mobile,
-  // or via a small transparent button in the corner on desktop.
-  const toggleNav = useCallback(() => {
-    setShowNav((v) => !v);
-  }, []);
-
   return (
     <div className="relative w-full h-dvh overflow-hidden" style={{ padding: 0, margin: 0 }}>
       <iframe
@@ -90,160 +84,137 @@ export default function DBooks() {
         onClick={onIframeClick}
       />
 
-      {/* ═══ DESKTOP: Floating capsule nav ═══ */}
-      <header
-        className={cn(
-          "fixed top-4 left-1/2 z-50 hidden lg:flex items-center gap-0.5 water-nav-bar transition-all duration-500",
-          showNav ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-4 pointer-events-none"
-        )}
-        style={{
-          position: "fixed",
-          transform: showNav ? "translateX(-50%)" : "translateX(-50%) translateY(-16px)",
-          width: "min(94vw, 1100px)",
-          padding: "7px 12px",
-          borderRadius: "999px",
-        }}
-      >
-        <Link href="/" className="relative z-10 flex items-center gap-2 shrink-0 group pr-2">
-          <div
-            className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 group-hover:scale-105"
-            style={{
-              background: "linear-gradient(135deg, #FF9F4C 0%, #FFD4A8 100%)",
-              color: "#ffffff",
-              boxShadow: "0 2px 12px rgba(255,159,76,0.25), inset 0 1px 0 0 rgba(255,255,255,0.2)",
-            }}
-          >
-            <GraduationCap size={16} />
-          </div>
-          <span className="font-bold text-[14px] tracking-tight hidden xl:block" style={{ color: "#FF9F4C" }}>
-            Neural Sync
-          </span>
-        </Link>
-
-        <div className="relative z-10 water-separator mx-0.5" />
-
-        <nav className="relative z-10 flex items-center gap-x-px flex-1 justify-center overflow-hidden">
-          {NAV_LINKS.map((link) => (
-            <CapsuleNavLink key={link.path} {...link} active={location === link.path} />
-          ))}
-        </nav>
-
-        <div className="relative z-10 water-separator mx-0.5" />
-
-        <Link
-          href="/#tools"
-          className="relative z-10 water-nav-cta flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold shrink-0"
-        >
-          All Tools
-        </Link>
-      </header>
-
-      {/* ═══ MOBILE: Floating capsule bar + hamburger ═══ */}
-      <header
-        className={cn(
-          "fixed top-4 left-2 right-8 z-50 lg:hidden flex items-center justify-between water-nav-bar transition-all duration-500",
-          showNav ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-4 pointer-events-none"
-        )}
-        style={{
-          position: "fixed",
-          padding: "8px 10px 8px 12px",
-          borderRadius: "999px",
-        }}
-      >
-        <Link href="/" className="relative z-10 flex items-center gap-2.5 shrink-0">
-          <div
-            className="w-9 h-9 rounded-full flex items-center justify-center"
-            style={{
-              background: "linear-gradient(135deg, #FF9F4C 0%, #FFD4A8 100%)",
-              color: "#ffffff",
-              boxShadow: "0 2px 12px rgba(255,159,76,0.25), inset 0 1px 0 0 rgba(255,255,255,0.2)",
-            }}
-          >
-            <GraduationCap size={18} />
-          </div>
-          <span className="font-bold text-[15px] tracking-tight" style={{ color: "#FF9F4C" }}>
-            Neural Sync
-          </span>
-        </Link>
-
-        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <SheetTrigger asChild>
-            <button
-              className="relative z-10 water-hamburger w-9 h-9 rounded-full flex items-center justify-center"
-              style={{ color: "#2D2D2D" }}
-              aria-label="Toggle menu"
-            >
-              <Menu size={18} />
-            </button>
-          </SheetTrigger>
-          <SheetContent side="right" className="w-[300px] p-0 water-sheet">
-            <SheetTitle className="sr-only">Navigation</SheetTitle>
-            <div className="flex flex-col h-full">
-              <div className="p-4 sm:p-6" style={{ borderBottom: "1px solid rgba(255,159,76,0.08)" }}>
-                <Link href="/" className="flex items-center gap-3">
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center"
-                    style={{ background: "linear-gradient(135deg, #FF9F4C 0%, #FFD4A8 100%)", color: "#ffffff" }}
-                  >
-                    <GraduationCap size={20} />
-                  </div>
-                  <span className="font-bold text-lg" style={{ color: "#FF9F4C" }}>Neural Sync</span>
-                </Link>
-              </div>
-              <nav className="flex-1 overflow-y-auto p-3 sm:p-4 lg-scroll">
-                <div className="space-y-1">
-                  {NAV_LINKS.map((link) => (
-                    <Link
-                      key={link.path}
-                      href={link.path}
-                      onClick={() => setMobileOpen(false)}
-                      className={cn(
-                        "water-sheet-item flex items-center gap-3 px-4 py-3 text-sm font-medium",
-                        location === link.path ? "water-sheet-active" : ""
-                      )}
-                      style={{ color: location === link.path ? "#E8852E" : "#4b5563" }}
-                    >
-                      <link.icon size={16} />
-                      {link.name}
-                    </Link>
-                  ))}
-                </div>
-                <div className="mt-6">
-                  <Link
-                    href="/#tools"
-                    onClick={() => setMobileOpen(false)}
-                    className="water-nav-cta flex items-center justify-center gap-1.5 mx-4 px-3 py-2.5 rounded-full text-[13px] font-semibold"
-                  >
-                    All Tools
-                  </Link>
-                </div>
-              </nav>
-            </div>
-          </SheetContent>
-        </Sheet>
-      </header>
-
-      {/* ═══ Toggle button — shows when nav is hidden so user can bring it back ═══ */}
-      {!showNav && (
-        <button
-          onClick={toggleNav}
-          className={cn(
-            "fixed z-50 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110",
-            "lg:top-4 lg:right-4 top-4 right-4"
-          )}
+      {/* ═══ DESKTOP: Floating capsule nav — only on landing page ═══ */}
+      {showNav && (
+        <header
+          className="fixed top-4 left-1/2 z-50 hidden lg:flex items-center gap-0.5 water-nav-bar"
           style={{
             position: "fixed",
-            background: "rgba(255,255,255,0.85)",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
-            border: "1.5px solid rgba(255,159,76,0.3)",
-            boxShadow: "0 2px 12px rgba(255,159,76,0.15)",
-            color: "#FF9F4C",
+            transform: "translateX(-50%)",
+            width: "min(94vw, 1100px)",
+            padding: "7px 12px",
+            borderRadius: "999px",
           }}
-          aria-label="Show navigation"
         >
-          <GraduationCap size={18} />
-        </button>
+          <Link href="/" className="relative z-10 flex items-center gap-2 shrink-0 group pr-2">
+            <div
+              className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 group-hover:scale-105"
+              style={{
+                background: "linear-gradient(135deg, #FF9F4C 0%, #FFD4A8 100%)",
+                color: "#ffffff",
+                boxShadow: "0 2px 12px rgba(255,159,76,0.25), inset 0 1px 0 0 rgba(255,255,255,0.2)",
+              }}
+            >
+              <GraduationCap size={16} />
+            </div>
+            <span className="font-bold text-[14px] tracking-tight hidden xl:block" style={{ color: "#FF9F4C" }}>
+              Neural Sync
+            </span>
+          </Link>
+
+          <div className="relative z-10 water-separator mx-0.5" />
+
+          <nav className="relative z-10 flex items-center gap-x-px flex-1 justify-center overflow-hidden">
+            {NAV_LINKS.map((link) => (
+              <CapsuleNavLink key={link.path} {...link} active={location === link.path} />
+            ))}
+          </nav>
+
+          <div className="relative z-10 water-separator mx-0.5" />
+
+          <Link
+            href="/#tools"
+            className="relative z-10 water-nav-cta flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold shrink-0"
+          >
+            All Tools
+          </Link>
+        </header>
+      )}
+
+      {/* ═══ MOBILE: Floating capsule bar + hamburger — only on landing page ═══ */}
+      {showNav && (
+        <header
+          className="fixed top-4 left-0 right-0 z-50 lg:hidden flex items-center water-nav-bar"
+          style={{
+            position: "fixed",
+            padding: "8px 12px",
+            borderRadius: "999px",
+          }}
+        >
+          <Link href="/" className="absolute left-1/2 top-1/2 z-10 flex items-center gap-2.5 shrink-0" style={{ transform: "translate(-50%, -50%)" }}>
+            <div
+              className="w-9 h-9 rounded-full flex items-center justify-center"
+              style={{
+                background: "linear-gradient(135deg, #FF9F4C 0%, #FFD4A8 100%)",
+                color: "#ffffff",
+                boxShadow: "0 2px 12px rgba(255,159,76,0.25), inset 0 1px 0 0 rgba(255,255,255,0.2)",
+              }}
+            >
+              <GraduationCap size={18} />
+            </div>
+            <span className="font-bold text-[15px] tracking-tight" style={{ color: "#FF9F4C" }}>
+              Neural Sync
+            </span>
+          </Link>
+
+          <div className="ml-auto relative z-10">
+            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+              <SheetTrigger asChild>
+                <button
+                  className="water-hamburger w-9 h-9 rounded-full flex items-center justify-center"
+                  style={{ color: "#2D2D2D" }}
+                  aria-label="Toggle menu"
+                >
+                  <Menu size={18} />
+                </button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[300px] p-0 water-sheet">
+                <SheetTitle className="sr-only">Navigation</SheetTitle>
+                <div className="flex flex-col h-full">
+                  <div className="p-4 sm:p-6" style={{ borderBottom: "1px solid rgba(255,159,76,0.08)" }}>
+                    <Link href="/" className="flex items-center gap-3">
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center"
+                        style={{ background: "linear-gradient(135deg, #FF9F4C 0%, #FFD4A8 100%)", color: "#ffffff" }}
+                      >
+                        <GraduationCap size={20} />
+                      </div>
+                      <span className="font-bold text-lg" style={{ color: "#FF9F4C" }}>Neural Sync</span>
+                    </Link>
+                  </div>
+                  <nav className="flex-1 overflow-y-auto p-3 sm:p-4 lg-scroll">
+                    <div className="space-y-1">
+                      {NAV_LINKS.map((link) => (
+                        <Link
+                          key={link.path}
+                          href={link.path}
+                          onClick={() => setMobileOpen(false)}
+                          className={cn(
+                            "water-sheet-item flex items-center gap-3 px-4 py-3 text-sm font-medium",
+                            location === link.path ? "water-sheet-active" : ""
+                          )}
+                          style={{ color: location === link.path ? "#E8852E" : "#4b5563" }}
+                        >
+                          <link.icon size={16} />
+                          {link.name}
+                        </Link>
+                      ))}
+                    </div>
+                    <div className="mt-6">
+                      <Link
+                        href="/#tools"
+                        onClick={() => setMobileOpen(false)}
+                        className="water-nav-cta flex items-center justify-center gap-1.5 mx-4 px-3 py-2.5 rounded-full text-[13px] font-semibold"
+                      >
+                        All Tools
+                      </Link>
+                    </div>
+                  </nav>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </header>
       )}
     </div>
   );
