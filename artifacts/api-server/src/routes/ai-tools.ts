@@ -29,9 +29,16 @@ class InputValidationError extends Error {
   }
 }
 
-function isGibberish(text: string): boolean {
+function isGibberish(text: string, isMath = false): boolean {
   const trimmed = text.trim();
   if (trimmed.length < 2) return true;
+  if (isMath) {
+    const hasLetter = /[a-zA-Z]/.test(trimmed);
+    const hasDigit = /\d/.test(trimmed);
+    const hasOperator = /[+\-*/^=<>]/.test(trimmed);
+    if (!hasLetter && !hasDigit) return true;
+    if (hasDigit || hasOperator || hasLetter) return false;
+  }
   const alphaOnly = trimmed.replace(/[^a-zA-Z]/g, "");
   if (alphaOnly.length < 2) return true;
   const alphaRatio = alphaOnly.length / trimmed.length;
@@ -62,8 +69,8 @@ function isGibberish(text: string): boolean {
   return false;
 }
 
-function validateTextInput(value: string, fieldName: string): void {
-  if (isGibberish(value)) {
+function validateTextInput(value: string, fieldName: string, isMath = false): void {
+  if (isGibberish(value, isMath)) {
     throw new InputValidationError(`Please enter a valid ${fieldName}. Your input appears to be gibberish or random characters.`);
   }
 }
@@ -198,7 +205,7 @@ router.post(
   "/ai-tools/math-solver",
   aiRoute(async (req, res) => {
     const input = SolveMathBody.parse(req.body);
-    validateTextInput(input.problem, "math problem");
+    validateTextInput(input.problem, "math problem", true);
     const result = await generateJson<unknown>({
       maxTokens: 4000,
       system:
