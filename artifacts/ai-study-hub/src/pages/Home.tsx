@@ -440,21 +440,6 @@ export default function Home() {
 
           </div>
         </div>
-
-        {/* futuristic icons row */}
-        <motion.div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-8"
-          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 3.2, duration: 0.8 }}>
-          {[Brain, Zap, FlaskConical, Sigma, Rocket].map((Icon, i) => (
-            <motion.div key={i}
-              className="w-9 h-9 rounded-xl flex items-center justify-center"
-              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,159,76,0.15)", boxShadow: "0 0 16px rgba(255,159,76,0.08), inset 0 1px 0 rgba(255,255,255,0.1)" }}
-              initial={{ opacity: 0, scale: 0.5, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ delay: 3.4 + i * 0.12, duration: 0.5 }}
-              whileHover={{ scale: 1.15, boxShadow: "0 0 24px rgba(255,159,76,0.15)" }}>
-              <Icon size={14} style={{ color: "rgba(255,159,76,0.5)" }} />
-            </motion.div>
-          ))}
-          <motion.div className="w-1 h-10 rounded-full" style={{ background: "linear-gradient(to bottom, rgba(255,159,76,0.2), rgba(255,159,76,0.05))" }} />
-        </motion.div>
       </section>
 
       {/* ═══ IMMERSIVE VISION ═══ */}
