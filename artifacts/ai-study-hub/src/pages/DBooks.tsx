@@ -28,6 +28,15 @@ export default function DBooks() {
     setMobileOpen(false);
   }, [location]);
 
+  // Hide nav after 3 seconds — by then user has entered the iframe
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowNav(false);
+      hasNavigatedRef.current = true;
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
   // Listen for postMessage from the STBB iframe to detect navigation
   useEffect(() => {
     const onMessage = (e: MessageEvent) => {
@@ -47,7 +56,6 @@ export default function DBooks() {
             }
           }
         } catch {
-          // plain string message — treat as navigation indicator
           if (data === "/" || data === "home" || data === "landing") {
             setShowNav(true);
             hasNavigatedRef.current = false;
@@ -62,11 +70,9 @@ export default function DBooks() {
     return () => window.removeEventListener("message", onMessage);
   }, []);
 
-  // Fallback: detect iframe clicks to hide nav when no postMessage support.
-  // The iframe will fire focus/click events we can observe.
-  const onIframeClick = useCallback(() => {
+  // Also hide on any mouse/touch interaction with the iframe area
+  const onIframeInteraction = useCallback(() => {
     if (!hasNavigatedRef.current) {
-      // First click likely navigates away from landing
       setShowNav(false);
       hasNavigatedRef.current = true;
     }
@@ -81,7 +87,8 @@ export default function DBooks() {
         className="block w-full h-full border-0 bg-white"
         style={{ margin: 0, padding: 0, width: "100%", height: "100%" }}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        onClick={onIframeClick}
+        onMouseDown={onIframeInteraction}
+        onTouchStart={onIframeInteraction}
       />
 
       {/* ═══ DESKTOP: Floating capsule nav — only on landing page ═══ */}
