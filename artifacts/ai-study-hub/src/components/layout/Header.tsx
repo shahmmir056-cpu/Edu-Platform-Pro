@@ -183,17 +183,21 @@ export function Header() {
       {/* ══════════ MOBILE: Floating Water Capsule Bar ══════════ */}
       <header
         className={cn(
-          "fixed top-4 left-2 right-8 z-50 lg:hidden flex items-center justify-between transition-all duration-500 ease-out water-nav-bar",
+          "fixed top-4 left-0 right-0 z-50 lg:hidden flex items-center transition-all duration-500 ease-out water-nav-bar",
           scrolled ? "water-nav-bar-scrolled" : ""
         )}
         style={{
-          padding: "8px 10px 8px 12px",
+          padding: "8px 12px",
           borderRadius: "999px",
           border: "none",
         }}
       >
-        {/* Logo */}
-        <Link href="/" className="relative z-10 flex items-center gap-2.5 shrink-0">
+        {/* Logo + Brand — perfectly centered in viewport */}
+        <Link
+          href="/"
+          className="absolute left-1/2 top-1/2 z-10 flex items-center gap-2.5 shrink-0"
+          style={{ transform: "translate(-50%, -50%)" }}
+        >
           <div
             className="w-9 h-9 rounded-full flex items-center justify-center"
             style={{
@@ -212,18 +216,19 @@ export function Header() {
           </span>
         </Link>
 
-        {/* Mobile water hamburger */}
-        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <SheetTrigger asChild>
-            <button
-              data-nav-toggle
-              className="relative z-10 water-hamburger w-9 h-9 rounded-full flex items-center justify-center"
-              style={{ color: "#2D2D2D" }}
-              aria-label="Toggle menu"
-            >
-              <Menu size={18} />
-            </button>
-          </SheetTrigger>
+        {/* Mobile water hamburger — fixed on the right */}
+        <div className="ml-auto relative z-10">
+          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+            <SheetTrigger asChild>
+              <button
+                data-nav-toggle
+                className="water-hamburger w-9 h-9 rounded-full flex items-center justify-center"
+                style={{ color: "#2D2D2D" }}
+                aria-label="Toggle menu"
+              >
+                <Menu size={18} />
+              </button>
+            </SheetTrigger>
           <SheetContent
             side="right"
             className="w-[300px] p-0 water-sheet"
@@ -298,6 +303,7 @@ export function Header() {
             </div>
           </SheetContent>
         </Sheet>
+        </div>
       </header>
     </>
   );
