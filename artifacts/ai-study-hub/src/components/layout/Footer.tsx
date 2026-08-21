@@ -49,7 +49,7 @@ const LIST = "flex flex-col gap-2.5 list-none m-0 p-0";
 export function Footer() {
   return (
     <footer
-      className="relative overflow-hidden text-left"
+      className="relative overflow-hidden text-left footer-root"
       style={{
         background: "rgba(255, 255, 255, 0.4)",
         backdropFilter: "blur(20px) saturate(180%)",
@@ -212,6 +212,51 @@ export function Footer() {
           </p>
         </div>
       </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .footer-root {
+            text-align: center !important;
+          }
+          .footer-root .grid {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            gap: 2.5rem !important;
+          }
+          .footer-root .grid > div {
+            text-align: center !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            width: 100% !important;
+          }
+          .footer-root .grid > div > * {
+            text-align: center !important;
+          }
+          .footer-root h4 {
+            text-align: center !important;
+          }
+          .footer-root ul {
+            align-items: center !important;
+          }
+          .footer-root .flex.items-center.gap-2.flex-wrap {
+            justify-content: center !important;
+          }
+          .footer-root .flex.items-center.gap-2.flex-wrap a {
+            margin: 0 4px !important;
+          }
+          .footer-root .mt-14 {
+            flex-direction: column !important;
+            align-items: center !important;
+            text-align: center !important;
+            gap: 0.75rem !important;
+          }
+          .footer-root .mt-14 p {
+            text-align: center !important;
+          }
+        }
+      `}</style>
     </footer>
   );
 }
