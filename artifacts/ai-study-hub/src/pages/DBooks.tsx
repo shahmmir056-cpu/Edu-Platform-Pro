@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { GraduationCap, Home, CalendarClock, FlaskConical, Brain, BookOpen, Cpu, Info, MessageCircle, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -15,68 +15,14 @@ const NAV_LINKS = [
   { name: "Feedback", path: "/contact", icon: MessageCircle },
 ];
 
-const STBB_ORIGIN = "https://stbb-live-production.up.railway.app";
-
 export default function DBooks() {
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [showNav, setShowNav] = useState(true);
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const hasNavigatedRef = useRef(false);
 
   useEffect(() => {
     setMobileOpen(false);
   }, [location]);
-
-  // Hide nav after 3 seconds — by then user has entered the iframe
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowNav(false);
-      hasNavigatedRef.current = true;
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Listen for postMessage from the STBB iframe to detect navigation
-  useEffect(() => {
-    const onMessage = (e: MessageEvent) => {
-      if (e.origin !== STBB_ORIGIN) return;
-      const data = e.data;
-      if (typeof data === "string") {
-        try {
-          const parsed = JSON.parse(data);
-          if (parsed.type === "navigate" || parsed.type === "route-change" || parsed.type === "page-change") {
-            const path = parsed.path ?? parsed.url ?? "";
-            if (path === "/" || path === "") {
-              setShowNav(true);
-              hasNavigatedRef.current = false;
-            } else {
-              setShowNav(false);
-              hasNavigatedRef.current = true;
-            }
-          }
-        } catch {
-          if (data === "/" || data === "home" || data === "landing") {
-            setShowNav(true);
-            hasNavigatedRef.current = false;
-          } else {
-            setShowNav(false);
-            hasNavigatedRef.current = true;
-          }
-        }
-      }
-    };
-    window.addEventListener("message", onMessage);
-    return () => window.removeEventListener("message", onMessage);
-  }, []);
-
-  // Also hide on any mouse/touch interaction with the iframe area
-  const onIframeInteraction = useCallback(() => {
-    if (!hasNavigatedRef.current) {
-      setShowNav(false);
-      hasNavigatedRef.current = true;
-    }
-  }, []);
 
   return (
     <div className="relative w-full h-dvh overflow-hidden" style={{ padding: 0, margin: 0 }}>
@@ -87,22 +33,19 @@ export default function DBooks() {
         className="block w-full h-full border-0 bg-white"
         style={{ margin: 0, padding: 0, width: "100%", height: "100%" }}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        onMouseDown={onIframeInteraction}
-        onTouchStart={onIframeInteraction}
       />
 
-      {/* ═══ DESKTOP: Floating capsule nav — only on landing page ═══ */}
-      {showNav && (
-        <header
-          className="fixed top-4 left-1/2 z-50 hidden lg:flex items-center gap-0.5 water-nav-bar"
-          style={{
-            position: "fixed",
-            transform: "translateX(-50%)",
-            width: "min(94vw, 1100px)",
-            padding: "7px 12px",
-            borderRadius: "999px",
-          }}
-        >
+      {/* ═══ DESKTOP: Floating capsule nav ═══ */}
+      <header
+        className="fixed top-4 left-1/2 z-50 hidden lg:flex items-center gap-0.5 water-nav-bar"
+        style={{
+          position: "fixed",
+          transform: "translateX(-50%)",
+          width: "min(94vw, 1100px)",
+          padding: "7px 12px",
+          borderRadius: "999px",
+        }}
+      >
           <Link href="/" className="relative z-10 flex items-center gap-2 shrink-0 group pr-2">
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 group-hover:scale-105"
@@ -136,18 +79,16 @@ export default function DBooks() {
             All Tools
           </Link>
         </header>
-      )}
 
-      {/* ═══ MOBILE: Floating capsule bar + hamburger — only on landing page ═══ */}
-      {showNav && (
-        <header
-          className="fixed top-4 left-0 right-0 z-50 lg:hidden flex items-center water-nav-bar"
-          style={{
-            position: "fixed",
-            padding: "8px 12px",
-            borderRadius: "999px",
-          }}
-        >
+      {/* ═══ MOBILE: Floating capsule bar + hamburger ═══ */}
+      <header
+        className="fixed top-4 left-0 right-0 z-50 lg:hidden flex items-center water-nav-bar"
+        style={{
+          position: "fixed",
+          padding: "8px 12px",
+          borderRadius: "999px",
+        }}
+      >
           <Link href="/" className="absolute left-1/2 top-1/2 z-10 flex items-center gap-2.5 shrink-0" style={{ transform: "translate(-50%, -50%)" }}>
             <div
               className="w-9 h-9 rounded-full flex items-center justify-center"
@@ -222,7 +163,6 @@ export default function DBooks() {
             </Sheet>
           </div>
         </header>
-      )}
     </div>
   );
 }
